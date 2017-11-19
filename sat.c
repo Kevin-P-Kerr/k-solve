@@ -21,6 +21,10 @@ char killWhite(char c) {
   return c;
 }
 
+int isAlpha (char c) {
+  return c >= 'A' && c <= 'z';
+}
+
 struct Token* tokenize() {
   char c;
   int i =0;
@@ -41,7 +45,7 @@ struct Token* tokenize() {
     else if (c == ']') {
       t->type = RBRAK;
     }
-    else {
+    else if (isAlpha(c)) {
       t->type = VAR;
       // for now, vars are 1 char
       t->value = c;
