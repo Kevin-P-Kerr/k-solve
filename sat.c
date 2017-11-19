@@ -7,17 +7,26 @@
 #define LBRAK 3
 #define RBRAK 4
 
+int ARRSIZE =0;
 struct Token {
   int deleted;
   int type;
   char value;
 };
 
+char killWhite(char c) {
+  while (c == '\n' || c == ' ' || c == '\t') {
+    c = getchar();
+  }
+  return c;
+}
+
 struct Token* tokenize() {
   char c;
   int i =0;
   struct Token* tokens = malloc(sizeof(struct Token)*MAXTOKEN);
   while ((c=getchar())!=EOF) {
+    c = killWhite(c);
     struct Token* t = &tokens[i];
     t->deleted = 0;
     if (c == '(') {
@@ -39,8 +48,37 @@ struct Token* tokenize() {
     }
     i++;
   }
+  ARRSIZE = i;
+  return tokens;
 }
 
+void fp (char c) {
+  fprintf(stderr,"%c",c);
+}
+
+void p (struct Token* t) {
+  int i,ii;
+  for (i=0,ii=ARRSIZE;i<ii;i++) {
+    struct Token* tok = &t[i];
+    if (tok->type == LPAREN) {
+      fp('(');
+    }
+    else if (tok->type == RPAREN) {
+      fp(')');
+    }
+    else if (tok->type == RBRAK) {
+      fp(']');
+    }
+    else if (tok->type == LBRAK) {
+      fp('[');
+    }
+    else if (tok->type == VAR) {
+      fp(tok->value);
+    }
+  }
+}
+
+
 int main() {
-  tokenize();
+  p(tokenize());
 }
