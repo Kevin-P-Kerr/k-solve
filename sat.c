@@ -30,6 +30,9 @@ void p (struct Token* t) {
   int i,ii;
   for (i=0,ii=ARRSIZE;i<ii;i++) {
     struct Token* tok = &t[i];
+    if (tok->deleted) {
+      continue;
+    }
     if (tok->type == LPAREN) {
       fp('(');
     }
@@ -90,32 +93,6 @@ struct Token* tokenize() {
   return tokens;
 }
 
-void fp (char c) {
-  fprintf(stderr,"%c",c);
-}
-
-void p (struct Token* t) {
-  int i,ii;
-  for (i=0,ii=ARRSIZE;i<ii;i++) {
-    struct Token* tok = &t[i];
-    if (tok->type == LPAREN) {
-      fp('(');
-    }
-    else if (tok->type == RPAREN) {
-      fp(')');
-    }
-    else if (tok->type == RBRAK) {
-      fp(']');
-    }
-    else if (tok->type == LBRAK) {
-      fp('[');
-    }
-    else if (tok->type == VAR) {
-      fp(tok->value);
-    }
-  }
-}
-
 int solve(struct Token *tokens) {
 
 }
@@ -165,7 +142,7 @@ int simplifyClause(char var, struct Token *tokens, int i) {
   if (empty < 2) {
     closeToken.deleted = 1;
     openToken.deleted = 1;
-    for (;beginning<ii;beginning++) {
+    for (;beginning<i;beginning++) {
       token = tokens[beginning];
       if (token.deleted) {
         continue;
@@ -193,7 +170,7 @@ int simplify(char var, struct Token *tokens, int l) {
   int simplified = 0;
   for (;i<l;i++) {
     struct Token token = tokens[i];
-    if (token.type == VAR && token.val == var) {
+    if (token.type == VAR && token.value == var) {
       simplified = 1;
       token.deleted = 1;
     }
@@ -202,6 +179,9 @@ int simplify(char var, struct Token *tokens, int l) {
       while (cont) {
         cont = simplifyClause(var,tokens,i);
       }
+    }
+  }
+}
 
 
 int main() {
