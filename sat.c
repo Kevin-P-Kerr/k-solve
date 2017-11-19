@@ -6,6 +6,9 @@
 #define VAR 2
 #define LBRAK 3
 #define RBRAK 4
+#define DEBUG 2
+#define WARN 1
+#define LEVEL 2
 
 int ARRSIZE =0;
 struct Token {
@@ -13,6 +16,37 @@ struct Token {
   int type;
   char value;
 };
+
+void warn (char* warning) {
+  if (LEVEL >= WARN) {
+   fprintf(stderr,"%s\n",warning);
+  }
+}
+void fp (char c) {
+  fprintf(stderr,"%c",c);
+}
+
+void p (struct Token* t) {
+  int i,ii;
+  for (i=0,ii=ARRSIZE;i<ii;i++) {
+    struct Token* tok = &t[i];
+    if (tok->type == LPAREN) {
+      fp('(');
+    }
+    else if (tok->type == RPAREN) {
+      fp(')');
+    }
+    else if (tok->type == RBRAK) {
+      fp(']');
+    }
+    else if (tok->type == LBRAK) {
+      fp('[');
+    }
+    else if (tok->type == VAR) {
+      fp(tok->value);
+    }
+  }
+}
 
 char killWhite(char c) {
   while (c == '\n' || c == ' ' || c == '\t') {
@@ -82,7 +116,96 @@ void p (struct Token* t) {
   }
 }
 
+int solve(struct Token *tokens) {
+
+}
+
+int getClosingType (int type) {
+  if (type == LPAREN) {
+    return RPAREN;
+  }
+  if (type == LBRAK) {
+    return RBRAK;
+  }
+  warn("bad closing type");
+  return 0;
+};
+
+int simplifyClause(char var, struct Token *tokens, int i) {
+  int beginning = i;
+  struct Token token = tokens[i];
+  struct Token openToken = token;
+  struct Token closeToken;
+  int closingType = getClosingType(token.type);
+  int openingType = token.type;
+  int empty = 0;
+  i++;
+  token = tokens[i];
+  int flag = 0;
+  while (token.type != closingType) {
+    if (token.deleted) {
+      continue;
+    }
+    if (token.type == LPAREN || token.type == LBRAK) {
+      empty++;
+      while (simplifyClause(var,tokens,i)) {}
+    }
+    if (token.type == VAR) {
+      if (token.value == var) {
+        flag = 1;
+        token.deleted = 1;
+      }
+      else {
+        empty++;
+      }
+    }
+    i++;
+  }
+  closeToken = token;
+  if (empty < 2) {
+    closeToken.deleted = 1;
+    openToken.deleted = 1;
+    for (;beginning<ii;beginning++) {
+      token = tokens[beginning];
+      if (token.deleted) {
+        continue;
+      }
+      else if (token.type == LPAREN) {
+        token.type == LBRAK;
+      }
+      else if (token.type == RPAREN) {
+        token.type == RBRAK;
+      }
+      else if (token.type == LBRAK) {
+        token.type == LPAREN;
+      }
+      else if (token.type == RBRAK) {
+        token.type == RPAREN;
+      }
+    }
+    return 0;
+  }
+  return flag;
+}
+
+int simplify(char var, struct Token *tokens, int l) {
+  int i =0;
+  int simplified = 0;
+  for (;i<l;i++) {
+    struct Token token = tokens[i];
+    if (token.type == VAR && token.val == var) {
+      simplified = 1;
+      token.deleted = 1;
+    }
+    else if (token.type == LPAREN || token.type == RPAREN) {
+      int cont = 1;
+      while (cont) {
+        cont = simplifyClause(var,tokens,i);
+      }
+
 
 int main() {
-  p(tokenize());
+  struct Token* tokens = tokenize();
+ // return solve(tokens);
+ return 1;
 }
