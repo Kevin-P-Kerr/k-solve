@@ -41,6 +41,7 @@ int strEquals(struct Str* a, struct Str *b) {
   int i=0;
   for (;i<alen;i++) {
     if (a->c[i] != b->c[i]) {
+      fprintf(stderr," yo %s %s\n",a->c,b->c);
       return 0;
     }
   }
@@ -118,6 +119,12 @@ struct Str* makeStr(char c) {
 }
 
 void append(int id, struct Str *str, struct VarContainer *vars) {
+  if (vars->id <0) {
+    vars->id = id;
+    vars->str = str;
+    vars->next = 0;
+    return;
+  }
   struct VarContainer *var = malloc(sizeof(struct VarContainer));
   var->id = id;
   var->str = str;
@@ -210,6 +217,7 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
     }
     if (token->type == LPAREN || token->type == LBRAK) {
       int cp = i;
+      fprintf(stderr,"hi %d\n",varId);
       i = simplifyClause(varId,tokens,i);
       if (!token->deleted || (tokens[cp+1].type == openingType && !tokens[cp+1].deleted)) {
         clauseCount++;
@@ -217,9 +225,11 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
     }
     else if (token->type == VAR) {
       if (token->id == varId) {
+        fprintf(stderr,"deleting %s\n",token->strValue->c);
         token->deleted = 1;
       }
       else {
+        fprintf(stderr," not deleting %s%d\n",token->strValue->c,token->id);
         clauseCount+=2;
       }
     }
@@ -243,7 +253,7 @@ void simplify(char var, struct Token *tokens, int l) {
       continue;
     }
     if (token.type == LPAREN || token.type == LBRAK) {
-      simplifyClause(var,tokens,i);
+      i = simplifyClause(var,tokens,i);
     }
   }
 }
@@ -256,11 +266,12 @@ int main() {
   struct Token* tokens = tokenize();
   p(tokens);
   warn("\n");
-  simplify(1,tokens,ARRSIZE);
+  simplify(0,tokens,ARRSIZE);
   p(tokens);
   warn("\n");
-  //simplify('b',tokens,ARRSIZE);
+  //simplify(1,tokens,ARRSIZE);
   //p(tokens);
+  warn("\n");
   // return solve(tokens);
  return 1;
 }
