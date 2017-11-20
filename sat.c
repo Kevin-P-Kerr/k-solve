@@ -109,7 +109,6 @@ int getClosingType (int type) {
   return 0;
 };
 
-int topLevel=0;
 int simplifyClause(char var, struct Token *tokens, int i) {
   topLevel++;
   int beginning = i;
@@ -131,9 +130,6 @@ int simplifyClause(char var, struct Token *tokens, int i) {
       i = simplifyClause(var,tokens,i);
       topLevel--;
       if (!token->deleted) {
-        if (topLevel == 1) {
-          fprintf(stderr,"%d\n",token->type);
-        }
         clauseCount++;
       }
     }
@@ -152,10 +148,6 @@ int simplifyClause(char var, struct Token *tokens, int i) {
   if (clauseCount < 2) {
     openToken->deleted = 1;
     closeToken->deleted =1;
-  }
-  if (topLevel == 1) {
-    fprintf(stderr,"%d",clauseCount);
-    fprintf(stderr,"***\n");
   }
   return i;
 }
