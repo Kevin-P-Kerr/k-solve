@@ -158,13 +158,12 @@ int simplifyClause(char var, struct Token *tokens, int i) {
     if (token->type == openingType) {
       token->deleted = 1;
       int nesting = 0;
-      warn("hi");
       while (token->type != closingType || nesting > 0) {
         if (!token->deleted) {
-          if (token->type == openingType) {
+          if (token->type == LPAREN || token->type == LBRAK) {
             nesting++;
           }
-          else if (token->type == closingType) {
+          else if (token->type == RBRAK || token->type == RPAREN) {
             nesting--;
           }
         }
