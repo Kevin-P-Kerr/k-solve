@@ -147,30 +147,31 @@ int simplifyClause(char var, struct Token *tokens, int i) {
   if (empty < 2) {
     closeToken->deleted = 1;
     openToken->deleted = 1;
-    beginning++;
-    for (;beginning<i;beginning++) {
-      token = &tokens[beginning];
-      if (token->deleted) {
-        continue;
-      }
-      if (token->type == openingType) {
-        token->deleted = 1;
-        int nesting = 0;
-        warn("hi");
-        while (token->type != closingType || nesting > 0) {
-          if (!token->deleted) {
-            if (token->type == openingType) {
-              nesting++;
-            }
-            else if (token->type == closingType) {
-              nesting--;
-            }
+  }
+  // final sweep through for stray parens and brackets
+  beginning++;
+  for (;beginning<i;beginning++) {
+    token = &tokens[beginning];
+    if (token->deleted) {
+      continue;
+    }
+    if (token->type == openingType) {
+      token->deleted = 1;
+      int nesting = 0;
+      warn("hi");
+      while (token->type != closingType || nesting > 0) {
+        if (!token->deleted) {
+          if (token->type == openingType) {
+            nesting++;
           }
-          beginning++;
-          token = &tokens[beginning];
+          else if (token->type == closingType) {
+            nesting--;
+          }
         }
-        token->deleted = 1;
+        beginning++;
+        token = &tokens[beginning];
       }
+      token->deleted = 1;
     }
   }
   return i;
