@@ -68,6 +68,7 @@ struct Token* tokenize() {
   struct Token* tokens = malloc(sizeof(struct Token)*MAXTOKEN);
   while ((c=getchar())!=EOF) {
     c = killWhite(c);
+    if (c == EOF) { break; } // why?
     struct Token* t = &tokens[i];
     t->deleted = 0;
     if (c == '(') {
@@ -105,6 +106,7 @@ int getClosingType (int type) {
     return RBRAK;
   }
   warn("bad closing type");
+  fprintf(stderr,"%d\n",type);
   return 0;
 };
 
@@ -185,6 +187,8 @@ void simplify(char var, struct Token *tokens, int l) {
 
 int main() {
   struct Token* tokens = tokenize();
+  p(tokens);
+  warn("\n");
   simplify('a',tokens,ARRSIZE);
   p(tokens);
   // return solve(tokens);
