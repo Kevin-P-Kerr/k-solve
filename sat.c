@@ -134,7 +134,6 @@ int simplifyClause(char var, struct Token *tokens, int i) {
     }
     else if (token->type == VAR) {
       if (token->value == var) {
-        warn("DELETE");
         token->deleted = 1;
       }
       else {
@@ -143,9 +142,6 @@ int simplifyClause(char var, struct Token *tokens, int i) {
     }
     i++;
     token = &tokens[i];
-    fprintf(stderr,"%d\n",token->type);
-    fprintf(stderr,"%d\n",closingType);
-    warn("******");
   }
   closeToken = token;
   if (empty < 1) {
@@ -177,18 +173,14 @@ void simplify(char var, struct Token *tokens, int l) {
   int i =0;
   int simplified = 0;
   for (;i<l;i++) {
-    warn("do it");
     struct Token token = tokens[i];
     if (token.deleted) {
-      warn("do it more");
       continue;
     }
     if (token.type == LPAREN || token.type == LBRAK) {
-      warn("do it even more");
       simplifyClause(var,tokens,i);
     }
   }
-  warn("hello");
 }
 
 
@@ -196,8 +188,6 @@ int main() {
   struct Token* tokens = tokenize();
   p(tokens);
   warn("\n");
-  simplify('a',tokens,ARRSIZE);
-  warn("second");
   simplify('a',tokens,ARRSIZE);
   p(tokens);
   // return solve(tokens);
