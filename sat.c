@@ -105,6 +105,7 @@ struct Str* makeStr(char c) {
     buf[len] =c;
     len++;
   }
+  ungetc(c,stdin);
   struct Str * str = malloc(sizeof(struct Str));
   str->len = len;
   str->c = malloc(sizeof(char)*len);
@@ -258,8 +259,8 @@ int main() {
   simplify(1,tokens,ARRSIZE);
   p(tokens);
   warn("\n");
-  simplify('b',tokens,ARRSIZE);
-  p(tokens);
+  //simplify('b',tokens,ARRSIZE);
+  //p(tokens);
   // return solve(tokens);
  return 1;
 }
