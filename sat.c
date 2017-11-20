@@ -24,13 +24,13 @@ struct Token {
 struct Str {
   char *c;
   int len;
-}
+};
 
 struct VarContainer {
   struct VarContainer *next;
   int id;
   struct Str* str;
-}
+};
 
 int strEquals(struct Str* a, struct Str *b) {
   int alen = a->len;
@@ -40,7 +40,7 @@ int strEquals(struct Str* a, struct Str *b) {
   }
   int i=0;
   for (;i<alen;i++) {
-    if (alen->c[i] != blen->c[i]) {
+    if (a->c[i] != b->c[i]) {
       return 0;
     }
   }
@@ -81,7 +81,7 @@ void p (struct Token* t) {
       fp('[');
     }
     else if (tok->type == VAR) {
-      fp(tok->strValue);
+      printStr(tok->strValue);
     }
   }
 }
@@ -131,7 +131,7 @@ int findVar(struct Str *str, struct VarContainer *vars) {
   if (vars->id < 0) {
     return -1;
   }
-  if (strEquals(str,vars->strValue)) {
+  if (strEquals(str,vars->str)) {
     return vars->id;
   }
   if (vars->next != 0) {
@@ -144,7 +144,7 @@ struct Token* tokenize() {
   char c;
   int i =0;
   struct Token* tokens = malloc(sizeof(struct Token)*MAXTOKEN);
-  int varCount = 0;
+  int varcount = 0;
   struct VarContainer *vars = malloc(sizeof(struct VarContainer));
   vars->id = -1;
   while ((c=getchar())!=EOF) {
@@ -255,7 +255,7 @@ int main() {
   struct Token* tokens = tokenize();
   p(tokens);
   warn("\n");
-  simplify('a',tokens,ARRSIZE);
+  simplify(1,tokens,ARRSIZE);
   p(tokens);
   warn("\n");
   simplify('b',tokens,ARRSIZE);
