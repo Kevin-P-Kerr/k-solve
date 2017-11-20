@@ -106,63 +106,63 @@ int getClosingType (int type) {
     return RBRAK;
   }
   warn("bad closing type");
-  fprintf(stderr,"%d\n",type);
   return 0;
 };
 
 int simplifyClause(char var, struct Token *tokens, int i) {
   int beginning = i;
-  struct Token token = tokens[i];
-  struct Token openToken = token;
-  struct Token closeToken;
-  int closingType = getClosingType(token.type);
-  int openingType = token.type;
+  struct Token* token = &tokens[i];
+  struct Token* openToken = token;
+  struct Token* closeToken;
+  int closingType = getClosingType(token->type);
+  int openingType = token->type;
   int empty = 0;
   i++;
-  token = tokens[i];
-  while (token.type != closingType) {
-    if (token.deleted) {
+  token = &tokens[i];
+  while (token->type != closingType) {
+    if (token->deleted) {
       i++;
       continue;
     }
-    if (token.type == LPAREN || token.type == LBRAK) {
+    if (token->type == LPAREN || token->type == LBRAK) {
       empty++;
       i = simplifyClause(var,tokens,i);
-      if (token.deleted) {
+      if (token->deleted) {
         empty--;
       }
     }
-    else if (token.type == VAR) {
-      if (token.value == var) {
-        token.deleted = 1;
+    else if (token->type == VAR) {
+      if (token->value == var) {
+        warn("DELETE");
+        token->deleted = 1;
       }
       else {
         empty++;
       }
     }
     i++;
-    token = tokens[i];
+    token = &tokens[i];
   }
   closeToken = token;
   if (empty < 2) {
-    closeToken.deleted = 1;
-    openToken.deleted = 1;
+    closeToken->deleted = 1;
+    openToken->deleted = 1;
     for (;beginning<i;beginning++) {
-      token = tokens[beginning];
-      if (token.deleted) {
+      token = &tokens[beginning];
+      if (token->deleted) {
         continue;
       }
-      else if (token.type == LPAREN) {
-        token.type == LBRAK;
+      else if (token->type == LPAREN) {
+        token->type == LBRAK;
       }
-      else if (token.type == RPAREN) {
-        token.type == RBRAK;
+      else if (token->type == RPAREN) {
+        token->type == RBRAK;
       }
-      else if (token.type == LBRAK) {
-        token.type == LPAREN;
+      else if (token->type == LBRAK) {
+        token->type == LPAREN;
       }
       else if (token.type == RBRAK) {
-        token.type == RPAREN;
+        token->type == RPAREN;
       }
     }
   }
