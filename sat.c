@@ -127,17 +127,9 @@ int simplifyClause(char var, struct Token *tokens, int i) {
     }
     if (token->type == LPAREN || token->type == LBRAK) {
       empty++;
-      if (token->type == openingType) {
-        token->deleted = 1;
-      }
       i = simplifyClause(var,tokens,i);
       if (token->deleted) {
         empty--;
-      }
-      else if (token->type == closingType) {
-        warn("hello");
-        empty++;
-        token->deleted = 1;
       }
     }
     else if (token->type == VAR) {
@@ -155,6 +147,31 @@ int simplifyClause(char var, struct Token *tokens, int i) {
   if (empty < 2) {
     closeToken->deleted = 1;
     openToken->deleted = 1;
+    beginning++;
+    for (;beginning<i;beginning++) {
+      token = &tokens[beginning];
+      if (token->deleted) {
+        continue;
+      }
+      if (token->type == openingType) {
+        token->deleted = 1;
+        int nesting = 0;
+        warn("hi");
+        while (token->type != closingType || nesting > 0) {
+          if (!token->deleted) {
+            if (token->type == openingType) {
+              nesting++;
+            }
+            else if (token->type == closingType) {
+              nesting--;
+            }
+          }
+          beginning++;
+          token = &tokens[beginning];
+        }
+        token->deleted = 1;
+      }
+    }
   }
   return i;
 }
