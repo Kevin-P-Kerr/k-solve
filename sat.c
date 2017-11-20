@@ -177,7 +177,7 @@ void simplify(char var, struct Token *tokens, int l) {
     if (token.deleted) {
       continue;
     }
-    if (token.type == LPAREN || token.type == RPAREN) {
+    if (token.type == LPAREN || token.type == LBRAK) {
       int cont = 1;
       simplifyClause(var,tokens,i);
     }
