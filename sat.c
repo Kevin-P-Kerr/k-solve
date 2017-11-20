@@ -118,18 +118,20 @@ int simplifyClause(char var, struct Token *tokens, int i) {
   int empty = 0;
   i++;
   token = tokens[i];
-  int flag = 0;
   while (token.type != closingType) {
     if (token.deleted) {
+      i++;
       continue;
     }
     if (token.type == LPAREN || token.type == LBRAK) {
       empty++;
-      while (simplifyClause(var,tokens,i)) {}
+      i = simplifyClause(var,tokens,i);
+      if (token.deleted) {
+        empty--;
+      }
     }
-    if (token.type == VAR) {
+    else if (token.type == VAR) {
       if (token.value == var) {
-        flag = 1;
         token.deleted = 1;
       }
       else {
@@ -137,6 +139,7 @@ int simplifyClause(char var, struct Token *tokens, int i) {
       }
     }
     i++;
+    token = tokens[i];
   }
   closeToken = token;
   if (empty < 2) {
@@ -160,25 +163,21 @@ int simplifyClause(char var, struct Token *tokens, int i) {
         token.type == RPAREN;
       }
     }
-    return 0;
   }
-  return flag;
+  return i;
 }
 
-int simplify(char var, struct Token *tokens, int l) {
+void simplify(char var, struct Token *tokens, int l) {
   int i =0;
   int simplified = 0;
   for (;i<l;i++) {
     struct Token token = tokens[i];
-    if (token.type == VAR && token.value == var) {
-      simplified = 1;
-      token.deleted = 1;
+    if (token.deleted) {
+      continue;
     }
-    else if (token.type == LPAREN || token.type == RPAREN) {
+    if (token.type == LPAREN || token.type == RPAREN) {
       int cont = 1;
-      while (cont) {
-        cont = simplifyClause(var,tokens,i);
-      }
+      simplifyClause(var,tokens,i);
     }
   }
 }
@@ -186,6 +185,8 @@ int simplify(char var, struct Token *tokens, int l) {
 
 int main() {
   struct Token* tokens = tokenize();
- // return solve(tokens);
+  simplify('a',tokens,ARRSIZE);
+  p(tokens);
+  // return solve(tokens);
  return 1;
 }
