@@ -109,16 +109,18 @@ int getClosingType (int type) {
   return 0;
 };
 
+int topLevel=0;
 int simplifyClause(char var, struct Token *tokens, int i) {
+  topLevel++;
   int beginning = i;
   struct Token* token = &tokens[i];
   struct Token* openToken = token;
   struct Token* closeToken;
   int closingType = getClosingType(token->type);
   int openingType = token->type;
-  int empty = 0;
   i++;
   token = &tokens[i];
+  int clauseCount = 0;
   while (token->type != closingType) {
     if (token->deleted) {
       i++;
@@ -126,10 +128,13 @@ int simplifyClause(char var, struct Token *tokens, int i) {
       continue;
     }
     if (token->type == LPAREN || token->type == LBRAK) {
-      empty++;
       i = simplifyClause(var,tokens,i);
-      if (token->deleted) {
-        empty--;
+      topLevel--;
+      if (!token->deleted) {
+        if (topLevel == 1) {
+          fprintf(stderr,"%d\n",token->type);
+        }
+        clauseCount++;
       }
     }
     else if (token->type == VAR) {
@@ -137,16 +142,20 @@ int simplifyClause(char var, struct Token *tokens, int i) {
         token->deleted = 1;
       }
       else {
-        empty+=2;
+        clauseCount+=2;
       }
     }
     i++;
     token = &tokens[i];
   }
   closeToken = token;
-  if (empty < 2) {
-    closeToken->deleted = 1;
+  if (clauseCount < 2) {
     openToken->deleted = 1;
+    closeToken->deleted =1;
+  }
+  if (topLevel == 1) {
+    fprintf(stderr,"%d",clauseCount);
+    fprintf(stderr,"***\n");
   }
   return i;
 }
@@ -171,6 +180,9 @@ int main() {
   p(tokens);
   warn("\n");
   simplify('a',tokens,ARRSIZE);
+  p(tokens);
+  warn("\n");
+  simplify('b',tokens,ARRSIZE);
   p(tokens);
   // return solve(tokens);
  return 1;
