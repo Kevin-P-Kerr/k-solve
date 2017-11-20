@@ -1,6 +1,5 @@
 
   // final sweep through for stray parens and brackets
-  /*
   beginning++;
   for (;beginning<i;beginning++) {
     token = &tokens[beginning];
@@ -24,5 +23,17 @@
       }
       token->deleted = 1;
     }
+    else if (token->type == LPAREN || token->type == LBRAK) {
+      int nesting =1;
+      while (nesting >0) {
+        beginning++;
+        token = &tokens[beginning];
+        if (token->type == LPAREN || token->type == LBRAK) {
+          nesting++;
+        }
+        else if (token->type == RPAREN || token->type == RBRAK) {
+          nesting--;
+        }
+      }
+    }
   }
-  */

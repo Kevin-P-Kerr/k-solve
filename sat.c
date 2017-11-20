@@ -110,7 +110,6 @@ int getClosingType (int type) {
 };
 
 int simplifyClause(char var, struct Token *tokens, int i) {
-  topLevel++;
   int beginning = i;
   struct Token* token = &tokens[i];
   struct Token* openToken = token;
@@ -127,9 +126,9 @@ int simplifyClause(char var, struct Token *tokens, int i) {
       continue;
     }
     if (token->type == LPAREN || token->type == LBRAK) {
+      int cp = i;
       i = simplifyClause(var,tokens,i);
-      topLevel--;
-      if (!token->deleted) {
+      if (!token->deleted || (tokens[cp+1].type == openingType && !tokens[cp+1].deleted)) {
         clauseCount++;
       }
     }
