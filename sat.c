@@ -239,6 +239,7 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   i++;
   token = tokens[i];
   while (token.type != closingType) {
+    if (token.deleted) { continue; }
     if (isClauseStart(token)) {
       i = seekEndClause(ss,i);
     }
@@ -276,12 +277,13 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
           if ((!tokens[cp].deleted)) {
             if (isClauseStart(tokens[cp])) {
               clauseCount++;
+              cp = seekEndClause(ss,cp);
             }
             else if (tokens[cp].type == VAR) {
               clauseCount+=2;
             }
           }
-        }
+        } 
       }
     }
     else if (token->type == VAR) {
