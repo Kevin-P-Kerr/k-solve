@@ -357,23 +357,14 @@ void simplify(int var, struct ScannedSheet *ss) {
   }
 }
 
-//int solve (struct Token *tokens,int l) {
-  //struct VarTable *v = getVariableOrder(tokens);
-//}
+void solve(struct ScannedSheet *ss, int varId) {
+  simplify(1,ss);
+}
 
 int main() {
   struct ScannedSheet *ss = tokenize();
+  solve(ss,-1);
   p(ss);
-  warn("\n");
-  simplify(0,ss);
-  p(ss);
-  warn("\n");
-  simplify(1,ss);
-  p(ss);
- // warn("\n");
-  //simplify(4,ss);
- // p(ss);
   warn("\n\nfinis\n");
-  // return solve(tokens);
  return 1;
 }
