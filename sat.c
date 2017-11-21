@@ -32,6 +32,11 @@ struct VarContainer {
   struct Str* str;
 };
 
+void freeStr(struct Str* str) {
+  free(str->c);
+  free(str);
+}
+
 int strEquals(struct Str* a, struct Str *b) {
   int alen = a->len;
   int blen = b->len;
@@ -82,7 +87,19 @@ void p (struct Token* t) {
       fp('[');
     }
     else if (tok->type == VAR) {
-      printStr(tok->strValue);
+      if ((!t[i+1].deleted) && t[i+1].type==VAR) {
+        int newlen = tok->strValue->len+1;
+        char *c = malloc(sizeof(char)*newlen);
+        sprintf(c,"%s ",tok->strValue->c);
+        struct Str *str = malloc(sizeof(struct Str));
+        str->len = newlen;
+        str->c = c;
+        printStr(str);
+        freeStr(str);
+      }
+      else {
+        printStr(tok->strValue);
+      }
     }
   }
 }
