@@ -119,7 +119,6 @@ struct Str* makeStr(char c) {
   int len =1;
   buf[0] = c;
   while (isAlpha(c=getchar())) {
-    fprintf(stderr,"is alpha %c\n",c);
     buf[len] =c;
     len++;
   }
@@ -131,7 +130,6 @@ struct Str* makeStr(char c) {
   for (;i<len;i++) {
     str->c[i] = buf[i];
   }
-  fprintf(stderr,"found var: %s\n",buf);
   free(buf);
   return str;
 }
