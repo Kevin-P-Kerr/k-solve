@@ -41,7 +41,6 @@ int strEquals(struct Str* a, struct Str *b) {
   int i=0;
   for (;i<alen;i++) {
     if (a->c[i] != b->c[i]) {
-      fprintf(stderr," yo %s %s\n",a->c,b->c);
       return 0;
     }
   }
@@ -217,7 +216,6 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
     }
     if (token->type == LPAREN || token->type == LBRAK) {
       int cp = i;
-      fprintf(stderr,"hi %d\n",varId);
       i = simplifyClause(varId,tokens,i);
       if (!token->deleted || (tokens[cp+1].type == openingType && !tokens[cp+1].deleted)) {
         clauseCount++;
@@ -225,11 +223,9 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
     }
     else if (token->type == VAR) {
       if (token->id == varId) {
-        fprintf(stderr,"deleting %s\n",token->strValue->c);
         token->deleted = 1;
       }
       else {
-        fprintf(stderr," not deleting %s%d\n",token->strValue->c,token->id);
         clauseCount+=2;
       }
     }
@@ -269,8 +265,8 @@ int main() {
   simplify(0,tokens,ARRSIZE);
   p(tokens);
   warn("\n");
-  //simplify(1,tokens,ARRSIZE);
-  //p(tokens);
+  simplify(2,tokens,ARRSIZE);
+  p(tokens);
   warn("\n");
   // return solve(tokens);
  return 1;
