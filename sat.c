@@ -220,7 +220,10 @@ int getClosingType (int type) {
   if (type == LBRAK) {
     return RBRAK;
   }
-  warn("bad closing type");
+  char *error = malloc(sizeof(char)*22);
+  sprintf(error,"bad bad opening type %d\n",type);
+  warn(error);
+  free(error);
   return 0;
 };
 
@@ -234,12 +237,13 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   int openingType = token.type;
   int closingType = getClosingType(openingType);
   i++;
+  token = tokens[i];
   while (token.type != closingType) {
-    token = tokens[i];
     if (isClauseStart(token)) {
       i = seekEndClause(ss,i);
     }
     i++;
+    token = tokens[i];
   }
   return i;
 }
@@ -312,6 +316,7 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
       else if (isClauseStart(token)) {
         n = seekEndClause(ss,n);
       }
+      n++;
     }
   }
   return i;
@@ -346,9 +351,9 @@ int main() {
   warn("\n");
   simplify(1,ss);
   p(ss);
-  warn("\n");
-  simplify(4,ss);
-  p(ss);
+ // warn("\n");
+  //simplify(4,ss);
+ // p(ss);
   warn("\n\nend\n");
   // return solve(tokens);
  return 1;
