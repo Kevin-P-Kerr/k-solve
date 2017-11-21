@@ -10,8 +10,6 @@
 #define WARN 1
 #define LEVEL 2
 
-int ARRSIZE =0;
-int VARCOUNT;
 struct Token {
   int deleted;
   int type;
@@ -30,6 +28,12 @@ struct VarContainer {
   struct VarContainer *next;
   int id;
   struct Str* str;
+};
+
+struct ScannedSheet {
+  struct VarContainer *vars;
+  struct Token *tokens;
+  int tokenLen;
 };
 
 void freeStr(struct Str* str) {
@@ -66,9 +70,11 @@ void printStr(struct Str *str) {
   fprintf(stderr,"%s",str->c);
 }
 
-void p (struct Token* t) {
+void p (struct ScannedSheet *ss) {
   int i,ii;
-  for (i=0,ii=ARRSIZE;i<ii;i++) {
+  i = ss->tokenLen;
+  struct Token *t = ss->tokens;
+  for (i=0;i<ii;i++) {
     struct Token* tok = &t[i];
     if (tok->deleted) {
       continue;
@@ -164,7 +170,7 @@ int findVar(struct Str *str, struct VarContainer *vars) {
   return -1;
 }
 
-struct Token* tokenize() {
+struct ScannedSheet* tokenize() {
   char c;
   int i =0;
   struct Token* tokens = malloc(sizeof(struct Token)*MAXTOKEN);
@@ -200,8 +206,11 @@ struct Token* tokenize() {
     }
     i++;
   }
-  ARRSIZE = i;
-  return tokens;
+  struct ScannedSheet *sheet = malloc(sizeof(struct ScannedSheet));
+  sheet->vars = vars;
+  sheet->tokens = tokens;
+  sheet->tokenLen = i;
+  return sheet;
 }
 
 int getClosingType (int type) {
@@ -215,8 +224,9 @@ int getClosingType (int type) {
   return 0;
 };
 
-int simplifyClause(int varId, struct Token *tokens, int i) {
+int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   int beginning = i;
+  struct Token* tokens = ss->tokens;
   struct Token* token = &tokens[i];
   struct Token* openToken = token;
   struct Token* closeToken;
@@ -233,7 +243,7 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
     }
     if (token->type == LPAREN || token->type == LBRAK) {
       int cp = i;
-      i = simplifyClause(varId,tokens,i);
+      i = simplifyClause(varId,ss,i);
       if (!token->deleted || (tokens[cp+1].type == openingType && !tokens[cp+1].deleted)) {
         clauseCount++;
       }
@@ -257,16 +267,18 @@ int simplifyClause(int varId, struct Token *tokens, int i) {
   return i;
 }
 
-void simplify(char var, struct Token *tokens, int l) {
+void simplify(int var, struct ScannedSheet *ss) {
   int i =0;
   int simplified = 0;
+  int l = ss->tokenLen;
+  struct Token *tokens = ss->tokens;
   for (;i<l;i++) {
     struct Token token = tokens[i];
     if (token.deleted) {
       continue;
     }
     if (token.type == LPAREN || token.type == LBRAK) {
-      i = simplifyClause(var,tokens,i);
+      i = simplifyClause(var,ss,i);
     }
   }
 }
@@ -276,14 +288,14 @@ void simplify(char var, struct Token *tokens, int l) {
 //}
 
 int main() {
-  struct Token* tokens = tokenize();
-  p(tokens);
+  struct ScannedSheet *ss = tokenize();
+  p(ss);
   warn("\n");
-  simplify(0,tokens,ARRSIZE);
-  p(tokens);
+  simplify(0,ss);
+  p(ss);
   warn("\n");
-  simplify(2,tokens,ARRSIZE);
-  p(tokens);
+  simplify(2,ss);
+  p(ss);
   warn("\n");
   // return solve(tokens);
  return 1;
