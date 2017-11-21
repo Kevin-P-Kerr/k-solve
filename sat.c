@@ -224,6 +224,10 @@ int getClosingType (int type) {
   return 0;
 };
 
+int isClauseStart(struct Token t) {
+  return t.type == LPAREN || t.type == LBRAK;
+}
+
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   int beginning = i;
   struct Token* tokens = ss->tokens;
@@ -244,8 +248,20 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     if (token->type == LPAREN || token->type == LBRAK) {
       int cp = i;
       i = simplifyClause(varId,ss,i);
-      if (!token->deleted || (tokens[cp+1].type == openingType && !tokens[cp+1].deleted)) {
+      if (!token->deleted) {
         clauseCount++;
+      }
+      else {
+        for (;cp<i;cp++) {
+          if ((!tokens[cp].deleted)) {
+            if (isClauseStart(tokens[cp])) {
+              clauseCount++;
+            }
+            else if (tokens[cp].type == VAR) {
+              clauseCount+=2;
+            }
+          }
+        }
       }
     }
     else if (token->type == VAR) {
@@ -299,7 +315,7 @@ int main() {
   warn("\n");
   simplify(4,ss);
   p(ss);
-  warn("end\n");
+  warn("\n\nend\n");
   // return solve(tokens);
  return 1;
 }
