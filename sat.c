@@ -299,6 +299,10 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     }
     i++;
     token = &tokens[i];
+    while (token->deleted) {
+      i++;
+      token = &tokens[i];
+    }
   }
   closeToken = token;
   if (clauseCount < 2) {
