@@ -56,7 +56,7 @@ int strEquals(struct Str* a, struct Str *b) {
   return 1;
 }
 
-int  *getNextToken(struct Token *tokens, int i) {
+int getNextToken(struct Token *tokens, int i) {
   struct Token *token = &tokens[i];
   while (token->deleted) {
     token = &tokens[i];
@@ -259,9 +259,6 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
 }
 
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
-  fprintf(stderr,"start\n");
-  p(ss);
-  fprintf(stderr,"\n---\n");
   int beginning = i;
   struct Token* tokens = ss->tokens;
   struct Token* token = &tokens[i];
@@ -315,8 +312,6 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   }
   closeToken = token;
   if (clauseCount < 2) {
-    warn("delete time\n");
-    fprintf(stderr,"%d %d\n",openToken->deleted,closeToken->deleted);
     openToken->deleted = 1;
     if (closeToken->deleted) {
       closeToken->deleted = 0;
@@ -329,30 +324,20 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     // sweep through and delete redundant bracket and parens
     int n = beginning+1;
     int nn = i-1;
-    int b = 0;
     for(;n<nn;n++) {
       struct Token *token = &tokens[n];
-      if (b) {
-        fprintf(stderr,"%d\n",token->type);
-      }
       if (token->deleted) { continue; }
       if (token->type == openingType) {
         token->deleted= 1;
-        b = 1;
-        fprintf(stderr,"hii %d %d\n",openingType,closingType);
       }
       else if (token->type == closingType) {
         token->deleted = 1;
-        fprintf(stderr,"hi\n");
       }
       else if (isClauseStart(*token)) {
         n = seekEndClause(ss,n);
       }
     }
   }
-  fprintf(stderr,"end\n");
-  p(ss);
-  warn("\n---\n");
   return i;
 }
 
@@ -388,7 +373,7 @@ int main() {
  // warn("\n");
   //simplify(4,ss);
  // p(ss);
-  warn("\n\nend\n");
+  warn("\n\nfinis\n");
   // return solve(tokens);
  return 1;
 }
