@@ -56,6 +56,15 @@ int strEquals(struct Str* a, struct Str *b) {
   return 1;
 }
 
+int  *getNextToken(struct Token *tokens, int i) {
+  struct Token *token = &tokens[i];
+  while (token->deleted) {
+    token = &tokens[i];
+    i++;
+  }
+  return i;
+}
+
 void warn (char* warning) {
   if (LEVEL >= WARN) {
    fprintf(stderr,"%s\n",warning);
