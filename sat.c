@@ -32,6 +32,11 @@ struct VarContainer {
   struct Str* str;
 };
 
+void freeStr(struct Str* str) {
+  free(str->c);
+  free(str);
+}
+
 int strEquals(struct Str* a, struct Str *b) {
   int alen = a->len;
   int blen = b->len;
@@ -81,7 +86,19 @@ void p (struct Token* t) {
       fp('[');
     }
     else if (tok->type == VAR) {
-      printStr(tok->strValue);
+      if ((!t[i+1].deleted) && t[i+1].type==VAR) {
+        int newlen = tok->strValue->len+1;
+        char *c = malloc(sizeof(char)*newlen);
+        sprintf(c,"%s ",tok->strValue->c);
+        struct Str *str = malloc(sizeof(struct Str));
+        str->len = newlen;
+        str->c = c;
+        printStr(str);
+        freeStr(str);
+      }
+      else {
+        printStr(tok->strValue);
+      }
     }
   }
 }
@@ -94,7 +111,7 @@ char killWhite(char c) {
 }
 
 int isAlpha (char c) {
-  return c >= 'A' && c <= 'z';
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
 struct Str* makeStr(char c) {
@@ -102,6 +119,7 @@ struct Str* makeStr(char c) {
   int len =1;
   buf[0] = c;
   while (isAlpha(c=getchar())) {
+    fprintf(stderr,"is alpha %c\n",c);
     buf[len] =c;
     len++;
   }
@@ -113,6 +131,7 @@ struct Str* makeStr(char c) {
   for (;i<len;i++) {
     str->c[i] = buf[i];
   }
+  fprintf(stderr,"found var: %s\n",buf);
   free(buf);
   return str;
 }
