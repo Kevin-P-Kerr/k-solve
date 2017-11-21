@@ -112,7 +112,7 @@ char killWhite(char c) {
 }
 
 int isAlpha (char c) {
-  return c >= 'A' && c <= 'z';
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
 
 struct Str* makeStr(char c) {
