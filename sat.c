@@ -72,7 +72,7 @@ void printStr(struct Str *str) {
 
 void p (struct ScannedSheet *ss) {
   int i,ii;
-  i = ss->tokenLen;
+  ii = ss->tokenLen;
   struct Token *t = ss->tokens;
   for (i=0;i<ii;i++) {
     struct Token* tok = &t[i];
@@ -294,9 +294,12 @@ int main() {
   simplify(0,ss);
   p(ss);
   warn("\n");
-  simplify(2,ss);
+  simplify(1,ss);
   p(ss);
   warn("\n");
+  simplify(4,ss);
+  p(ss);
+  warn("end\n");
   // return solve(tokens);
  return 1;
 }
