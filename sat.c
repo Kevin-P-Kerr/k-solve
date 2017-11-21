@@ -228,6 +228,22 @@ int isClauseStart(struct Token t) {
   return t.type == LPAREN || t.type == LBRAK;
 }
 
+int seekEndClause(struct ScannedSheet *ss, int i) {
+  struct Token token = ss->tokens[i];
+  struct Token *tokens = ss->tokens;
+  int openingType = token.type;
+  int closingType = getClosingType(openingType);
+  i++;
+  while (token.type != closingType) {
+    token = tokens[i];
+    if (isClauseStart(token)) {
+      i = seekEndClause(ss,i);
+    }
+    i++;
+  }
+  return i;
+}
+
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   int beginning = i;
   struct Token* tokens = ss->tokens;
@@ -279,6 +295,24 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   if (clauseCount < 2) {
     openToken->deleted = 1;
     closeToken->deleted =1;
+  }
+  else {
+    // sweep through and delete redundant bracket and parens
+    int n = beginning+1;
+    int nn = i-1;
+    for(;n<nn;n++) {
+      struct Token token = tokens[n];
+      if (token.deleted) { continue; }
+      if (token.type == openingType) {
+        token.deleted= 1;
+      }
+      else if (token.type == closingType) {
+        token.deleted = 1;
+      }
+      else if (isClauseStart(token)) {
+        n = seekEndClause(ss,n);
+      }
+    }
   }
   return i;
 }
