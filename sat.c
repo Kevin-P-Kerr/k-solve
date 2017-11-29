@@ -248,7 +248,9 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   i++;
   token = tokens[i];
   while (token.type != closingType) {
-    if (token.deleted) { continue; }
+    char *c = malloc(sizeof(char)*20);
+    warn(c);
+    if (token.deleted) { i++; token=tokens[i]; continue; }
     if (isClauseStart(token)) {
       i = seekEndClause(ss,i);
     }
@@ -338,6 +340,7 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
       }
     }
   }
+      warn("bye");
   return i;
 }
 
@@ -358,7 +361,7 @@ void simplify(int var, struct ScannedSheet *ss) {
 }
 
 void solve(struct ScannedSheet *ss, int varId) {
-  simplify(1,ss);
+  simplify(0,ss);
 }
 
 int main() {
