@@ -272,9 +272,6 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   token = &tokens[i];
   int clauseCount = 0;
   while (token->type != closingType) {
-    char *debugString = malloc(sizeof(char)*20);
-    sprintf(debugString,"token type %d\n", token->type);
-    d(debugString);
     if (token->deleted) {
       i++;
       token = &tokens[i];
