@@ -259,7 +259,13 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   return i;
 }
 
+int debug = 0;
+void d(char *s) {
+  if (debug) {warn(s);}
+}
+
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
+  debug = varId == 1;
   int beginning = i;
   struct Token* tokens = ss->tokens;
   struct Token* token = &tokens[i];
@@ -271,6 +277,14 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   token = &tokens[i];
   int clauseCount = 0;
   while (token->type != closingType) {
+    char *debugString = malloc(sizeof(char)*20);
+    sprintf(debugString,"token type %d\n", token->type);
+    d(debugString);
+    if (token->type == 2) {
+      printStr(token->strValue);
+      fprintf(stderr, " %d",token->id);
+      d("\n");
+    }
     if (token->deleted) {
       i++;
       token = &tokens[i];
