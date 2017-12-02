@@ -42,6 +42,11 @@ void freeStr(struct Str* str) {
 }
 
 int strEquals(struct Str* a, struct Str *b) {
+  fprintf(stderr,"str equls time\n");
+  printStr(a);
+  warn("\n");
+  printStr(b);
+  warn("\n");
   int alen = a->len;
   int blen = b->len;
   if (alen!=blen) {
@@ -163,7 +168,7 @@ void append(int id, struct Str *str, struct VarContainer *vars) {
   while (vars->next != 0) {
     vars = vars->next;
   }
-  var->next = var;
+  vars->next = var;
 }
 
 int findVar(struct Str *str, struct VarContainer *vars) {
@@ -206,11 +211,15 @@ struct ScannedSheet* tokenize() {
     else if (isAlpha(c)) {
       t->type = VAR;
       t->strValue = makeStr(c);
+      fprintf(stderr,"what\n");
+      printStr(t->strValue);
       int id = findVar(t->strValue, vars);
+      t->id = id;
       if (id<0) {
         t->id = varcount;
         append(t->id,t->strValue,vars);
         varcount++;
+        fprintf(stderr,"varcount %d\n",varcount);
       }
     }
     i++;
