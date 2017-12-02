@@ -261,7 +261,6 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
 }
 
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
-  debug = varId == 1;
   int beginning = i;
   struct Token* tokens = ss->tokens;
   struct Token* token = &tokens[i];
