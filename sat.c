@@ -261,12 +261,14 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
 
 int deleteClause(int i, struct ScannedSheet *ss) {
   struct Token *token = &ss->tokens[i];
+  token->deleted = 1;
   struct Token *tokens = ss->tokens;
   int openingType = token->type;
   int closingType = getClosingType(openingType);
   i++;
   token = &tokens[i];
   while (token->type != closingType) {
+    if (token->deleted) { i++; token=&tokens[i]; continue; }
     token->deleted = 1;
     if (isClauseStart(*token)) {
       i = seekEndClause(ss,i);
@@ -274,6 +276,7 @@ int deleteClause(int i, struct ScannedSheet *ss) {
     i++;
     token = &tokens[i];
   }
+  token->deleted=1;
   return i;
 }
 
@@ -386,6 +389,8 @@ void simplify(int var, struct ScannedSheet *ss) {
 }
 
 int solve(struct ScannedSheet *ss, int varId) {
+  simplify(0,ss);
+  p(ss);
 }
 
 int main() {
