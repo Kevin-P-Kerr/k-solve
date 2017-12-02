@@ -42,11 +42,6 @@ void freeStr(struct Str* str) {
 }
 
 int strEquals(struct Str* a, struct Str *b) {
-  fprintf(stderr,"str equls time\n");
-  printStr(a);
-  warn("\n");
-  printStr(b);
-  warn("\n");
   int alen = a->len;
   int blen = b->len;
   if (alen!=blen) {
@@ -211,15 +206,12 @@ struct ScannedSheet* tokenize() {
     else if (isAlpha(c)) {
       t->type = VAR;
       t->strValue = makeStr(c);
-      fprintf(stderr,"what\n");
-      printStr(t->strValue);
       int id = findVar(t->strValue, vars);
       t->id = id;
       if (id<0) {
         t->id = varcount;
         append(t->id,t->strValue,vars);
         varcount++;
-        fprintf(stderr,"varcount %d\n",varcount);
       }
     }
     i++;
@@ -268,11 +260,6 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   return i;
 }
 
-int debug = 0;
-void d(char *s) {
-  if (debug) {warn(s);}
-}
-
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   debug = varId == 1;
   int beginning = i;
@@ -289,11 +276,6 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     char *debugString = malloc(sizeof(char)*20);
     sprintf(debugString,"token type %d\n", token->type);
     d(debugString);
-    if (token->type == 2) {
-      printStr(token->strValue);
-      fprintf(stderr, " %d",token->id);
-      d("\n");
-    }
     if (token->deleted) {
       i++;
       token = &tokens[i];
