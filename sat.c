@@ -249,7 +249,6 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   i++;
   token = tokens[i];
   while (token.type != closingType) {
-    char *c = malloc(sizeof(char)*20);
     if (token.deleted) { i++; token=tokens[i]; continue; }
     if (isClauseStart(token)) {
       i = seekEndClause(ss,i);
@@ -260,8 +259,27 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
   return i;
 }
 
+int deleteClause(int i, struct ScannedSheet *ss) {
+  struct Token *token = &ss->tokens[i];
+  struct Token *tokens = ss->tokens;
+  int openingType = token->type;
+  int closingType = getClosingType(openingType);
+  i++;
+  token = &tokens[i];
+  while (token->type != closingType) {
+    token->deleted = 1;
+    if (isClauseStart(*token)) {
+      i = seekEndClause(ss,i);
+    }
+    i++;
+    token = &tokens[i];
+  }
+  return i;
+}
+
 int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
   int beginning = i;
+  int delete = 0;
   struct Token* tokens = ss->tokens;
   struct Token* token = &tokens[i];
   struct Token* openToken = token;
@@ -280,6 +298,10 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     if (token->type == LPAREN || token->type == LBRAK) {
       int cp = i;
       i = simplifyClause(varId,ss,i);
+      if (i<0) {
+        deleteClause(beginning,ss);
+        return -1;
+      }
       if (!token->deleted) {
         clauseCount++;
       }
@@ -300,6 +322,10 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
     else if (token->type == VAR) {
       if (token->id == varId) {
         token->deleted = 1;
+        if (openingType == LPAREN) {
+          deleteClause(beginning,ss);
+          return -1;
+        }
       }
       else {
         clauseCount+=2;
@@ -360,9 +386,6 @@ void simplify(int var, struct ScannedSheet *ss) {
 }
 
 int solve(struct ScannedSheet *ss, int varId) {
-  if (fullyResolved(ss)) {
-    return consistent(ss);
-  }
 }
 
 int main() {
