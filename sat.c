@@ -359,14 +359,9 @@ void simplify(int var, struct ScannedSheet *ss) {
   }
 }
 
-void solve(struct ScannedSheet *ss, int varId) {
-  int i =0;
-  int ii=2;
-  p(ss);
-  for (; i<ii; i++) {
-    warn("\nnext");
-    simplify(i,ss);
-    p(ss);
+int solve(struct ScannedSheet *ss, int varId) {
+  if (fullyResolved(ss)) {
+    return consistent(ss);
   }
 }
 
