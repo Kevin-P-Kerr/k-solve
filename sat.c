@@ -262,13 +262,11 @@ int seekEndClause(struct ScannedSheet *ss, int i) {
 int deleteClause(int i, struct ScannedSheet *ss) {
   struct Token *token = &ss->tokens[i];
   token->deleted = 1;
-  fprintf(stderr,"hi\n");
   struct Token *tokens = ss->tokens;
   int openingType = token->type;
   int closingType = getClosingType(openingType);
   i = getNextToken(tokens,i);
   token = &tokens[i];
-  fprintf(stderr,"%d %d %d\n",openingType,closingType,token->type);
   while (token->type != closingType) {
     if (token->deleted) { i++; token=&tokens[i]; continue; }
     token->deleted = 1;
@@ -277,7 +275,6 @@ int deleteClause(int i, struct ScannedSheet *ss) {
     }
     i++;
     token = &tokens[i];
-    fprintf(stderr, "next token: %d %d\n",token->type,token->deleted);
   }
   token->deleted=1;
   return i;
@@ -305,10 +302,7 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
       int cp = i;
       i = simplifyClause(varId,ss,i);
       if (i<0) {
-        fprintf(stderr,"delete up! %d\n",openingType);
         deleteClause(beginning,ss);
-        p(ss);
-        fprintf(stderr,"\n");
         return -1;
       }
       if (!token->deleted) {
@@ -332,10 +326,7 @@ int simplifyClause(int varId, struct ScannedSheet *ss, int i) {
       if (token->id == varId) {
         token->deleted = 1;
         if (openingType == LPAREN) {
-          fprintf(stderr,"delete! %d\n", beginning);
           deleteClause(beginning,ss);
-          p(ss);
-          fprintf(stderr,"\n");
           return -1;
         }
       }
@@ -404,6 +395,8 @@ int solve(struct ScannedSheet *ss, int varId) {
 
 int main() {
   struct ScannedSheet *ss = tokenize();
+  p(ss);
+  warn("\n");
   solve(ss,-1);
   warn("\n\nfinis\n");
  return 1;
