@@ -15,7 +15,7 @@
 from c+b=a a>b a=incb produce c=inc0
 c+b=incb (rw)
 c=incb-b b=incb-c (5)
-incb-b=inc0 (6)
+incb-b=inc0 (7)
 c=inc0 (4)
 
 
