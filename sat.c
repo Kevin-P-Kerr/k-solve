@@ -36,6 +36,17 @@ struct ScannedSheet {
   int tokenLen;
 };
 
+struct Clause {
+  int type;
+  struct Clause *subClauses;
+  // only for atomic clauses
+  int varId;
+  // link to next clause
+  struct Clause *next;
+
+}
+
+
 struct ParsedSheet {
   struct VarContainer *vars;
   struct Clause *clauses;
@@ -228,6 +239,14 @@ struct ScannedSheet* tokenize() {
   sheet->tokenLen = i;
   return sheet;
 }
+
+struct ParsedSheet *parse(struct ScannedSheet *ss) {
+  struct Clause *clause = malloc(sizeof(struct Clause));
+  int i =0;
+  int ii = ss->tokenLen;
+  for (;i<ii;i++) {
+
+
 
 int main() {
   struct ScannedSheet *ss = tokenize();
