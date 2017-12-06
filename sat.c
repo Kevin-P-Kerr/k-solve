@@ -244,9 +244,20 @@ struct ParsedSheet *parse(struct ScannedSheet *ss) {
   struct Clause *clause = malloc(sizeof(struct Clause));
   int i =0;
   int ii = ss->tokenLen;
+  struct Token token;
   for (;i<ii;i++) {
-
-
+    token = ss->tokens[i];
+    if (token.type == LPAREN) {
+    }
+    else if (token.type == LBRAK) {
+    }
+    else if (token.type = VAR) {
+    }
+    else {
+      warn("bad token type!");
+    }
+  }
+}
 
 int main() {
   struct ScannedSheet *ss = tokenize();
