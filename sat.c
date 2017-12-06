@@ -36,6 +36,12 @@ struct ScannedSheet {
   int tokenLen;
 };
 
+struct ParsedSheet {
+  struct VarContainer *vars;
+  struct Clause *clauses;
+  int clauseLen;
+}
+
 void freeStr(struct Str* str) {
   free(str->c);
   free(str);
