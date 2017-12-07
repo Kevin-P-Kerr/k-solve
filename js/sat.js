@@ -362,6 +362,7 @@ var solvePartial = function (variable, clauses,trueVars) {
 var getSinglePositives = function (clauses) {
     var pos = [];
     var helper = function (clauses) {
+        console.log(clauses);
         clauses.forEach(function (c) {
             if (!isAtomic(c)) {
                 if (isSingleton(c) && !isReducible(c)) {
@@ -370,7 +371,7 @@ var getSinglePositives = function (clauses) {
                     }
                 }
                 else {
-                    c.subClauses.forEach(function (subc) { helper(subc) });
+                    helper(c.subClauses);
                 }
             }
         });
@@ -390,7 +391,7 @@ var getSingleNegatives = function (clauses) {
                     }
                 }
                 else {
-                    c.subClauses.forEach(function (subc) { helper(subc) });
+                    helper(c.subClauses);
                 }
             }
         });
@@ -463,9 +464,9 @@ var main = function () {
   //  print(t);
 //   console.log(solve(t));
     t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)[g]"));
-//    printAnswer(solve(t),t);
+   printAnswer(solve(t),t);
 //
    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-    printAnswer(solve(t),t);
+ //   printAnswer(solve(t),t);
 }
 main();
