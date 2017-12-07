@@ -378,9 +378,9 @@ var solvePartial = function (variable, clauses,trueVars) {
   var cpy = simplify(variable,clauses);
   if (cpy == null) {
     console.log("discovered conflict");
+    print(clauses);
     return false;
   }
- // print(cpy);
   if (fullyResolved(cpy)) {
     return true;
   }
@@ -443,6 +443,7 @@ var solve = function (clauses,trueVars) {
   console.log("begin");
   if (hasConflicts(clauses)) {
       console.log("conflict discovered");
+      print(clauses);
       return false;
   }
   var variables = getVariableOrder(clauses);
