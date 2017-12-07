@@ -265,15 +265,6 @@ var getVariableOrder = function (clauses) {
           variables[c.val] = 1;
         }
       }
-      else if (isSingleton(c) && !isReducible(c)) {
-        var name = c.subClauses[0].val;
-        if (c.type == LPAREN) {
-            variables[name] = Infinity;
-        }
-        else {
-            variables[name] = -Infinity;
-        }
-      }
       else {
         helper(variables,c.subClauses);
       }
@@ -281,6 +272,14 @@ var getVariableOrder = function (clauses) {
     return variables;
   };
   var variables =  helper({},clauses);
+  var singlePositives = getSinglePositives(clauses);
+  var singleNegatives = getSingleNegatives(clauses);
+  singlePositives.forEach(function (p) {
+      variables[p] = Infinity;
+  });
+  singleNegatives.forEach(function (p) {
+      variables[p] = -Infinity;
+  });
   var arr = [];
   var k;
   for (k in variables) {
@@ -496,7 +495,7 @@ var main = function () {
     DEBUG=true;
     setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./sub.test").toString()));
     console.log("start");
     printAnswer(solve(t),t);
 }
