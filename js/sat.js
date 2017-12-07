@@ -6,7 +6,7 @@ var VAR = 2;
 var LBRAK = 3;
 var RBRAK = 4;
 
-var DEBUG = false;
+var DEBUG = true;
 var setDebug = (function () {
     var c = console.log;
     return function () {
@@ -318,8 +318,10 @@ var fullyResolved = function (clauses) {
 };
 
 var print = function (clauses) {
+  var lineLevel = -1;
   var helper = function (clauses) {
     var str = '';
+    lineLevel++;
     clauses.forEach(function (c) {
       if (isAtomic(c)) {
         str += (c.val+" ");
@@ -328,16 +330,19 @@ var print = function (clauses) {
         str += '(';
         str += helper(c.subClauses);
         str += ')';
+      if (lineLevel ==0) { str += "\n"; }
       }
       else if (c.type == LBRAK) {
         str += '[';
         str += helper(c.subClauses);
         str += ']';
+      if (lineLevel ==0) { str += "\n"; }
       }
       else {
         throw new Error('yikes');
       }
     });
+    lineLevel--;
     return str;
   };
   console.log(helper(clauses));
@@ -348,11 +353,10 @@ var solvePartial = function (variable, clauses,trueVars) {
   console.log('removing ' + variable);
   var cpy = simplify(variable,clauses);
   if (cpy == null) {
-    console.log("null");
+    console.log("discovered conflict");
     return false;
   }
   print(cpy);
-  console.log("**");
   if (fullyResolved(cpy)) {
     return true;
   }
@@ -362,7 +366,6 @@ var solvePartial = function (variable, clauses,trueVars) {
 var getSinglePositives = function (clauses) {
     var pos = [];
     var helper = function (clauses) {
-        console.log(clauses);
         clauses.forEach(function (c) {
             if (!isAtomic(c)) {
                 if (isSingleton(c) && !isReducible(c)) {
@@ -416,9 +419,9 @@ var hasConflicts = function (clauses) {
 var solve = function (clauses,trueVars) {
   trueVars = trueVars || [];
   console.log("solving");
-  print(clauses);
   console.log("begin");
   if (hasConflicts(clauses)) {
+      console.log("conflict discovered");
       return false;
   }
   var variables = getVariableOrder(clauses);
@@ -467,6 +470,9 @@ var main = function () {
    printAnswer(solve(t),t);
 //
    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
- //   printAnswer(solve(t),t);
+    DEBUG=true;
+    setDebug();
+    console.log("start");
+    printAnswer(solve(t),t);
 }
 main();
