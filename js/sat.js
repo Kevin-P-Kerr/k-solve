@@ -355,7 +355,10 @@ var main = function () {
  //   var x = getVariableOrder(t);
   //  print(t);
  //   console.log(solve(t));
-    t = parse(tokenize("[a b c][a (c) b][(a)(b)(c)][a(b)][(a)b]"));
+   // t = parse(tokenize("[a b c][a (c) b][(a)(b)(c)][a(b)][(a)b]"));
+//    console.log(solve(t));
+//
+    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
     console.log(solve(t));
 }
 main();
