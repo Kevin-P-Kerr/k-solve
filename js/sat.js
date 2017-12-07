@@ -20,7 +20,8 @@ var setDebug = (function () {
 })();
 
 setDebug();
-
+// GLOBAL
+var conflictTable = {};
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
 };
@@ -239,6 +240,8 @@ var copy = function (v,clause) {
     }
     else if (clause.type == VAR) {
         if (clause.val == v) {
+            var name = clause.val;
+            if (conflictTable[name]) { conflictTable[name]++; } else { conflictTable[name] = 1; }
             return null;
         }
         else {
@@ -287,6 +290,27 @@ var getVariableOrder = function (clauses) {
     arr.push(rec);
   }
   arr.sort(function (a,b) {
+    if (a.count == Infinity) {
+        return -1;
+    }
+    if (b.count == Infinity) {
+        return 1;
+    }
+    if (a.count == -Infinity) {
+        return 1;
+    }
+    if (b.count == -Infinity) {
+        return -1;
+    }
+    if (conflictTable[a.name] && Math.round(Math.random()*100) > conflictTable[a.name]) {
+        return -1;
+    }
+    if (conflictTable[b] && Math.round(Math.random()*100) > conflictTable[b]) {
+        return 1;
+    }
+    if (Math.round(Math.random() * 100) < 5) {
+        return 1;
+    }
     if (a.count < b.count) {
       return 1;
     }
@@ -309,7 +333,7 @@ var fullyResolved = function (clauses) {
     c = clauses[i];
     if (!(isAtomic(c) || (isSingleton(c) && c.type != LPAREN))) {
       console.log('try');
-      print(clauses);
+      //print(clauses);
       console.log("nope!");
       return false;
     }
@@ -349,14 +373,14 @@ var print = function (clauses) {
 };
 
 var solvePartial = function (variable, clauses,trueVars) {
-  print(clauses);
+  //print(clauses);
   console.log('removing ' + variable);
   var cpy = simplify(variable,clauses);
   if (cpy == null) {
     console.log("discovered conflict");
     return false;
   }
-  print(cpy);
+ // print(cpy);
   if (fullyResolved(cpy)) {
     return true;
   }
@@ -410,6 +434,9 @@ var hasConflicts = function (clauses) {
     var ii = singlePositives.length;
     for (;i<ii;i++) {
         if (singleNegatives.indexOf(singlePositives[i]) >= 0) {
+            console.log("conflict",singlePositives[i]);
+            var n = singlePositives[i];
+            if (conflictTable[n]) { conflictTable[n]++ } else { conflictTable[n] = 1; }
             return true;
         }
     }
@@ -462,17 +489,17 @@ var printAnswer = function (answer,clauses) {
 
 
 var main = function () {
+    DEBUG=true;
+    setDebug();
     var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)[g]"));
+    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
    printAnswer(solve(t),t);
 //
    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-    DEBUG=true;
-    setDebug();
-    console.log("start");
-    printAnswer(solve(t),t);
+  //  console.log("start");
+//    printAnswer(solve(t),t);
 }
 main();
