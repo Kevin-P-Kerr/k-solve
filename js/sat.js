@@ -495,7 +495,7 @@ var main = function () {
     DEBUG=true;
     setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./sub.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./composite.test").toString()));
     console.log("start");
     printAnswer(solve(t),t);
 }
