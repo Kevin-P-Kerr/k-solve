@@ -191,19 +191,19 @@ var reduce = function (clause) {
 
 var clausePositiveContains = function (v,clause) {
     var parenFlag = clause.type == LPAREN;
-    var flag = false;
-    clause.subClauses.forEach(function (c) {
-        if (flag) { return; }
-        if (c.type == VAR)  {
-            if (c.val == v) {
-                flag = parenFlag;
-            }
+    var flag =  parenFlag && isSingleton(clause) && !isReducible(clause) && clause.subClauses[0].val == v;
+    if (flag) { return flag; }
+    if (!clause.subClauses) {
+        return false;
+    }
+    var i = 0;
+    var ii = clause.subClauses.length;
+    for (;i<ii;i++) {
+        if (clausePositiveContains(v,clause.subClauses[i])) {
+            return true;
         }
-        else {
-            flag = clausePositiveContains(v,c);
-        }
-    });
-    return flag;
+    }
+    return false;
 };
 
 var clauseConflicts = function (v,c) {
@@ -406,7 +406,7 @@ var main = function () {
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
+    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)[g]"));
     printAnswer(solve(t),t);
 //
    t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
