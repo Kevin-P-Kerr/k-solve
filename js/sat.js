@@ -1,4 +1,4 @@
-re('fs');
+var fs = require('fs');
 // constants 
 var LPAREN = 0;
 var RPAREN = 1;
@@ -200,8 +200,8 @@ var isSingleton = function (c) {
 };
 
 var isEmpty = function (c) {
-    return c.subClauses.length == 0 || 
-        (isSingleton(c) && isEmpty(c.subClauses[0]));
+    return !isAtomic(c) && (c.subClauses.length == 0 || 
+        (isSingleton(c) && isEmpty(c.subClauses[0])));
 };
 
 var isAtomic = function (c) {
@@ -237,10 +237,10 @@ var copy = function (v,clause) {
 };
 
 var main = function () {
-    var t = parse(tokenize("a[b 2+2([bc a])]"));
+    var t = parse(tokenize("a[b 2+2([bc (a)])]"));
     console.log(JSON.stringify(t,null,2));
     console.log('!!!');
-    t = simplify('b',t);
+    t = simplify('a',t);
     console.log(JSON.stringify(t,null,2));
 }
 main();
