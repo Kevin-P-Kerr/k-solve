@@ -237,17 +237,108 @@ var copy = function (v,clause) {
 };
 
 var getVariableOrder = function (clauses) {
+  var helper = function (variables, clauses) {
+    clauses.forEach(function (c) {
+      if (isAtomic(c)) {
+        if (variables[c.val]) {
+          variables[c.val] += 1;
+        }
+        else {
+          variables[c.val] = 1;
+        }
+      }
+      else {
+        helper(variables,c.subClauses);
+      }
+    });
+    return variables;
+  };
+  var variables =  helper({},clauses);
+  var arr = [];
+  var k;
+  for (k in variables) {
+    var rec = {};
+    rec.name = k;
+    rec.count = variables[k];
+    arr.push(rec);
+  }
+  arr.sort(function (a,b) {
+    if (a.count < b.count) {
+      return 1;
+    }
+    else {
+      return -1;
+    }
+  });
+  var ret  =[];
+  arr.forEach(function (a) {
+    ret.push(a.name);
+  });
+  return ret;
+};
+
+var fullyResolved = function (clauses) {
+  var  i =0;
+  var ii = clauses.length;
+  var c;
+  for (;i<ii;i++) {
+    c = clauses[i];
+    if (!(isAtomic(c) || (isSingleton(c) && c.type != LPAREN))) {
+      console.log('try');
+      print(clauses);
+      console.log("nope!");
+      return false;
+    }
+  }
+  return true;
+};
+
+var print = function (clauses) {
+  var helper = function (clauses) {
+    var str = '';
+    clauses.forEach(function (c) {
+      if (isAtomic(c)) {
+        str += (c.val+" ");
+      }
+      else if (c.type == LPAREN) {
+        str += '(';
+        str += helper(c.subClauses);
+        str += ')';
+      }
+      else if (c.type == LBRAK) {
+        str += '[';
+        str += helper(c.subClauses);
+        str += ']';
+      }
+      else {
+        throw new Error('yikes');
+      }
+    });
+    return str;
+  };
+  console.log(helper(clauses));
 };
 
 var solvePartial = function (variable, clauses) {
+  print(clauses);
+  console.log('removing ' + variable);
   var cpy = simplify(variable,clauses);
   if (cpy == null) {
+    console.log("null");
     return false;
+  }
+  print(cpy);
+  console.log("**");
+  if (fullyResolved(cpy)) {
+    return true;
   }
   return solve(cpy);
 };
 
 var solve = function (clauses) {
+  console.log("solving");
+  print(clauses);
+  console.log("begin");
   var variables = getVariableOrder(clauses);
   var i = 0;
   var ii = variables.length;
@@ -261,9 +352,10 @@ var solve = function (clauses) {
 
 var main = function () {
     var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
-    console.log(JSON.stringify(t,null,2));
-    console.log('!!!');
-    t = simplify('b',t);
-    console.log(JSON.stringify(t,null,2));
+    var x = getVariableOrder(t);
+    print(t);
+ //   console.log(solve(t));
+    t = parse(tokenize("[a b][(a)(b)][a(b)][(a)b]"));
+    console.log(solve(t));
 }
 main();
