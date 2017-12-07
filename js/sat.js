@@ -247,6 +247,15 @@ var getVariableOrder = function (clauses) {
           variables[c.val] = 1;
         }
       }
+      else if (isSingleton(c) && !isReducible(c)) {
+        var name = c.subClauses[0].val;
+        if (c.type == LPAREN) {
+            variables[name] = Infinity;
+        }
+        else {
+            variables[name] = -Infinity;
+        }
+      }
       else {
         helper(variables,c.subClauses);
       }
@@ -319,7 +328,7 @@ var print = function (clauses) {
   console.log(helper(clauses));
 };
 
-var solvePartial = function (variable, clauses) {
+var solvePartial = function (variable, clauses,trueVars) {
   print(clauses);
   console.log('removing ' + variable);
   var cpy = simplify(variable,clauses);
@@ -332,19 +341,24 @@ var solvePartial = function (variable, clauses) {
   if (fullyResolved(cpy)) {
     return true;
   }
-  return solve(cpy);
+  return solve(cpy,trueVars);
 };
 
-var solve = function (clauses) {
+var solve = function (clauses,trueVars) {
+  trueVars = trueVars || [];
   console.log("solving");
   print(clauses);
   console.log("begin");
   var variables = getVariableOrder(clauses);
   var i = 0;
   var ii = variables.length;
-  for(; i<ii; i++ ) {
-    if (solvePartial(variables[i],clauses)) {
-      return true;
+  for(; i<ii; i++ ) { 
+    trueVars.push(variables[i]);
+    if (solvePartial(variables[i],clauses,trueVars)) {
+      return trueVars;
+    }
+    else {
+        while (trueVars.pop()) { continue; }
     }
   }
   return false;
@@ -354,11 +368,11 @@ var main = function () {
     var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
  //   var x = getVariableOrder(t);
   //  print(t);
- //   console.log(solve(t));
-   // t = parse(tokenize("[a b c][a (c) b][(a)(b)(c)][a(b)][(a)b]"));
-//    console.log(solve(t));
-//
-    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+//   console.log(solve(t));
+    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
     console.log(solve(t));
+//
+  //  t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+ //   console.log(solve(t));
 }
 main();
