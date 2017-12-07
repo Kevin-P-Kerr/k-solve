@@ -6,6 +6,21 @@ var VAR = 2;
 var LBRAK = 3;
 var RBRAK = 4;
 
+var DEBUG = false;
+var setDebug = (function () {
+    var c = console.log;
+    return function () {
+        if (DEBUG) {
+            console.log = c;
+        }
+        else {
+            console.log = function () {};
+        }
+    };
+})();
+
+setDebug();
+
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
 };
@@ -358,21 +373,43 @@ var solve = function (clauses,trueVars) {
       return trueVars;
     }
     else {
-        while (trueVars.pop()) { continue; }
+        trueVars.pop();
     }
   }
   return false;
 };
+
+var printAnswer = function (answer,clauses) {
+    DEBUG = true;
+    setDebug();
+    if (!answer) { console.log("no solution"); }
+    else {
+        var variables = getVariableOrder(clauses);
+        var falseVariables = [];
+        variables.forEach(function (v) {
+            if (answer.indexOf(v) < 0) {
+                falseVariables.push(v);
+            }
+        });
+        console.log("positive vars: ");
+        console.log(answer);
+        console.log("negative vars:");
+        console.log(falseVariables);
+    }
+    DEBUG = false;
+    setDebug();
+};
+
 
 var main = function () {
     var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
-    console.log(solve(t));
+//    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
+//    printAnswer(solve(t),t);
 //
-  //  t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
- //   console.log(solve(t));
+   t = parse(tokenize(fs.readFileSync("./composite.test").toString()));
+    printAnswer(solve(t),t);
 }
 main();
