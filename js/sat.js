@@ -397,9 +397,6 @@ var getSinglePositives = function (clauses) {
                         pos.push(c.subClauses[0].val);
                     }
                 }
-                else {
-                    helper(c.subClauses);
-                }
             }
         });
     }
@@ -416,9 +413,6 @@ var getSingleNegatives = function (clauses) {
                     if (c.type == LBRAK) {
                         pos.push(c.subClauses[0].val);
                     }
-                }
-                else {
-                    helper(c.subClauses);
                 }
             }
         });
@@ -495,11 +489,14 @@ var main = function () {
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
+    t = parse(tokenize("(g f x z)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
    printAnswer(solve(t),t);
 //
+    DEBUG=true;
+    setDebug();
+   
    t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-  //  console.log("start");
-//    printAnswer(solve(t),t);
+    console.log("start");
+    printAnswer(solve(t),t);
 }
 main();
