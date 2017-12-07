@@ -352,10 +352,10 @@ var solve = function (clauses) {
 
 var main = function () {
     var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
-    var x = getVariableOrder(t);
-    print(t);
+ //   var x = getVariableOrder(t);
+  //  print(t);
  //   console.log(solve(t));
-    t = parse(tokenize("[a b][(a)(b)][a(b)][(a)b]"));
+    t = parse(tokenize("[a b c][a (c) b][(a)(b)(c)][a(b)][(a)b]"));
     console.log(solve(t));
 }
 main();
