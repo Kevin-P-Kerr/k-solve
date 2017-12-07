@@ -406,10 +406,10 @@ var main = function () {
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-//    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
-//    printAnswer(solve(t),t);
+    t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)"));
+    printAnswer(solve(t),t);
 //
-   t = parse(tokenize(fs.readFileSync("./composite.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
     printAnswer(solve(t),t);
 }
 main();
