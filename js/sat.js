@@ -6,7 +6,7 @@ var VAR = 2;
 var LBRAK = 3;
 var RBRAK = 4;
 
-var DEBUG = true;
+var DEBUG = false;
 var setDebug = (function () {
     var c = console.log;
     return function () {
@@ -22,6 +22,20 @@ var setDebug = (function () {
 setDebug();
 // GLOBAL
 var conflictTable = {};
+var shapeUtil = (function () {
+  var shapes = [];
+  var register = function (clauses) {
+    var str = printcl(clauses);
+    if (shapes.indexOf(str) >= 0) { return; }
+    shapes.push(str);
+  };
+  var check = function (clauses) {
+    var str = printcl(clauses);
+    return shapes.indexOf(str) >= 0;
+  }
+  return {register:register,check:check};
+})();
+//
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
 };
@@ -340,7 +354,7 @@ var fullyResolved = function (clauses) {
   return true;
 };
 
-var print = function (clauses) {
+var printcl = function (clauses) {
   var lineLevel = -1;
   var helper = function (clauses) {
     var str = '';
@@ -368,7 +382,11 @@ var print = function (clauses) {
     lineLevel--;
     return str;
   };
-  console.log(helper(clauses));
+  return helper(clauses);
+};
+
+var print = function (clauses) {
+  console.log(printcl(clauses));
 };
 
 var solvePartial = function (variable, clauses,trueVars) {
@@ -440,9 +458,13 @@ var solve = function (clauses,trueVars) {
   trueVars = trueVars || [];
   console.log("solving");
   console.log("begin");
+  if (shapeUtil.check(clauses)) {
+    return false;
+  }
   if (hasConflicts(clauses)) {
       console.log("conflict discovered");
       print(clauses);
+      shapeUtil.register(clauses);
       return false;
   }
   var variables = getVariableOrder(clauses);
@@ -454,6 +476,7 @@ var solve = function (clauses,trueVars) {
       return trueVars;
     }
     else {
+        shapeUtil.register(clauses);
         trueVars.pop();
     }
   }
@@ -492,10 +515,8 @@ var main = function () {
     t = parse(tokenize("(g f x z)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
    printAnswer(solve(t),t);
 //
-    DEBUG=true;
-    setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./composite.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
     console.log("start");
     printAnswer(solve(t),t);
 }
