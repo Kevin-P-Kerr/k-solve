@@ -236,11 +236,34 @@ var copy = function (v,clause) {
     return copyClause;
 };
 
+var getVariableOrder = function (clauses) {
+};
+
+var solvePartial = function (variable, clauses) {
+  var cpy = simplify(variable,clauses);
+  if (cpy == null) {
+    return false;
+  }
+  return solve(cpy);
+};
+
+var solve = function (clauses) {
+  var variables = getVariableOrder(clauses);
+  var i = 0;
+  var ii = variables.length;
+  for(; i<ii; i++ ) {
+    if (solvePartial(variables[i],clauses)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 var main = function () {
-    var t = parse(tokenize("a[b 2+2([bc (a)])]"));
+    var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
     console.log(JSON.stringify(t,null,2));
     console.log('!!!');
-    t = simplify('a',t);
+    t = simplify('b',t);
     console.log(JSON.stringify(t,null,2));
 }
 main();
