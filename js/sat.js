@@ -359,11 +359,67 @@ var solvePartial = function (variable, clauses,trueVars) {
   return solve(cpy,trueVars);
 };
 
+var getSinglePositives = function (clauses) {
+    var pos = [];
+    var helper = function (clauses) {
+        clauses.forEach(function (c) {
+            if (!isAtomic(c)) {
+                if (isSingleton(c) && !isReducible(c)) {
+                    if (c.type == LPAREN) {
+                        pos.push(c.subClauses[0].val);
+                    }
+                }
+                else {
+                    c.subClauses.forEach(function (subc) { helper(subc) });
+                }
+            }
+        });
+    }
+    helper(clauses);
+    return pos;
+};
+
+var getSingleNegatives = function (clauses) {
+    var pos = [];
+    var helper = function (clauses) {
+        clauses.forEach(function (c) {
+            if (!isAtomic(c)) {
+                if (isSingleton(c) && !isReducible(c)) {
+                    if (c.type == LBRAK) {
+                        pos.push(c.subClauses[0].val);
+                    }
+                }
+                else {
+                    c.subClauses.forEach(function (subc) { helper(subc) });
+                }
+            }
+        });
+    }
+    helper(clauses);
+    return pos;
+};
+
+var hasConflicts = function (clauses) {
+    var singlePositives = getSinglePositives(clauses);
+    var singleNegatives = getSingleNegatives(clauses);
+    var i = 0;
+    var ii = singlePositives.length;
+    for (;i<ii;i++) {
+        if (singleNegatives.indexOf(singlePositives[i]) >= 0) {
+            return true;
+        }
+    }
+    return false;
+};
+
 var solve = function (clauses,trueVars) {
   trueVars = trueVars || [];
   console.log("solving");
   print(clauses);
   console.log("begin");
+  if (hasConflicts(clauses)) {
+      return false;
+  }
   var variables = getVariableOrder(clauses);
   var i = 0;
   var ii = variables.length;
@@ -407,9 +463,9 @@ var main = function () {
   //  print(t);
 //   console.log(solve(t));
     t = parse(tokenize("[(a) b c][a (c) b][(a)(b)(c)][a(b)][(a)b][z x f g][(z)(f)](g)[g]"));
-    printAnswer(solve(t),t);
+//    printAnswer(solve(t),t);
 //
-   t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
     printAnswer(solve(t),t);
 }
 main();
