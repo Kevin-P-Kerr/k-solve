@@ -424,7 +424,7 @@ var solvePartial = function (variable, clauses,trueVars) {
   if (fullyResolved(cpy)) {
     return true;
   }
-  return solve(cpy,trueVars);
+  return metaSolve(cpy,trueVars);
 };
 
 var getSinglePositives = function (clauses) {
@@ -506,6 +506,69 @@ var solve = function (clauses,trueVars) {
   return false;
 };
 
+var getSubProblems = function (clauses) {
+    var subProblems = [];
+    var marked = [];
+    var helper = function (cls) {
+        var originalLen = cls.length;
+        var variables = getVariableOrder(cls);
+        variables.forEach(function (v) {
+            var i = 0;
+            var ii = clauses.length;
+            for (;i<ii;i++) {
+                if (marked[i]) { continue; }
+                var c = clauses[i];
+                if (contains(c,v)) {
+                    marked[i] = true;
+                    cls.push(c);
+                }
+            }
+            if (cls.length > originalLen) {
+                helper(cls);
+            }
+        });
+    };
+    var  i =0;
+    var ii = clauses.length;
+    for (;i<ii;i++) {
+        if (marked[i]) { continue; }
+        var sub = [clauses[i]];
+        marked[i] = true;
+        subProblems.push(sub);
+        helper(sub);
+    }
+    return subProblems;
+};
+
+var contains = function (cl,v) {
+    if (isAtomic(cl)) {
+        return cl.val == v;
+    }
+    var  i = 0;
+    var ii = cl.subClauses.length;
+    for (;i<ii;i++) {
+        if (contains(cl.subClauses[i],v)) {
+            return true;
+        }
+    }
+    return false;
+};
+
+var metaSolve = function (clauses,trueVars) {
+    trueVars = trueVars || [];
+    var problems = getSubProblems(clauses);
+    var  i = 0;
+    var ii = problems.length;
+    for (;i<ii;i++) {
+        console.log("subproblem below");
+        print(problems[i]);
+        if (!solve(problems[i],trueVars)) {
+            return false;
+        }
+    }
+    return trueVars;
+};
+
 var printAnswer = function (answer,clauses) {
     DEBUG = true;
     setDebug();
@@ -531,16 +594,18 @@ var printAnswer = function (answer,clauses) {
 var main = function () {
     DEBUG=true;
     setDebug();
-    var t = parse(tokenize("a[b 2+2([bc (a)])][b]"));
+    var t = parse(tokenize("(a)[b 2+2([bc (a)])][b]"));
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("(g f x z)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
-   printAnswer(solve(t),t);
+    t = parse(tokenize("(g f x y z z a)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
+   printAnswer(metaSolve(t),t);
 //
+    DEBUG=true;
+    setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./partial.test").toString()));
     console.log("start");
-    printAnswer(solve(t),t);
+   printAnswer(metaSolve(t),t);
 }
 main();
