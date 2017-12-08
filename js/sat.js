@@ -25,12 +25,12 @@ var conflictTable = {};
 var shapeUtil = (function () {
   var shapes = [];
   var register = function (clauses) {
-    var str = printcl(clauses);
+    var str = printcl(copyClean(clauses));
     if (shapes.indexOf(str) >= 0) { return; }
     shapes.push(str);
   };
   var check = function (clauses) {
-    var str = printcl(clauses);
+    var str = printcl(copyClean(clauses));
     return shapes.indexOf(str) >= 0;
   }
   return {register:register,check:check};
@@ -237,6 +237,29 @@ var isEmpty = function (c) {
 var isAtomic = function (c) {
     return !c.subClauses || c.type == VAR;
 }
+
+var copyClean = function (clauses) {
+  var getVar = (function () { var i =0; return function () { return i+""; } })();
+  var newVars = {};
+  var helper = function (clauses) {
+    var newClauses = [];
+    clauses.forEach(function (c) {
+      var newClause = {};
+      if (isAtomic(c)) {
+        newClause.type == VAR;
+        newClause.val =  newVars[c.val] ? newVars[c.val] : getVar();
+        if (!newVars[c.val]) { newVars[c.val] =  newClause.val; }
+      }
+      else {
+        newClause.type = c.type;
+        newClause.subClauses = helper(c.subClauses);
+      }
+      newClauses.push(newClause);
+    });
+    return newClauses;
+  };
+  return helper(clauses);
+};
 
 // we know if this method is called the clause does not simply contain the val
 // we also know the clause does not conflict
