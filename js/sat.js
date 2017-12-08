@@ -592,19 +592,19 @@ var printAnswer = function (answer,clauses) {
 
 
 var main = function () {
-    DEBUG=true;
+   // DEBUG=true;
     setDebug();
     var t = parse(tokenize("(a)[b 2+2([bc (a)])][b]"));
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("(g f x y z z a)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
-   printAnswer(metaSolve(t),t);
+    t = parse(tokenize("(g f x z)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
+   //printAnswer(metaSolve(t),t);
 //
-    DEBUG=true;
+ //   DEBUG=true;
     setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./partial.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
     console.log("start");
    printAnswer(metaSolve(t),t);
 }
