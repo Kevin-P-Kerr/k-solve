@@ -73,7 +73,56 @@ var parse = function (tokens) {
  return helper(th);
 };
 
-var x = parse(tokenize("2+2+2=6"));
-console.log(x);
+var toString = function (ast) {
+  if (ast.type == "equalExpr") {
+    return toString(ast.left)+"="+toString(ast.right);
+  }
+  if (ast.type == "opExpr") {
+    return toString(ast.left)+ast.val+toString(ast.right);
+  }
+  return ast.val;
+};
 
+var Axiom = function (form,args) {
+  this.replace = function (expressions) {
+    var s = form;
+    if (args.length != expressions.length) { throw new Error(); }
+    var i = 0;
+    var ii = args.length;
+    for (;i<ii;i++) {
+      s.replace(args[i],expressions[i]);
+    }
+    return s;
+  };
+  this.generate = function (numericExpressions) {
+    var exprs = [];
+    if (numericExpressions < args.length) { return exprs; }
+    if (numericExpressions == args.length) { return [this.replace(numericExpressions)] }
+    var arglen = args.length-1;
+    var i =1;
+    var ii = numericExpressions.length-arglen;
+    var n;
+    var e = [];
+    for (;i<ii;i++) {
+      e = [];
+      n=0;
+      for(;n<arglen;n++) {
+        e.push(numericExpressions[i+n]);
+      }
+      exprs.push(this.replace(e));
+    }
+    numericExpressions.shift();
+    var more = this.generate(numericExpressions);
+    more.forEach(function (e) { exprs.push(e); });
+    return exprs;
+  };
+};
 
+var axioms = [];
+axioms.push(new Axiom("[A+B (B+A B+A=A+B)]",["A","B"]));
+axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
+axioms.push(new Axiom("[A+B=C (B=C-A A=C-B)]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
+  
