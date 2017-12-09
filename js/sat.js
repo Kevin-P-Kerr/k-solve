@@ -574,21 +574,27 @@ var printAnswer = function (answer,clauses) {
     setDebug();
     if (!answer) { console.log("no solution"); }
     else {
-        var variables = getVariableOrder(clauses);
-        var falseVariables = [];
-        variables.forEach(function (v) {
-            if (answer.indexOf(v) < 0) {
-                falseVariables.push(v);
-            }
-        });
+        answer = getAnswer(answer,clauses);
         console.log("positive vars: ");
-        console.log(answer);
+        console.log(answer[0]);
         console.log("negative vars:");
-        console.log(falseVariables);
+        console.log(answer[1]);
     }
     DEBUG = false;
     setDebug();
 };
+
+var getAnswer = function (answer,clauses) {
+  if (!answer) { return null; }
+  var variables = getVariableOrder(clauses);
+  var falseVariables = [];
+  variables.forEach(function (v) {
+      if (answer.indexOf(v) < 0) {
+          falseVariables.push(v);
+      }
+  });
+  return [answer,falseVariables];
+}
 
 
 var main = function () {
@@ -604,8 +610,15 @@ var main = function () {
  //   DEBUG=true;
     setDebug();
    
-   t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
+   //t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
     console.log("start");
    printAnswer(metaSolve(t),t);
 }
-main();
+
+module.exports = function (str) {
+  var tokens = tokenize(str);
+  var parsed = parse(tokens);
+  var answer = metaSolve(parsed);
+  answer = getAnswer(answer,parsed);
+  return answer;
+};
