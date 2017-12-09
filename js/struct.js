@@ -112,7 +112,11 @@ var Axiom = function (form,args) {
       for(;n<arglen-1;n++) {
         e.push(numericExpressions[i+n]);
       }
-      exprs.push(this.replace(e));
+      var perms = permute(e);
+      var that = this;
+      perms.forEach(function (e) { 
+        exprs.push(that.replace(e));
+      });
     }
     ne.shift();
     var more = this.generate(ne);
@@ -125,6 +129,29 @@ var copy =  function (arr1) {
   arr1.forEach(function (el) { ret.push(el); });
   return ret;
 };
+
+var permute = function (input) {
+  var permArr = [],
+    usedChars = [];
+
+  var helper =  function(input) {
+    var i, ch;
+    for (i = 0; i < input.length; i++) {
+      ch = input.splice(i, 1)[0];
+      usedChars.push(ch);
+      if (input.length == 0) {
+        permArr.push(usedChars.slice());
+      }
+      helper(input);
+      input.splice(i, 0, ch);
+      usedChars.pop();
+    }
+    return permArr
+  };
+  return helper(input);
+};
+
+
 var generateNums = function (exp) {
   var nums = [];
   if (exp.type == "equalExpr" || exp.type == "opExpr") {
@@ -153,17 +180,58 @@ var generateNums = function (exp) {
 
 
 var axioms = [];
-//axioms.push(new Axiom("[A+B (B+A B+A=A+B)]",["A","B"]));
-//axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
+axioms.push(new Axiom("[A+B (B+A B+A=A+B)]",["A","B"]));
+axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
 axioms.push(new Axiom("[A+B=C (B=C-A A=C-B)]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 
-var statement = "a+b=0";
-var  p = parse(tokenize(statement));
-var num = generateNums(p);
-var sheet = [];
-console.log(num);
-axioms.forEach(function (ax) {console.log('**'); console.log(ax.generate(num)); });
-  
+var calc = function (trueFacts,falseFacts,turns) {
+  var nums = [];
+  trueFacts.forEach(function (fact) {
+    var n = generateNums(parse(tokenize(fact)));
+    n.forEach(function (nn) {
+      if (nums.indexOf(nn) >= 0) {return; }
+      nums.push(nn);
+    });
+  });
+  var sheet = [];
+  var question = "";
+  axioms.forEach(function (ax) { sheet.push(ax.generate(nums)); });
+  trueFacts.forEach(function (fact) { question += "( "+fact+" )"});
+  falseFacts.forEach(function (fact) { question += "[ "+fact+" ]"});
+  sheet.forEach(function (scheme) {
+    scheme.forEach(function (instance) { question += (instance + " "); });
+  });
+  console.log("question is");
+  console.log(question);
+  var answer = prune(solve(question,true));
+  if (turns == 0) {
+    return answer;
+  }
+  return calc(answer[0],answer[1],turns-1);
+};
+
+var prune = function (answer) {
+  var na = [];
+  var tna = [];
+  answer[0].forEach(function (prop) {
+    if (prop.match("=")) {
+      tna.push(prop);
+    }
+  });
+  na[0] = tna;
+  var fna = [];
+  answer[1].forEach(function (prop) {
+    if (prop.match("=")) {
+      fna.push(prop);
+    }
+  });
+  na[1] = fna;
+  return na;
+};
+
+console.log("here it is");
+var hih = calc(["a+b=0","a+c=3"],["3=0"],0);
+console.log(hih);
