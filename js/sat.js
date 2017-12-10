@@ -6,7 +6,7 @@ var VAR = 2;
 var LBRAK = 3;
 var RBRAK = 4;
 
-var DEBUG = false;
+var DEBUG = true;
 var setDebug = (function () {
     var c = console.log;
     return function () {
@@ -130,7 +130,7 @@ var parse = function (tokens) {
     return clauses;
 };
 
-var simplify = function (v, clauses) {
+var simplify = function (v, clauses,negative) {
     var newClauses = [];
     clauses.forEach(function (clause) {
         if (isAtomic(clause)) {
@@ -138,12 +138,15 @@ var simplify = function (v, clauses) {
                 return;
             }
         }
-        else if (clausePositiveContains(v,clause)) {
+        else if (!negative && clausePositiveContains(v,clause)) {
             return;
         }
-        else if (clauseConflicts(v,clause)) {
-            newClauses.push(null);
-            return;
+        else if (negative && clauseNegativeContains(v,clause)) {
+          return;
+        }
+        else if (clauseConflicts(v,clause,negative)) {
+          newClauses.push(null);
+          return;
         }
         newClauses.push(copy(v,clause));
     });
@@ -221,8 +224,27 @@ var clausePositiveContains = function (v,clause) {
     return false;
 };
 
-var clauseConflicts = function (v,c) {
-    return (!isAtomic(c) && isSingleton(c) && c.type == LBRAK && c.subClauses[0].val == v);
+var clauseNegativeContains = function (v,clause) {
+    var parenFlag = clause.type == LBRAK;
+    var flag =  parenFlag && isSingleton(clause) && !isReducible(clause) && clause.subClauses[0].val == v;
+    if (flag) { return flag; }
+    if (!clause.subClauses) {
+        return false;
+    }
+    var i = 0;
+    var ii = clause.subClauses.length;
+    for (;i<ii;i++) {
+        if (clauseNegativeContains(v,clause.subClauses[i])) {
+            return true;
+        }
+    }
+    return false;
+};
+
+var clauseConflicts = function (v,c,negative) {
+    if (!negative) { return (!isAtomic(c) && isSingleton(c) && c.type == LBRAK && c.subClauses[0].val == v) }
+    var x= !isAtomic(c) && isSingleton(c) && c.type == LPAREN && c.subClauses[0].val == v;
+    return x;
 };
 
 var isSingleton = function (c) {
@@ -368,9 +390,6 @@ var fullyResolved = function (clauses) {
   for (;i<ii;i++) {
     c = clauses[i];
     if (!(isAtomic(c) || (isSingleton(c) && c.type != LPAREN))) {
-      console.log('try');
-      //print(clauses);
-      console.log("nope!");
       return false;
     }
   }
@@ -412,12 +431,27 @@ var print = function (clauses) {
   console.log(printcl(clauses));
 };
 
-var solvePartial = function (variable, clauses,trueVars) {
-  //print(clauses);
-  console.log('removing ' + variable);
-  var cpy = simplify(variable,clauses);
+var pruneNegatives = function (clauses) {
+  if (clauses == null) { return clauses; }
+  var negatives = getSingleNegatives(clauses);
+  var i = 0;
+  var ii = negatives.length;
+  var saved = clauses;
+  for (;i<ii;i++) {
+    saved = clauses;
+    clauses = simplify(negatives[i],clauses,true);
+    if (!clauses) {
+      return null;
+    }
+  }
+  return clauses;
+};
+
+var solvePartial = function (variable, clauses,trueVars,falseVars,positive) {
+  console.log('removing ' + variable+' '+positive);
+  var cpy = simplify(variable,clauses,!positive);
   if (cpy == null) {
-    console.log("discovered conflict");
+    console.log("discovered conflict",variable,positive);
     print(clauses);
     return false;
   }
@@ -468,7 +502,7 @@ var hasConflicts = function (clauses) {
     var ii = singlePositives.length;
     for (;i<ii;i++) {
         if (singleNegatives.indexOf(singlePositives[i]) >= 0) {
-            console.log("conflict",singlePositives[i]);
+            console.log("found conflict: "+singlePositives[i]);
             var n = singlePositives[i];
             if (conflictTable[n]) { conflictTable[n]++ } else { conflictTable[n] = 1; }
             return true;
@@ -477,17 +511,15 @@ var hasConflicts = function (clauses) {
     return false;
 };
 
-var solve = function (clauses,trueVars) {
-  trueVars = trueVars || [];
+var solve = function (clauses,trueVars,falseVars) {
   console.log("solving");
-  console.log("begin");
-  if (shapeUtil.check(clauses)) {
-    return false;
-  }
+  print(clauses);
+  console.log("current true vars",trueVars);
+  console.log("current false vars",falseVars);
+  clauses = pruneNegatives(clauses);
+  trueVars = trueVars || [];
+  falseVars = falseVars || [];
   if (hasConflicts(clauses)) {
-      console.log("conflict discovered");
-      print(clauses);
-      shapeUtil.register(clauses);
       return false;
   }
   var variables = getVariableOrder(clauses);
@@ -495,12 +527,18 @@ var solve = function (clauses,trueVars) {
   var ii = variables.length;
   for(; i<ii; i++ ) { 
     trueVars.push(variables[i]);
-    if (solvePartial(variables[i],clauses,trueVars)) {
+    if (solvePartial(variables[i],clauses,trueVars,falseVars,true)) {
       return trueVars;
     }
     else {
-        shapeUtil.register(clauses);
-        trueVars.pop();
+      trueVars.pop();
+      falseVars.push(variables[i]);
+      if (solvePartial(variables[i],clauses,trueVars,falseVars,false)) {
+        return trueVars;
+      }
+      else {
+        falseVars.pop();
+      }
     }
   }
   return false;
@@ -556,12 +594,13 @@ var contains = function (cl,v) {
 
 var metaSolve = function (clauses,trueVars) {
     trueVars = trueVars || [];
-    var problems = getSubProblems(clauses);
+    console.log("getting sub problems");
+    console.log(clauses.length + " total clauses");
+    //var problems = getSubProblems(clauses);
+    var problems = [clauses];
     var  i = 0;
     var ii = problems.length;
     for (;i<ii;i++) {
-        console.log("subproblem below");
-        print(problems[i]);
         if (!solve(problems[i],trueVars)) {
             return false;
         }
@@ -598,27 +637,32 @@ var getAnswer = function (answer,clauses) {
 
 
 var main = function () {
-   // DEBUG=true;
+   DEBUG=true;
     setDebug();
-    var t = parse(tokenize("(a)[b 2+2([bc (a)])][b]"));
+    var t = parse(tokenize("[b][(a) b](a)"));
  //   var x = getVariableOrder(t);
   //  print(t);
 //   console.log(solve(t));
-    t = parse(tokenize("(g f x z)[(a) b c][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
-   //printAnswer(metaSolve(t),t);
-//
- //   DEBUG=true;
-    setDebug();
-   
-   //t = parse(tokenize(fs.readFileSync("./arith.test").toString()));
-    console.log("start");
+    //t = parse(tokenize("[f][b](g)[(a) b c][a(f)][a (c) b][(a)(b)(c)][a(b d e [a])][(a)b][z x f g][(z)(f)]"));
    printAnswer(metaSolve(t),t);
+//
+    DEBUG = true;
+    setDebug();
+   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+    console.log("start");
 }
 
-module.exports = function (str) {
+main();
+
+module.exports = function (str,debug) {
+  var d = DEBUG;
+  DEBUG = debug;
+  setDebug();
   var tokens = tokenize(str);
   var parsed = parse(tokens);
   var answer = metaSolve(parsed);
   answer = getAnswer(answer,parsed);
+  DEBUG = d;
+  setDebug();
   return answer;
 };
