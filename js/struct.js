@@ -187,9 +187,10 @@ axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 
-var calc = function (trueFacts,falseFacts,turns) {
+var calc = function (trueFacts,falseFacts,turns,generators) {
+  generators = generators || trueFacts;
   var nums = [];
-  trueFacts.forEach(function (fact) {
+  generators.forEach(function (fact) {
     var n = generateNums(parse(tokenize(fact)));
     n.forEach(function (nn) {
       if (nums.indexOf(nn) >= 0) {return; }
@@ -232,6 +233,22 @@ var prune = function (answer) {
   return na;
 };
 
+var sequentialCalc = function (trueFacts,falseFacts,gens) {
+  var finalAnswer;
+  gens.forEach(function (fact) {
+    gens.push(fact);
+    var answer = calc(trueFacts,falseFacts,0,gens);
+    finalAnswer = answer;
+    var trueAnswer = answer[0];
+    trueAnswer.forEach(function (fact) {
+      trueFacts.push(fact);
+    });
+  });
+  return finalAnswer;
+};
+
+
+
 console.log("here it is");
-var hih = calc(["a+b=0","a+c=3"],["3=0","0=3"],0);
+var hih = sequentialCalc([],["0=3"],["a+b=0","a+c=3","c=0"]);
 console.log(hih);
