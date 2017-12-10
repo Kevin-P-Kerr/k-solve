@@ -10,7 +10,7 @@ var DEBUG = true;
 var setDebug = (function () {
     var c = console.log;
     return function () {
-        if (true) {
+        if (DEBUG) {
             console.log = c;
         }
         else {
@@ -690,6 +690,7 @@ var metaSolve = function (clauses,trueVars,falseVars) {
 };
 
 var printAnswer = function (answer,clauses) {
+    var d = DEBUG;
     DEBUG = true;
     setDebug();
     if (!answer) { console.log("no solution"); }
@@ -702,7 +703,7 @@ var printAnswer = function (answer,clauses) {
         console.log("undetermined vars:");
         console.log(answer[1]);
     }
-    DEBUG = false;
+    DEBUG = d;
     setDebug();
 };
 
@@ -724,14 +725,12 @@ var getAnswer = function (answer,clauses) {
 
 
 var main = function () {
-  DEBUG = true;
-  setDebug();
-  t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-  printAnswer(solve(t),t);
+  t = parse(tokenize(fs.readFileSync("./problem.test").toString()));
+  var answer = solve(t);
+  fs.writeFileSync("./answer.txt",JSON.stringify(answer));
+  printAnswer(answer,t);
   console.log("start");
 }
-
-main();
 
 module.exports = function (str,debug) {
   var d = DEBUG;
