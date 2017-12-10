@@ -159,7 +159,7 @@ var simplify = function (v, clauses,negative) {
     }
     var simpleNewClauses = [];
     newClauses.forEach(function (c) {
-        if (isAtomic(c)) {
+      if (isAtomic(c)) {
             simpleNewClauses.push(c);
         }
         else {
@@ -209,34 +209,36 @@ var reduce = function (clause) {
 
 var clausePositiveContains = function (v,clause) {
     var parenFlag = clause.type == LPAREN;
-    var flag =  parenFlag && isSingleton(clause) && !isReducible(clause) && clause.subClauses[0].val == v;
-    if (flag) { return flag; }
-    if (!clause.subClauses) {
-        return false;
+    if (!parenFlag) {
+      return false;
     }
     var i = 0;
     var ii = clause.subClauses.length;
     for (;i<ii;i++) {
-        if (clausePositiveContains(v,clause.subClauses[i])) {
-            return true;
-        }
+      if (isAtomic(clause.subClauses[i]) && clause.subClauses[i].val == v) {
+        return true;
+      }
+      else if (clausePositiveContains(v,clause.subClauses[i])) {
+        return true;
+      }
     }
     return false;
 };
 
 var clauseNegativeContains = function (v,clause) {
     var parenFlag = clause.type == LBRAK;
-    var flag =  parenFlag && isSingleton(clause) && !isReducible(clause) && clause.subClauses[0].val == v;
-    if (flag) { return flag; }
-    if (!clause.subClauses) {
-        return false;
+    if (!parenFlag) {
+      return false;
     }
     var i = 0;
     var ii = clause.subClauses.length;
     for (;i<ii;i++) {
-        if (clauseNegativeContains(v,clause.subClauses[i])) {
-            return true;
-        }
+      if (isAtomic(clause.subClauses[i]) && clause.subClauses[i].val == v) {
+        return true;
+      }
+      else if (clauseNegativeContains(v,clause.subClauses[i])) {
+        return true;
+      }
     }
     return false;
 };
@@ -300,7 +302,6 @@ var copy = function (v,clause) {
     else if (clause.type == VAR) {
         if (clause.val == v) {
             var name = clause.val;
-            if (conflictTable[name]) { conflictTable[name]++; } else { conflictTable[name] = 1; }
             return null;
         }
         else {
@@ -436,9 +437,7 @@ var pruneNegatives = function (clauses) {
   var negatives = getSingleNegatives(clauses);
   var i = 0;
   var ii = negatives.length;
-  var saved = clauses;
   for (;i<ii;i++) {
-    saved = clauses;
     clauses = simplify(negatives[i],clauses,true);
     if (!clauses) {
       return null;
@@ -517,6 +516,7 @@ var solve = function (clauses,trueVars,falseVars) {
   console.log("current true vars",trueVars);
   console.log("current false vars",falseVars);
   clauses = pruneNegatives(clauses);
+  if (!clauses) { return false; }
   trueVars = trueVars || [];
   falseVars = falseVars || [];
   if (hasConflicts(clauses)) {
@@ -648,7 +648,8 @@ var main = function () {
 //
     DEBUG = true;
     setDebug();
-   t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+   t = parse(tokenize(fs.readFileSync("./log.txt").toString()));
+   printAnswer(metaSolve(t),t);
     console.log("start");
 }
 
