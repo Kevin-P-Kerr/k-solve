@@ -233,5 +233,5 @@ var prune = function (answer) {
 };
 
 console.log("here it is");
-var hih = calc(["a+b=0","a+c=3"],["3=0"],0);
+var hih = calc(["a+b=0","a+c=3"],["3=0","0=3"],0);
 console.log(hih);
