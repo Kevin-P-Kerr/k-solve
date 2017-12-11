@@ -526,14 +526,14 @@ var hasConflicts = function (clauses,trueVars,falseVars) {
     var tv,fv;
     for(i=0,ii=trueVars.length;i<ii;i++) {
       tv = trueVars[i];
-      if (singleNegatives.indexOf(tv) >=0 ) {
+      if (singleNegatives.indexOf(tv) >=0 || falseVars.indexOf(tv) >=0 ) {
         console.log("found conflict " + tv);
         return true;
       }
     }
     for(i=0,ii=falseVars.length;i<ii;i++) {
       fv = falseVars[i];
-      if (singlePositives.indexOf(fv) >= 0) {
+      if (singlePositives.indexOf(fv) >= 0 || trueVars.indexOf(fv) >=0) {
         console.log("found conflict " + fv);
         return true;
       }
@@ -623,14 +623,14 @@ var solve = function (clauses,trueVars,falseVars) {
     v = variables[i];
     var hasTruth = trueVars.indexOf(v) >= 0;
     falseVars.push(v);
-    if ((!hasTruth) && solvePartial(v,clauses,trueVars,falseVars,false)) {
+    if ((!hasTruth) && solvePartial(v,clauses,trueVars,falseVars,false) && !hasConflicts(clauses,trueVars,falseVars)) {
       return [trueVars,falseVars];
     }
     else {
       falseVars.pop();
       var hasFalsity = falseVars.indexOf(v) >=0;
       trueVars.push(v);
-      if ((!hasFalsity) && solvePartial(v,clauses,trueVars,falseVars,true)) {
+      if ((!hasFalsity) && solvePartial(v,clauses,trueVars,falseVars,true) && !hasConflicts(clauses,trueVars,falseVars)) {
         return [trueVars,falseVars];
       }
       else {
@@ -745,7 +745,7 @@ var getAnswer = function (answer,clauses) {
 
 
 var main = function () {
-  t = parse(tokenize(fs.readFileSync("./problem.test").toString()));
+  t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
   var answer = solve(t);
   fs.writeFileSync("./answer.txt",JSON.stringify(answer));
   printAnswer(answer,t);

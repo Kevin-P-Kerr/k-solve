@@ -153,8 +153,6 @@ var permute = function (input) {
     permutations.push(a);
     i.addOne();
   }
-  console.log(input);
-  console.log(permutations);
   return permutations;
 }
 
@@ -222,11 +220,12 @@ var axioms = [];
 axioms.push(new Axiom("(A=A)",["A"]));
 axioms.push(new Axiom("(A-A=0)",["A"]));
 axioms.push(new Axiom("(B+A=A+B)",["A","B"]));
+axioms.push(new Axiom("[A+B=C D+B=C B=0 (A=D)]",["A","B","C","D"]));
 axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
 axioms.push(new Axiom("[A+0=B (B=A)]",["A","B"]));
 axioms.push(new Axiom("[A+B=C (B=C-A A=C-B)]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
-axioms.push(new Axiom("[A=B (A-C=B-C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A+B=C (A=C-B B=C-A) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 
@@ -294,9 +293,37 @@ var sequentialCalc = function (trueFacts,falseFacts,gens) {
   return finalAnswer;
 };
 
+var append = function (problem, answers) {
+  problem += "\n";
+  answers[0][0].forEach(function (a) {
+    problem += ("("+a+")"+"\n");
+  });
+  answers[0][1].forEach(function (a) {
+    problem += ("["+a+"]"+"\n");
+  });
+  return problem;
+};
+
 
 
 console.log("here it is");
 //var hih = sequentialCalc([],["0=3"],["a+b=0","a+c=3","c=0"]);
-var hih = calc(["a+a=a"],[],0,["a+a=a"]);
-console.log(hih);
+//var hih = calc(["a+b=0","a+c=3","3-b=c","a=0","a=b"],["0=3"],0,["a+b=0","a+c=3"]);
+//console.log(hih);
+var ceqthree = function () {
+  var problem = "";
+  problem += "(a+b=0)\n";
+  problem += "(a+c=3)\n";
+  problem += "(a=0)\n";
+  problem +=  axioms[7].replace(["a","0","c"]);
+  problem += "\n";
+  problem +=  axioms[10].replace(["a+c","0+c"]);
+  console.log(problem);
+  var x = solve(problem,true);
+  console.log(x);
+  a();
+  problem = append(problem,x);
+  console.log(problem);
+}
+console.log(ceqthree());
+
