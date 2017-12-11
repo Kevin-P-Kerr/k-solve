@@ -412,6 +412,7 @@ var getVariableOrder = function (clauses) {
 };
 
 var fullyResolved = function (clauses,falseVariables) {
+  return false;
   var  i =0;
   var ii = clauses.length;
   var c;
@@ -464,6 +465,13 @@ var print = function (clauses) {
 
 var solvePartial = function (variable, clauses,trueVars,falseVars,positive) {
   console.log('removing ' + variable+' '+positive);
+  // at this point, we might be trying to assign an already discovered variable to its opposite value
+  if (positive && falseVars.indexOf(variable) >= 0) {
+    return false;
+  }
+  if (!positive && trueVars.indexOf(variable) >= 0) {
+    return false;
+  }
   var cpy = simplify(variable,clauses,!positive);
   if (cpy == null) {
     console.log("discovered conflict",variable,positive);
@@ -519,7 +527,6 @@ var hasConflicts = function (clauses,trueVars,falseVars) {
         if (singleNegatives.indexOf(singlePositives[i]) >= 0) {
             console.log("found conflict: "+singlePositives[i]);
             var n = singlePositives[i];
-            if (conflictTable[n]) { conflictTable[n]++ } else { conflictTable[n] = 1; }
             return true;
         }
     }
@@ -541,13 +548,15 @@ var hasConflicts = function (clauses,trueVars,falseVars) {
     return false;
 };
 
-var pruneClauses = function (clauses) {
+var pruneClauses = function (clauses,trueVars) {
   var singlePositives = getSinglePositives(clauses);
   var singleNegatives = getSingleNegatives(clauses);
-
+  var allPositives = [];
+  trueVars.forEach(function (v) { allPositives.push(v); });
+  singlePositives.forEach(function (v) { allPositives.push(v); });
    var i,ii,v;
-   for (i=0,ii=singlePositives.length;i<ii;i++) {
-      v = singlePositives[i];
+   for (i=0,ii=allPositives.length;i<ii;i++) {
+      v = allPositives[i];
       clauses = eliminate(v,clauses,false);
       if (!clauses) {
         return false;
@@ -592,20 +601,14 @@ var eliminate = function (v,clauses,negative) {
 var solve = function (clauses,trueVars,falseVars) {
   console.log("solving");
   print(clauses);
-  console.log("current true vars",trueVars);
-  console.log("current false vars",falseVars);
-  if (shapeUtil.check(clauses)) {
-    console.log("cached conflict");
-    //return false;
-  }
+ // console.log("current true vars",trueVars);
+ // console.log("current false vars",falseVars);
   trueVars = trueVars || [];
   falseVars = falseVars || [];
-  var variables = getVariableOrder(clauses);
   if (hasConflicts(clauses,trueVars,falseVars)) {
-    shapeUtil.register(clauses);
     return false;
   }
-  pruneInfo = pruneClauses(clauses);
+  pruneInfo = pruneClauses(clauses,trueVars);
   clauses = pruneInfo[0];
   pruneInfo[1].forEach(function (truth) {
     trueVars.push(truth);
@@ -616,21 +619,30 @@ var solve = function (clauses,trueVars,falseVars) {
   if (clauses.length == 0) {
     return [trueVars,falseVars];
   }
+  var variables = getVariableOrder(clauses);
   var i = 0;
   var ii = variables.length;
   var v;
+  var hasFalsity;
+  var hasTruth;
   for(; i<ii; i++ ) {
     v = variables[i];
-    var hasTruth = trueVars.indexOf(v) >= 0;
+    hasFalsity = falseVars.indexOf(v) >= 0;
+    hasTruth = trueVars.indexOf(v) >= 0;
+    if (hasFalsity && hasTruth) {
+      // sanity check
+      console.log(v);
+      throw new Error();
+    }
     falseVars.push(v);
-    if ((!hasTruth) && solvePartial(v,clauses,trueVars,falseVars,false) && !hasConflicts(clauses,trueVars,falseVars)) {
+    
+    if ((!hasTruth) && solvePartial(v,clauses,trueVars,falseVars,false)) {
       return [trueVars,falseVars];
     }
     else {
       falseVars.pop();
-      var hasFalsity = falseVars.indexOf(v) >=0;
       trueVars.push(v);
-      if ((!hasFalsity) && solvePartial(v,clauses,trueVars,falseVars,true) && !hasConflicts(clauses,trueVars,falseVars)) {
+      if ((!hasFalsity) && solvePartial(v,clauses,trueVars,falseVars,true)) {
         return [trueVars,falseVars];
       }
       else {
@@ -638,7 +650,8 @@ var solve = function (clauses,trueVars,falseVars) {
       }
     }
   }
-  shapeUtil.register(clauses);
+  pruneInfo[1].forEach(function (el) { trueVars.pop(); });
+  pruneInfo[2].forEach(function (el) { falseVars.pop();});
   return false;
 };
 
@@ -751,6 +764,8 @@ var main = function () {
   printAnswer(answer,t);
   console.log("start");
 }
+
+main();
 
 module.exports = function (str,debug) {
   var d = DEBUG;
