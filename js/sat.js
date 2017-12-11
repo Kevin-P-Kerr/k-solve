@@ -758,14 +758,45 @@ var getAnswer = function (answer,clauses) {
 
 
 var main = function () {
-  t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-  var answer = solve(t);
-  fs.writeFileSync("./answer.txt",JSON.stringify(answer));
-  printAnswer(answer,t);
-  console.log("start");
+ var t = JSON.parse(fs.readFileSync("./parsed.txt").toString());
+  console.log("solving");
+ var betterq = search(t,"c=3",[]);
+ addAllPositives(t,betterq);
+ fs.writeFileSync("./betterq.test",printcl(betterq));
+ var answer = solve(betterq);
+ fs.writeFileSync("./answer.txt",JSON.stringify(answer));
+  //printAnswer(answer,t);
 }
 
+var addAllPositives = function (parsed,ls) {
+    console.log(parsed.length);
+    parsed.forEach(function (cl) { if (cl.type == LPAREN) { ls.push(cl); }});
+};
+
+var search = function (parsed,v,consumed,limit) {
+    limit = limit || 0;
+    if (limit > 10000) {
+        return [];
+    }
+    console.log("searching for " +v);
+    var clauses =[];
+    consumed.push(v);
+    parsed.forEach(function(c) {
+        if (clausePositiveContains(v,c)) {
+            clauses.push(c);
+            c.subClauses.forEach(function (cc) {
+                if (isAtomic(cc) && consumed.indexOf(cc.val) < 0 && limit<10) {
+                    limit++;
+                    var x = search(parsed,cc.val,consumed,limit);
+                    x.forEach(function (cl) { clauses.push(cl); });
+                }
+            });
+        }
+    });
+    return clauses;
+}
 main();
+
 
 module.exports = function (str,debug) {
   var d = DEBUG;

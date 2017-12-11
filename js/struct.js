@@ -223,41 +223,68 @@ axioms.push(new Axiom("(B+A=A+B)",["A","B"]));
 axioms.push(new Axiom("[A+B=C D+B=C B=0 (A=D)]",["A","B","C","D"]));
 axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
 axioms.push(new Axiom("[A+0=B (B=A)]",["A","B"]));
-axioms.push(new Axiom("[A+B=C (B=C-A A=C-B)]",["A","B","C"]));
+axioms.push(new Axiom("[A+B=C (A=C-B)]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
-axioms.push(new Axiom("[A+B=C (A=C-B B=C-A) ]",["A","B","C"]));
+axioms.push(new Axiom("[A+B=C (A=C-B) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
+axioms.push(new Axiom("(A-0=A)",["A"]));
+axioms.push(new Axiom("(0-A=0)",["A"]));
+axioms.push(new Axiom("[A+B=C (B=C-A)]",["A","B","C"]));
 
-var calc = function (trueFacts,falseFacts,turns,generators,question) {
-  generators = generators || trueFacts;
-  var nums = [];
-  question = false;
-  if (!question) {
-    question = "";
-    generators.forEach(function (fact) {
-      var n = generateNums(parse(tokenize(fact)));
-      n.forEach(function (nn) {
-        if (nums.indexOf(nn) >= 0) {return; }
-        nums.push(nn);
-      });
+var generateOp = function (code,one,two,ret) {
+    var x = [one,two];
+    var p = permute(x);
+    p.forEach(function (pair) {
+        var n = {type:"opExpr",val:code};
+        n.left = parse(tokenize(pair[0]));
+        n.right = parse(tokenize(pair[1]));
+        console.log(toString(n));
+        ret.push(toString(n));
     });
-    var sheet = [];
-    var instances = [];
-    axioms.forEach(function (ax) { sheet.push(ax.generate(nums)); });
-    falseFacts.forEach(function (fact) { question += "[ "+fact+" ]"});
-    sheet.forEach(function (scheme) {
-      scheme.forEach(function (instance) { if(instances.indexOf(instance) < 0) {question += (instance + " "); }});
+    return ret;
+};
+
+var getNums = function (gens) {
+    var ret = [];
+    gens.forEach(function (construct) {
+        ret.push(construct);
     });
-  }
+    var i =0;
+    var ii = gens.length-2;
+    for (;i<=ii;i++) {
+        generateOp("-",gens[i],gens[i+1],ret);
+        generateOp("+",gens[i],gens[i+1],ret);
+    }
+    return ret;
+};
+
+var stringNums = function (nums) {
+    var ret= [];
+    nums.forEach(function (n) { ret.push(toString(n)); });
+    return ret;
+};
+
+var calc = function (trueFacts,falseFacts,generators) {
+  var nums = getNums(generators);
+  console.log(nums);
+  question = "";
+  var sheet = [];
+  var instances = [];
+  console.log("g axioms");
+  axioms.forEach(function (ax) { sheet.push(ax.generate(nums)); });
+  console.log("got axioms");
+  falseFacts.forEach(function (fact) { question += "[ "+fact+" ]"});
+  sheet.forEach(function (scheme) {
+      console.log(scheme.length);
+      scheme.forEach(function (instance) { if(instances.indexOf(instance) < 0) {question += (instance + " "); instances.push(instance);}});
+    });
   trueFacts.forEach(function (fact) { question += "( "+fact+" )"});
   console.log("question is");
   console.log(question);
+  fs.writeFileSync("./question.test",question);
   var answer = prune(solve(question,false));
-  if (turns == 0) {
-    return answer;
-  }
-  return calc(answer[0],answer[1],turns-1,null,question);
+  return answer;
 };
 
 var prune = function (answer) {
@@ -279,20 +306,6 @@ var prune = function (answer) {
   return na;
 };
 
-var sequentialCalc = function (trueFacts,falseFacts,gens) {
-  var finalAnswer;
-  gens.forEach(function (fact) {
-    gens.push(fact);
-    var answer = calc(trueFacts,falseFacts,1,gens);
-    finalAnswer = answer;
-    var trueAnswer = answer[0];
-    trueAnswer.forEach(function (fact) {
-      trueFacts.push(fact);
-    });
-  });
-  return finalAnswer;
-};
-
 var append = function (problem, answers) {
   problem += "\n";
   answers[0][0].forEach(function (a) {
@@ -304,26 +317,30 @@ var append = function (problem, answers) {
   return problem;
 };
 
-
-
 console.log("here it is");
 //var hih = sequentialCalc([],["0=3"],["a+b=0","a+c=3","c=0"]);
-//var hih = calc(["a+b=0","a+c=3","3-b=c","a=0","a=b"],["0=3"],0,["a+b=0","a+c=3"]);
-//console.log(hih);
+var hih = calc(["a+b=0","a+c=3"],["0=3"],["a","b","c","0","3"]);
+console.log(hih);
 var ceqthree = function () {
   var problem = "";
   problem += "(a+b=0)\n";
   problem += "(a+c=3)\n";
-  problem += "(a=0)\n";
   problem +=  axioms[7].replace(["a","0","c"]);
   problem += "\n";
   problem +=  axioms[10].replace(["a+c","0+c"]);
-  console.log(problem);
-  var x = solve(problem,true);
-  console.log(x);
-  a();
+  problem += "\n";
+  problem += axioms[7].replace(["a","0","b"]);
+  problem +=  axioms[10].replace(["a+c","0+c"]);
+  problem +=  axioms[9].replace(["0+c","a+c","3"]);
+  problem +=  axioms[6].replace(["0","c","3"]);
+  problem +=  axioms[11].replace(["3"]);
+  problem +=  axioms[9].replace(["c","3-0","3"]);
+  problem +=  axioms[8].replace(["a","b","0"]);
+  problem +=  axioms[13].replace(["a","b","0"]);
+  problem +=  axioms[12].replace(["b"]);
+  problem +=  axioms[9].replace(["a","0-b","0"]);
+  var x = solve(problem,false);
   problem = append(problem,x);
   console.log(problem);
 }
-console.log(ceqthree());
 
