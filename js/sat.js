@@ -251,9 +251,29 @@ var clauseNegativeContains = function (v,clause) {
 };
 
 var clauseConflicts = function (v,c,negative) {
-    if (!negative) { return (!isAtomic(c) && isSingleton(c) && c.type == LBRAK && c.subClauses[0].val == v) }
-    var x= !isAtomic(c) && isSingleton(c) && c.type == LPAREN && c.subClauses[0].val == v;
-    return x;
+  var i,ii,sc;
+  if (isAtomic(c)) { return false; }
+  if (negative) {
+    if (c.type == LPAREN) {
+      for (i=0,ii=c.subClauses.length;i<ii;i++) {
+        sc= c.subClauses[i];
+        if (isAtomic(sc) && sc.val == v) {
+          return true;
+        }
+        else {
+          if (clauseConflicts(v,sc,negative)) { return true; }
+        }
+      }
+    }
+  }
+  else {
+    if (c.type == LBRAK) {
+      if (isSingleton(c) && c.subClauses[0].val == v) {
+        return true;
+      }
+    }
+  }
+  return false;
 };
 
 var isSingleton = function (c) {
