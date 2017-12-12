@@ -101,26 +101,30 @@ var Axiom = function (form,args) {
     var exprs = [];
     if (numericExpressions.length < args.length) { return exprs; }
     if (numericExpressions == args.length) { return [this.replace(numericExpressions)] }
-    var arglen = args.length;
-    var i =1;
-    var n;
-    var e = [];
-    var ii = numericExpressions.length-(arglen-1);
-    for (;i<=ii;i++) {
-      e = [numericExpressions[0]];
-      n=0;
-      for(;n<arglen-1;n++) {
-        e.push(numericExpressions[i+n]);
-      }
-      var perms = permute(e);
-      var that = this;
-      perms.forEach(function (e) { 
-        exprs.push(that.replace(e));
-      });
+    var baseNum = getBaseNumber(args.length,numericExpressions.length);
+    baseNum.addOne();
+    var that = this;
+    while (!baseNum.isZero()) {
+      (function () {
+        var a = [];
+        var i =0;
+        var ii = args.length;
+        for (;i<ii;i++) {
+          a.push(numericExpressions[baseNum.getDigit(i)]);
+        }
+        exprs.push(that.replace(a));
+        baseNum.addOne();
+      })();
     }
-    ne.shift();
-    var more = this.generate(ne);
-    more.forEach(function (e) { exprs.push(e); });
+    (function () {
+      var a = [];
+      var i =0;
+      var ii = args.length;
+      for (;i<ii;i++) {
+        a.push(numericExpressions[baseNum.getDigit(i)]);
+      }
+      exprs.push(that.replace(a));
+    })();
     return exprs;
   };
 };
@@ -156,7 +160,8 @@ var permute = function (input) {
   return permutations;
 }
 
-var getBaseNumber = function (n) {
+var getBaseNumber = function (n,base) {
+  base = base || n;
   var obj = {};
   var digits = [];
   var i = n;
@@ -166,7 +171,7 @@ var getBaseNumber = function (n) {
       if (digit >= n) { return; }
       var x = digits[digit];
       x++;
-      if (x >= n) { x=0; helper(digit+1); }
+      if (x >= base) { x=0; helper(digit+1); }
       digits[digit] = x;
     }
     helper(0);
@@ -217,21 +222,15 @@ var generateNums = function (exp) {
 
 
 var axioms = [];
-axioms.push(new Axiom("(A=A)",["A"]));
-axioms.push(new Axiom("(A-A=0)",["A"]));
-axioms.push(new Axiom("(B+A=A+B)",["A","B"]));
-axioms.push(new Axiom("[A+B=C D+B=C B=0 (A=D)]",["A","B","C","D"]));
-axioms.push(new Axiom("[A+B=A (B=0)]",["A","B"]));
-axioms.push(new Axiom("[A+0=B (B=A)]",["A","B"]));
-axioms.push(new Axiom("[A+B=C (A=C-B)]",["A","B","C"]));
-axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
-axioms.push(new Axiom("[A+B=C (A=C-B) ]",["A","B","C"]));
-axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
-axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 axioms.push(new Axiom("(A-0=A)",["A"]));
 axioms.push(new Axiom("(0-A=0)",["A"]));
+axioms.push(new Axiom("(A=A)",["A"]));
+axioms.push(new Axiom("[A+B=C (A=C-B) ]",["A","B","C"]));
+axioms.push(new Axiom("[A+B=C (A=C-B)]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 axioms.push(new Axiom("[A+B=C (B=C-A)]",["A","B","C"]));
-
 var generateOp = function (code,one,two,ret) {
     var x = [one,two];
     var p = permute(x);
@@ -246,7 +245,8 @@ var generateOp = function (code,one,two,ret) {
 };
 
 var getNums = function (gens) {
-    var ret = [];
+  return gens;  
+  var ret = [];
     gens.forEach(function (construct) {
         ret.push(construct);
     });
@@ -275,15 +275,15 @@ var calc = function (trueFacts,falseFacts,generators) {
   axioms.forEach(function (ax) { sheet.push(ax.generate(nums)); });
   console.log("got axioms");
   falseFacts.forEach(function (fact) { question += "[ "+fact+" ]"});
+  trueFacts.forEach(function (fact) { question += "( "+fact+" )"});
   sheet.forEach(function (scheme) {
       console.log(scheme.length);
       scheme.forEach(function (instance) { if(instances.indexOf(instance) < 0) {question += (instance + " "); instances.push(instance);}});
     });
-  trueFacts.forEach(function (fact) { question += "( "+fact+" )"});
   console.log("question is");
   console.log(question);
   fs.writeFileSync("./question.test",question);
-  var answer = prune(solve(question,false));
+  //var answer = solve(question);
   return answer;
 };
 
@@ -319,7 +319,7 @@ var append = function (problem, answers) {
 
 console.log("here it is");
 //var hih = sequentialCalc([],["0=3"],["a+b=0","a+c=3","c=0"]);
-var hih = calc(["a+b=0","a+c=3"],["0=3"],["a","b","c","0","3"]);
+var hih = calc(["a+b=0","a+c=3","b=0","0=b"],["0=3","a=c"],["a","b","c","0","3","0-a","0-b"]);
 console.log(hih);
 var ceqthree = function () {
   var problem = "";

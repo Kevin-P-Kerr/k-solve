@@ -756,17 +756,23 @@ var getAnswer = function (answer,clauses) {
   return [answer,undetermined];
 }
 
-
-var main = function () {
- var t = JSON.parse(fs.readFileSync("./parsed.txt").toString());
-  console.log("solving");
+ //var t = JSON.parse(fs.readFileSync("./parsed.txt").toString());
+/*
  var betterq = search(t,"c=3",[]);
  addAllPositives(t,betterq);
  fs.writeFileSync("./betterq.test",printcl(betterq));
  var answer = solve(betterq);
  fs.writeFileSync("./answer.txt",JSON.stringify(answer));
   //printAnswer(answer,t);
+*/
+var main = function () {
+  console.log("solving");
+  var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
+  var a = solve(t);
+  printAnswer(a,t);
 }
+
+main();
 
 var addAllPositives = function (parsed,ls) {
     console.log(parsed.length);
@@ -795,8 +801,8 @@ var search = function (parsed,v,consumed,limit) {
     });
     return clauses;
 }
-main();
 
+//main();
 
 module.exports = function (str,debug) {
   var d = DEBUG;
