@@ -350,7 +350,7 @@ var eliminate = function (v,clauses,positive) {
   var newClauses = [];
   clauses.forEach(function (cl) {
     if (cl.type == VAR) { throw new Error(); }
-    var clausePositive == cl.type == LPAREN;
+    var clausePositive = cl.type == LPAREN;
     if (clausePositive) {
       if (isSingleton(clause) && (clause.subClauses[0].val == v)) { 
         return; 
@@ -370,10 +370,6 @@ var eliminate = function (v,clauses,positive) {
     newClauses.push(reduce(copy(cl,v,positive)));
   });
   return newClauses;
-};
-
-
-
 };
 
 var checkReturnCondition = function (clauses,trueVars,falseVars) {
