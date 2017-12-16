@@ -303,13 +303,14 @@ var print = function (clauses) {
   console.log(printcl(clauses));
 };
 
-var solvePartial = function (variable, clauses,trueVars,falseVars,positive) {
+var solvePartial = function (clauses,variable,trueVars,falseVars,positive) {
   console.log('removing ' + variable+' '+positive);
   var cpy;
   try {
     cpy = eliminate(clauses,variable,positive);
   }
-  catch (e) { 
+  catch (e) {
+    console.log('conflict in solve partial',variable);
     return false;
   }
   if (cpy.length == 0) {
@@ -371,7 +372,7 @@ var negativeClauseContains = function (clauses,v,positive) {
   return false;
 };
 
-var eliminate = function (v,clauses,positive) {
+var eliminate = function (clauses,v,positive) {
   var newClauses = [];
   clauses.forEach(function (cl) {
     if (cl.type == VAR) { throw new Error(); }
@@ -437,11 +438,11 @@ var fullyReduceClauses = function (clauses,trueVars,falseVars) {
   var singleNegatives = getSingleNegatives(clauses);
   try {
     singlePositives.forEach(function (v) {
-      clauses = eliminate(v,clauses,true);
+      clauses = eliminate(clauses,v,true);
       trueVars.push(v);
     });
     singleNegatives.forEach(function (v) {
-      clauses = eliminate(v,clauses,false);
+      clauses = eliminate(clauses,v,false);
       falseVars.push(v);
     });
   } catch (e) {
@@ -514,13 +515,19 @@ var solve = function (clauses,trueVars,falseVars) {
   var variables = getVariableOrder(clauses);
   var  i =0;
   var ii = variables.length;
+  var currentVar;
   for (;i<ii;i++) {
+    currentVar = variables[i];
+    falseVars.push(currentVar);
     if(solvePartial(clauses,variables[i],trueVars,falseVars,false)) {
       return [trueVars,falseVars];
     }
+    falseVars.pop();
+    trueVars.push(currentVar);
     if(solvePartial(clauses,variables[i],trueVars,falseVars,true)) {
       return [trueVars,falseVars];
     }
+    trueVars.pop();
   }
   retCond = checkReturnCondition(clauses,trueVars,falseVars);
   if (retCond) { return retCond; }
@@ -564,8 +571,8 @@ var getAnswer = function (answer,clauses) {
 
 var main = function () {
   console.log("solving");
-  //var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
-  var t = parse(tokenize("(a)[a b (d)]"));
+  var t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+  //var t = parse(tokenize("(a)[a b (d)](b)"));
   var a = solve(t);
   printAnswer(a,t);
 }
