@@ -431,20 +431,6 @@ var solve = function (clauses,trueVars,falseVars) {
   return false;
 };
 
-var contains = function (cl,v) {
-    if (isAtomic(cl)) {
-        return cl.val == v;
-    }
-    var  i = 0;
-    var ii = cl.subClauses.length;
-    for (;i<ii;i++) {
-        if (contains(cl.subClauses[i],v)) {
-            return true;
-        }
-    }
-    return false;
-};
-
 var printAnswer = function (answer,clauses) {
     var d = DEBUG;
     DEBUG = true;
