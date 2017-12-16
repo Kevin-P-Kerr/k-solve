@@ -153,70 +153,6 @@ var reduce = function (clause) {
     }
 };
 
-var clausePositiveContains = function (v,clause) {
-    if (isAtomic(clause)) {
-      return false;
-    }
-    var parenFlag = clause.type == LPAREN;
-    if (isSingleton(clause) && clause.subClauses[0].val == v) {
-      return parenFlag;
-    }
-    var i = 0;
-    var ii = clause.subClauses.length;
-    for (;i<ii;i++) {
-      if (clausePositiveContains(v,clause.subClauses[i])) {
-        return true;
-      }
-    }
-    return false;
-};
-
-var clauseNegativeContains = function (v,clause) {
-    if (isAtomic(clause)) {
-      return false;
-    }
-    var parenFlag = clause.type == LBRAK;
-    var i = 0;
-    var ii = clause.subClauses.length;
-    var currentClause;
-    for (;i<ii;i++) {
-      currentClause = clause.subClauses[i];
-      if (isAtomic(currentClause) && currentClause.val == v) {
-        return parenFlag;
-      }
-      if (clauseNegativeContains(v,clause.subClauses[i])) {
-        return true;
-      }
-    }
-    return false;
-};
-
-var clauseConflicts = function (v,c,negative) {
-  var i,ii,sc;
-  if (isAtomic(c)) { return false; }
-  if (negative) {
-    if (c.type == LPAREN) {
-      for (i=0,ii=c.subClauses.length;i<ii;i++) {
-        sc= c.subClauses[i];
-        if (isAtomic(sc) && sc.val == v) {
-          return true;
-        }
-        else {
-          if (clauseConflicts(v,sc,negative)) { return true; }
-        }
-      }
-    }
-  }
-  else {
-    if (c.type == LBRAK) {
-      if (isSingleton(c) && c.subClauses[0].val == v) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
 var isSingleton = function (c) {
     return c.subClauses.length == 1;
 };
@@ -230,33 +166,7 @@ var isAtomic = function (c) {
     return !c.subClauses || c.type == VAR;
 }
 
-// we know if this method is called the clause does not simply contain the val
-// we also know the clause does not conflict
 var copy = function (v,clause) {
-    var copyClause = {type:clause.type};
-    if (clause.type == LPAREN || clause.type == LBRAK) {
-        copyClause.subClauses= [];
-        clause.subClauses.forEach(function (c) {
-            var cpy = copy(v,c);
-            if (cpy == null) {
-                return;
-            }
-            copyClause.subClauses.push(cpy);
-        });
-    }
-    else if (clause.type == VAR) {
-        if (clause.val == v) {
-            var name = clause.val;
-            return null;
-        }
-        else {
-            copyClause.val = clause.val;
-        }
-    }
-    else {
-        throw new Error("what");
-    }
-    return copyClause;
 };
 
 var getVariableOrder = function (clauses) {
@@ -438,7 +348,32 @@ var getSingleNegatives = function (clauses) {
 
 var eliminate = function (v,clauses,positive) {
   var newClauses = [];
-  clauses.forEach(function 
+  clauses.forEach(function (cl) {
+    if (cl.type == VAR) { throw new Error(); }
+    var clausePositive == cl.type == LPAREN;
+    if (clausePositive) {
+      if (isSingleton(clause) && (clause.subClauses[0].val == v)) { 
+        return; 
+      }
+    }
+    else {
+      if (positive) {
+        if (negativeClauseContains(clauses,v,positive)) {
+          return;
+        }
+      }
+      else {
+        if (negativeClauseContains(clauses,v,false));
+          return;
+      }
+    }
+    newClauses.push(reduce(copy(cl,v,positive)));
+  });
+  return newClauses;
+};
+
+
+
 };
 
 var checkReturnCondition = function (clauses,trueVars,falseVars) {
