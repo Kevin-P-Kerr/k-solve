@@ -180,7 +180,7 @@ var copy = function (clause,v) {
     else {
       var sbcl = reduce(copy(cl,v));
       if (!isEmpty(sbcl)) {
-        newClause.subClauses.push();
+        newClause.subClauses.push(sbcl);
       }
     }
   });
@@ -364,7 +364,7 @@ var negativeClauseContains = function (clauses,v,positive) {
     if (sc.type == LPAREN && isSingleton(sc) && sc.subClauses[0].val == v && positive) {
       return true;
     }
-    if (sc.type == LBRAK && negativeClauseContains(sc,v,positive)) {
+    if (sc.type == LBRAK && negativeClauseContains(sc.subClauses,v,positive)) {
       return true;
     }
   }
@@ -389,12 +389,12 @@ var eliminate = function (v,clauses,positive) {
         throw new Error(); // conflict
       }
       if (positive) {
-        if (negativeClauseContains(cl,v,positive)) {
+        if (negativeClauseContains(cl.subClauses,v,positive)) {
           return;
         }
       }
       else {
-        if (negativeClauseContains(cl,v,false));
+        if (negativeClauseContains(cl.subClauses,v,false));
           return;
       }
     }
@@ -565,7 +565,7 @@ var getAnswer = function (answer,clauses) {
 var main = function () {
   console.log("solving");
   //var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
-  var t = parse(tokenize("(a)[a b (d)](c)[d]"));
+  var t = parse(tokenize("(a)[a b (d)]"));
   var a = solve(t);
   printAnswer(a,t);
 }
