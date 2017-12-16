@@ -231,12 +231,6 @@ var getVariableOrder = function (clauses) {
     if (b.count == -Infinity) {
         return -1;
     }
-    if (conflictTable[a.name] && Math.round(Math.random()*100) > conflictTable[a.name]) {
-        return -1;
-    }
-    if (conflictTable[b] && Math.round(Math.random()*100) > conflictTable[b]) {
-        return 1;
-    }
     if (Math.round(Math.random() * 100) < 5) {
         return 1;
     }
@@ -308,7 +302,7 @@ var print = function (clauses) {
 
 var solvePartial = function (variable, clauses,trueVars,falseVars,positive) {
   console.log('removing ' + variable+' '+positive);
-  var cpy = eliminate(variable,clauses,positive);
+  var cpy = eliminate(clauses,variable,positive);
   if (cpy.length == 0) {
     return true;
   }
@@ -394,6 +388,23 @@ var eliminate = function (v,clauses,positive) {
   return newClauses;
 };
 
+var consistentVars = function (trueVars,falseVars) {
+  var i,ii,p,n;
+  for (i=0,ii=trueVars.length;i<ii;i++) {
+    p = trueVars[i];
+    if (falseVars.indexOf(p) >= 0) {
+      return false;
+    }
+  }
+  for (i=0,ii=falseVars.length;i<ii;i++) {
+    n = falseVars[i];
+    if (trueVars.indexOf(n) >= 0) {
+      return false;
+    }
+  }
+  return true;
+};
+
 var checkReturnCondition = function (clauses,trueVars,falseVars) {
   if (!consistentVars(trueVars, falseVars) || !consistent(clauses)) {
     return false;
@@ -467,7 +478,7 @@ var solve = function (clauses,trueVars,falseVars) {
   clauses = fullyReduceClauses(clauses,trueVars,falseVars);
   var retCond = checkReturnCondition(clauses,trueVars,falseVars);
   if (retCond == false) {
-    unwind(copiedVars,trueVars,falseVars);
+    unwindVariables(copiedVars,trueVars,falseVars);
     return false;
   }
   if (retCond) { return retCond; }
@@ -484,7 +495,7 @@ var solve = function (clauses,trueVars,falseVars) {
   }
   retCond = checkReturnCondition(clauses,trueVars,falseVars);
   if (retCond) { return retCond; }
-  unwind(copyVariables,trueVars,falseVars);
+  unwindVariables(copyVariables,trueVars,falseVars);
   return false;
 };
 
@@ -524,7 +535,8 @@ var getAnswer = function (answer,clauses) {
 
 var main = function () {
   console.log("solving");
-  var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
+  //var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
+  var t = parse(tokenize("(a)[a b (d)](c)"));
   var a = solve(t);
   printAnswer(a,t);
 }
