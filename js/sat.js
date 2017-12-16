@@ -20,23 +20,7 @@ var setDebug = (function () {
 })();
 
 setDebug();
-// GLOBAL
-var conflictTable = {};
-var shapeUtil = (function () {
-  var shapes = [];
-  var register = function (clauses) {
-    return;
-    var str = printcl(copyClean(clauses));
-    if (shapes.indexOf(str) >= 0) { return; }
-    shapes.push(str);
-  };
-  var check = function (clauses) {
-    var str = printcl(copyClean(clauses));
-    return shapes.indexOf(str) >= 0;
-  }
-  return {register:register,check:check};
-})();
-//
+
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
 };
@@ -129,49 +113,6 @@ var parse = function (tokens) {
         }
     }
     return clauses;
-};
-
-var simplify = function (v, clauses,negative) {
-    var newClauses = [];
-    clauses.forEach(function (clause) {
-        if (isAtomic(clause)) {
-            if (clause.val == v) {
-                return;
-            }
-        }
-        else if (!negative && clausePositiveContains(v,clause)) {
-            return;
-        }
-        else if (negative && clauseNegativeContains(v,clause)) {
-          return;
-        }
-        else if (clauseConflicts(v,clause,negative)) {
-          newClauses.push(null);
-          return;
-        }
-        newClauses.push(copy(v,clause));
-    });
-    var i =0;
-    var ii = newClauses.length;
-    for (;i<ii;i++) {
-        if (newClauses[i] == null) {
-            return null; // there was a conflict
-        }
-    }
-    var simpleNewClauses = [];
-    newClauses.forEach(function (c) {
-      if (isAtomic(c)) {
-            simpleNewClauses.push(c);
-        }
-        else {
-            var nc = reduce(c);
-            if (isEmpty(nc)) {
-              return;
-            }
-            simpleNewClauses.push(reduce(c));
-        }
-    });
-    return simpleNewClauses;
 };
 
 var isReducible = function (clause) {
@@ -288,29 +229,6 @@ var isEmpty = function (c) {
 var isAtomic = function (c) {
     return !c.subClauses || c.type == VAR;
 }
-
-var copyClean = function (clauses) {
-  var getVar = (function () { var i =0; return function () { return i+""; } })();
-  var newVars = {};
-  var helper = function (clauses) {
-    var newClauses = [];
-    clauses.forEach(function (c) {
-      var newClause = {};
-      if (isAtomic(c)) {
-        newClause.type == VAR;
-        newClause.val =  newVars[c.val] ? newVars[c.val] : getVar();
-        if (!newVars[c.val]) { newVars[c.val] =  newClause.val; }
-      }
-      else {
-        newClause.type = c.type;
-        newClause.subClauses = helper(c.subClauses);
-      }
-      newClauses.push(newClause);
-    });
-    return newClauses;
-  };
-  return helper(clauses);
-};
 
 // we know if this method is called the clause does not simply contain the val
 // we also know the clause does not conflict
@@ -518,177 +436,68 @@ var getSingleNegatives = function (clauses) {
     return pos;
 };
 
-var hasConflicts = function (clauses,trueVars,falseVars) {
-    var singlePositives = getSinglePositives(clauses);
-    var singleNegatives = getSingleNegatives(clauses);
-    var i = 0;
-    var ii = singlePositives.length;
-    for (;i<ii;i++) {
-        if (singleNegatives.indexOf(singlePositives[i]) >= 0) {
-            console.log("found conflict: "+singlePositives[i]);
-            var n = singlePositives[i];
-            return true;
-        }
-    }
-    var tv,fv;
-    for(i=0,ii=trueVars.length;i<ii;i++) {
-      tv = trueVars[i];
-      if (singleNegatives.indexOf(tv) >=0 || falseVars.indexOf(tv) >=0 ) {
-        console.log("found conflict " + tv);
-        return true;
-      }
-    }
-    for(i=0,ii=falseVars.length;i<ii;i++) {
-      fv = falseVars[i];
-      if (singlePositives.indexOf(fv) >= 0 || trueVars.indexOf(fv) >=0) {
-        console.log("found conflict " + fv);
-        return true;
-      }
-    }
-    return false;
+var eliminate = function (v,clauses,positive) {
+  var newClauses = [];
+  clauses.forEach(function 
 };
 
-var pruneClauses = function (clauses,trueVars) {
-  var singlePositives = getSinglePositives(clauses);
-  var singleNegatives = getSingleNegatives(clauses);
-  var allPositives = [];
-  singlePositives.forEach(function (v) { allPositives.push(v); });
-   var i,ii,v;
-   for (i=0,ii=allPositives.length;i<ii;i++) {
-      v = allPositives[i];
-      clauses = simplify(v,clauses,false);
-      if (!clauses) {
-        throw new Error();
-        return false;
-      }
-   }
-   for (i=0,ii=singleNegatives.length;i<ii;i++) {
-      v = singleNegatives[i];
-      clauses = simplify(v,clauses,true);
-      if (!clauses) {
-        console.log(v);
-        throw new Error();
-        return false;
-      }
-   }
-   return [clauses,singlePositives,singleNegatives];
-};
-
-var eliminate = function (v,clauses,negative) {
-    var newClauses = [];
-    clauses.forEach(function (clause) {
-        if (isAtomic(clause)) {
-            if (clause.val == v) {
-                return;
-            }
-        }
-        else if (!negative && clausePositiveContains(v,clause)) {
-            return;
-        }
-        else if (negative && clauseNegativeContains(v,clause)) {
-          return;
-        }
-        newClauses.push(clause);
-    });
-    var i =0;
-    var ii = newClauses.length;
-    for (;i<ii;i++) {
-        if (newClauses[i] == null) {
-            return null; // there was a conflict
-        }
-    }
-    return newClauses;
-};
-
-var solve = function (clauses,trueVars,falseVars) {
-  console.log("solving");
-  print(clauses);
- // console.log("current true vars",trueVars);
- // console.log("current false vars",falseVars);
-  trueVars = trueVars || [];
-  falseVars = falseVars || [];
-  if (hasConflicts(clauses,trueVars,falseVars)) {
+var checkReturnCondition = function (clauses,trueVars,falseVars) {
+  if (!consistentVars(trueVars, falseVars) || !consistent(clauses)) {
     return false;
   }
-  pruneInfo = pruneClauses(clauses,trueVars);
-  clauses = pruneInfo[0];
-  pruneInfo[1].forEach(function (truth) {
-    trueVars.push(truth);
-  });
-  pruneInfo[2].forEach(function (falsity) {
-    falseVars.push(falsity);
-  });
   if (clauses.length == 0) {
     return [trueVars,falseVars];
   }
-  var variables = getVariableOrder(clauses);
-  var i = 0;
-  var ii = variables.length;
-  var v;
-  var hasFalsity;
-  var hasTruth;
-  for(; i<ii; i++ ) {
-    v = variables[i];
-    hasFalsity = falseVars.indexOf(v) >= 0;
-    hasTruth = trueVars.indexOf(v) >= 0;
-    if (hasFalsity && hasTruth) {
-      // sanity check
-      console.log(v);
-      throw new Error();
-    }
-    falseVars.push(v);
-    
-    if ((!hasTruth) && solvePartial(v,clauses,trueVars,falseVars,false)) {
-      return [trueVars,falseVars];
-    }
-    else {
-      falseVars.pop();
-      trueVars.push(v);
-      if ((!hasFalsity) && solvePartial(v,clauses,trueVars,falseVars,true)) {
-        return [trueVars,falseVars];
-      }
-      else {
-        trueVars.pop();
-      }
-    }
-  }
-  pruneInfo[1].forEach(function (el) { trueVars.pop(); });
-  pruneInfo[2].forEach(function (el) { falseVars.pop();});
-  return false;
 };
 
-var getSubProblems = function (clauses) {
-    var subProblems = [];
-    var marked = [];
-    var helper = function (cls) {
-        var originalLen = cls.length;
-        var variables = getVariableOrder(cls);
-        variables.forEach(function (v) {
-            var i = 0;
-            var ii = clauses.length;
-            for (;i<ii;i++) {
-                if (marked[i]) { continue; }
-                var c = clauses[i];
-                if (contains(c,v)) {
-                    marked[i] = true;
-                    cls.push(c);
-                }
-            }
-            if (cls.length > originalLen) {
-                helper(cls);
-            }
-        });
-    };
-    var  i =0;
-    var ii = clauses.length;
-    for (;i<ii;i++) {
-        if (marked[i]) { continue; }
-        var sub = [clauses[i]];
-        marked[i] = true;
-        subProblems.push(sub);
-        helper(sub);
+var fullyReduceClauses = function (clauses,trueVars,falseVars) {
+  var singlePositives = getSinglePositives(clauses);
+  var singleNegatives = getSingleNegatives(clauses);
+  singlePositives.forEach(function (v) {
+    clauses = elminate(v,clauses,true);
+    trueVars.push(v);
+  });
+  singleNegatives.forEach(function (v) {
+    clauses = eliminate(v,clauses,false);
+    falseVars.push(v);
+  });
+  singlePositives = getSinglePositives(clauses);
+  singleNegatives = getSingleNegatives(clauses);
+  if (singlePositives.length || singleNegatives.length) {
+    return fullyReduceClauses(clauses,trueVars,falseVars);
+  }
+  return clauses;
+};
+  
+
+var solve = function (clauses,trueVars,falseVars) {
+  if (!consistent(clauses)) {
+    return false;
+  }
+  var copyVariables = copyVariables(trueVars,falseVars);
+
+  clauses = fullyReduceClauses(clauses,trueVars,falseVars);
+  var retCond = checkReturnCondition(clauses,trueVars,falseVars);
+  if (retCond == false) {
+    unwind(copyVariables,trueVars,falseVars);
+    return false;
+  }
+  if (retCond) { return retCond; }
+  var variables = getVariableOrder(clauses);
+  var  i =0;
+  var ii = variables.length;
+  for (;i<ii;i++) {
+    if(solvePartial(clauses,variables[i],trueVars,falseVars,false)) {
+      return [trueVars,falseVars];
     }
-    return subProblems;
+    if(solvePartial(clauses,variables[i],trueVars,falseVars,true)) {
+      return [trueVars,falseVars];
+    }
+  }
+  retCond = checkReturnCondition(clauses,trueVars,falseVars);
+  if (retCond) { return retCond; }
+  unwind(copyVariables,trueVars,falseVars);
+  return false;
 };
 
 var contains = function (cl,v) {
@@ -703,25 +512,6 @@ var contains = function (cl,v) {
         }
     }
     return false;
-};
-
-var metaSolve = function (clauses,trueVars,falseVars) {
-    trueVars = trueVars || [];
-    falseVars = falseVars || [];
-    console.log("getting sub problems");
-    console.log(clauses.length + " total clauses");
-    var v = getVariableOrder(clauses);
-    console.log(v.length + " total variables");
-    //var problems = getSubProblems(clauses);
-    var problems = [clauses];
-    var  i = 0;
-    var ii = problems.length;
-    for (;i<ii;i++) {
-        if (!solve(problems[i],trueVars,falseVars)) {
-            return false;
-        }
-    }
-    return [trueVars,falseVars];
 };
 
 var printAnswer = function (answer,clauses) {
@@ -758,15 +548,6 @@ var getAnswer = function (answer,clauses) {
   return [answer,undetermined];
 }
 
- //var t = JSON.parse(fs.readFileSync("./parsed.txt").toString());
-/*
- var betterq = search(t,"c=3",[]);
- addAllPositives(t,betterq);
- fs.writeFileSync("./betterq.test",printcl(betterq));
- var answer = solve(betterq);
- fs.writeFileSync("./answer.txt",JSON.stringify(answer));
-  //printAnswer(answer,t);
-*/
 var main = function () {
   console.log("solving");
   var t = parse(tokenize(fs.readFileSync("./question.test").toString()));
@@ -776,45 +557,4 @@ var main = function () {
 
 main();
 
-var addAllPositives = function (parsed,ls) {
-    console.log(parsed.length);
-    parsed.forEach(function (cl) { if (cl.type == LPAREN) { ls.push(cl); }});
-};
 
-var search = function (parsed,v,consumed,limit) {
-    limit = limit || 0;
-    if (limit > 10000) {
-        return [];
-    }
-    console.log("searching for " +v);
-    var clauses =[];
-    consumed.push(v);
-    parsed.forEach(function(c) {
-        if (clausePositiveContains(v,c)) {
-            clauses.push(c);
-            c.subClauses.forEach(function (cc) {
-                if (isAtomic(cc) && consumed.indexOf(cc.val) < 0 && limit<10) {
-                    limit++;
-                    var x = search(parsed,cc.val,consumed,limit);
-                    x.forEach(function (cl) { clauses.push(cl); });
-                }
-            });
-        }
-    });
-    return clauses;
-}
-
-//main();
-
-module.exports = function (str,debug) {
-  var d = DEBUG;
-  DEBUG = debug;
-  setDebug();
-  var tokens = tokenize(str);
-  var parsed = parse(tokens);
-  var answer = metaSolve(parsed);
-  answer = getAnswer(answer,parsed);
-  DEBUG = d;
-  setDebug();
-  return answer;
-};
