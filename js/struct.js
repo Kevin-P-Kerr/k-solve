@@ -223,11 +223,15 @@ var generateNums = function (exp) {
 
 var axioms = [];
 axioms.push(new Axiom("(A-0=A)",["A"]));
+axioms.push(new Axiom("(A+0=A)",["A"]));
 axioms.push(new Axiom("(0-A=0)",["A"]));
 axioms.push(new Axiom("(A=A)",["A"]));
+axioms.push(new Axiom("[A+B=C A=0 (B=C)]",["A","B","C"]));
 axioms.push(new Axiom("[A+B=C (A=C-B) ]",["A","B","C"]));
 axioms.push(new Axiom("[A+B=C (A=C-B)]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (A+C=B+C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (A-C=B-C) ]",["A","B","C"]));
+axioms.push(new Axiom("[A=B (C=A=C-B) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B B=C (A=C) ]",["A","B","C"]));
 axioms.push(new Axiom("[A=B (B=A) ]",["A","B"]));
 axioms.push(new Axiom("[A+B=C (B=C-A)]",["A","B","C"]));
@@ -319,7 +323,7 @@ var append = function (problem, answers) {
 
 console.log("here it is");
 //var hih = sequentialCalc([],["0=3"],["a+b=0","a+c=3","c=0"]);
-var hih = calc(["a+b=0","a+c=3","b=0","0=b"],["0=3","a=c"],["a","b","c","0","3","0-a","0-b"]);
+var hih = calc(["a+b=0","a+c=3","b=0","0=b","a=b","b=a","a=0","b=0"],["0=3","a=c"],["a","b","c","0","3","0-a","0-b","a+c","c+a","3-0","3-a"]);
 console.log(hih);
 var ceqthree = function () {
   var problem = "";

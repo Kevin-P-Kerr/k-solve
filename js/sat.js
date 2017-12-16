@@ -552,20 +552,22 @@ var pruneClauses = function (clauses,trueVars) {
   var singlePositives = getSinglePositives(clauses);
   var singleNegatives = getSingleNegatives(clauses);
   var allPositives = [];
-  trueVars.forEach(function (v) { allPositives.push(v); });
   singlePositives.forEach(function (v) { allPositives.push(v); });
    var i,ii,v;
    for (i=0,ii=allPositives.length;i<ii;i++) {
       v = allPositives[i];
-      clauses = eliminate(v,clauses,false);
+      clauses = simplify(v,clauses,false);
       if (!clauses) {
+        throw new Error();
         return false;
       }
    }
    for (i=0,ii=singleNegatives.length;i<ii;i++) {
       v = singleNegatives[i];
-      clauses = eliminate(v,clauses,true);
+      clauses = simplify(v,clauses,true);
       if (!clauses) {
+        console.log(v);
+        throw new Error();
         return false;
       }
    }
