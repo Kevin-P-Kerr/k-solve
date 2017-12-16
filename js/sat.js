@@ -188,37 +188,36 @@ var copy = function (clause,v) {
 };
 
 var getVariableOrder = function (clauses) {
-  var helper = function (variables, clauses) {
+  var helper = function (variables, clauses,positive) {
     clauses.forEach(function (c) {
       if (isAtomic(c)) {
         if (variables[c.val]) {
-          variables[c.val] += 1;
+          variables[c.val][positive] += 1;
         }
         else {
-          variables[c.val] = 1;
+          variables[c.val] = {true:0,false:0};
+          variables[c.val][positive] = 1;
         }
       }
       else {
-        helper(variables,c.subClauses);
+        helper(variables,c.subClauses,c.type == LPAREN);
       }
     });
     return variables;
   };
   var variables =  helper({},clauses);
-  var singlePositives = getSinglePositives(clauses);
-  var singleNegatives = getSingleNegatives(clauses);
-  singlePositives.forEach(function (p) {
-      variables[p] = Infinity;
-  });
-  singleNegatives.forEach(function (p) {
-      variables[p] = Infinity;
-  });
   var arr = [];
   var k;
   for (k in variables) {
     var rec = {};
     rec.name = k;
-    rec.count = variables[k];
+    rec.positive = false;
+    rec.count = variables[k][false];
+    arr.push(rec);
+    var rec = {};
+    rec.name = k;
+    rec.positive = true;
+    rec.count = variables[k][true];
     arr.push(rec);
   }
   arr.sort(function (a,b) {
@@ -244,28 +243,7 @@ var getVariableOrder = function (clauses) {
       return -1;
     }
   });
-  var ret  =[];
-  arr.forEach(function (a) {
-    ret.push(a.name);
-  });
-  return ret;
-};
-
-var fullyResolved = function (clauses,falseVariables) {
-  return false;
-  var  i =0;
-  var ii = clauses.length;
-  var c;
-  var falses = [];
-  for (;i<ii;i++) {
-    c = clauses[i];
-    if (!(isAtomic(c) || (isSingleton(c) && c.type != LPAREN))) {
-      return false;
-    }
-    else if (isSingleton(c)) { falses.push(c.subClauses[0].val) }
-  }
-  falses.forEach(function (f) { falseVariables.push(f); });
-  return true;
+  return arr;
 };
 
 var printcl = function (clauses) {
@@ -306,10 +284,8 @@ var print = function (clauses) {
 var solvePartial = function (clauses,variable,trueVars,falseVars,positive) {
   console.log('removing ' + variable+' '+positive);
   var cpy;
-  try {
-    cpy = eliminate(clauses,variable,positive);
-  }
-  catch (e) {
+  cpy = eliminate(clauses,variable,positive);
+  if (!cpy) {
     console.log('conflict in solve partial',variable);
     return false;
   }
@@ -357,9 +333,10 @@ var negativeClauseContains = function (clauses,v,positive) {
   var i = 0;
   var ii = clauses.length;
   var sc;
+
   for (;i<ii;i++) {
     sc = clauses[i];
-    if (sc.type == VAR && sc.type == v && !positive) {
+    if (sc.type == VAR && sc.val == v && !positive) {
       return true;
     }
     if (sc.type == LPAREN && isSingleton(sc) && sc.subClauses[0].val == v && positive) {
@@ -381,13 +358,14 @@ var eliminate = function (clauses,v,positive) {
       if (isSingleton(cl) && (cl.subClauses[0].val == v)) { 
         if (!positive) {
           //conflict
-          throw new Error();
+          newClauses.push(null);
         }
+        return;
       }
     }
     else {
       if (isSingleton(cl) && cl.subClauses[0].val == v && positive) {
-        throw new Error(); // conflict
+        newClauses.push(null);
       }
       if (positive) {
         if (negativeClauseContains(cl.subClauses,v,positive)) {
@@ -395,8 +373,9 @@ var eliminate = function (clauses,v,positive) {
         }
       }
       else {
-        if (negativeClauseContains(cl.subClauses,v,false));
+        if (negativeClauseContains(cl.subClauses,v,false)) {
           return;
+        }
       }
     }
     var nc = reduce(copy(cl,v,positive));
@@ -404,6 +383,9 @@ var eliminate = function (clauses,v,positive) {
       newClauses.push(nc);
     }
   });
+  if (newClauses.indexOf(null) >= 0) {
+    return false;
+  }
   return newClauses;
 };
 
@@ -436,17 +418,26 @@ var checkReturnCondition = function (clauses,trueVars,falseVars) {
 var fullyReduceClauses = function (clauses,trueVars,falseVars) {
   var singlePositives = getSinglePositives(clauses);
   var singleNegatives = getSingleNegatives(clauses);
-  try {
-    singlePositives.forEach(function (v) {
-      clauses = eliminate(clauses,v,true);
+  var i,ii,v;
+  for (i=0,ii=singlePositives.length;i<ii;i++) {
+    v = singlePositives[i];
+    clauses = eliminate(clauses,v,true);
+    if (clauses) {
       trueVars.push(v);
-    });
-    singleNegatives.forEach(function (v) {
-      clauses = eliminate(clauses,v,false);
+    }
+    else {
+      return false;
+    }
+  }
+  for (i=0,ii=singleNegatives.length;i<ii;i++) {
+    v = singleNegatives[i];
+    clauses = eliminate(clauses,v,false);
+    if (clauses) {
       falseVars.push(v);
-    });
-  } catch (e) {
-    return false;
+    }
+    else {
+      return false;
+    }
   }
   singlePositives = getSinglePositives(clauses);
   singleNegatives = getSingleNegatives(clauses);
@@ -502,6 +493,7 @@ var solve = function (clauses,trueVars,falseVars) {
 
   clauses = fullyReduceClauses(clauses,trueVars,falseVars);
   if (!clauses) {
+    unwindVariables(copiedVars,trueVars,falseVars);
     return false;
   }
   console.log("after reduction");
@@ -518,16 +510,34 @@ var solve = function (clauses,trueVars,falseVars) {
   var currentVar;
   for (;i<ii;i++) {
     currentVar = variables[i];
-    falseVars.push(currentVar);
-    if(solvePartial(clauses,variables[i],trueVars,falseVars,false)) {
-      return [trueVars,falseVars];
+    if (currentVar.positive) {
+      trueVars.push(currentVar.name);
+      if(solvePartial(clauses,currentVar.name,trueVars,falseVars,true)) {
+        return [trueVars,falseVars];
+      }
+      else {
+        trueVars.pop();
+        falseVars.push(currentVar.name);
+        if(solvePartial(clauses,currentVar.name,trueVars,falseVars,false)) {
+          return [trueVars,falseVars];
+        }
+        falseVars.pop();
+      }
     }
-    falseVars.pop();
-    trueVars.push(currentVar);
-    if(solvePartial(clauses,variables[i],trueVars,falseVars,true)) {
-      return [trueVars,falseVars];
+    else {
+      falseVars.push(currentVar.name);
+      if(solvePartial(clauses,currentVar.name,trueVars,falseVars,false)) {
+        return [trueVars,falseVars];
+      }
+      else {
+        falseVars.pop();
+        trueVars.push(currentVar.name);
+        if(solvePartial(clauses,currentVar.name,trueVars,falseVars,true)) {
+          return [trueVars,falseVars];
+        }
+        trueVars.pop();
+      }
     }
-    trueVars.pop();
   }
   retCond = checkReturnCondition(clauses,trueVars,falseVars);
   if (retCond) { return retCond; }
@@ -571,8 +581,9 @@ var getAnswer = function (answer,clauses) {
 
 var main = function () {
   console.log("solving");
-  var t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-  //var t = parse(tokenize("(a)[a b (d)](b)"));
+  //var t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
+  //var t = parse(tokenize(fs.readFileSync("./problem.test").toString()));
+  var t = parse(tokenize("[a b c][(a)b(c)][a(b)(c)][(a)(b)c](c)"));
   var a = solve(t);
   printAnswer(a,t);
 }
