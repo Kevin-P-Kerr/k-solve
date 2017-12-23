@@ -12,6 +12,7 @@ var compile2viz = function (src,nodeMap) {
     src = src.split('\n');
     var subGraphs = src[0];
     var connections = src[1];
+    var subclusterEnum = getAlphaGen();
     subGraphs = makeTokens(tokenize(subGraphs));
     var compileSubGraph = function (stem,graphColor,nodeColor, tokens,connections) {
         stem += "style=filled; color="+graphColor+"; node [style=filled,color="+nodeColor+"];";
@@ -20,7 +21,7 @@ var compile2viz = function (src,nodeMap) {
             if (token.type == LPAREN) {
                 var newNodeColor = getNextColor(nodeColor);
                 var newGraphColor = getNextColor(graphColor);
-                stem += compileSubGraph("subgraph cluster_e {",newGraphColor,newNodeColor,tokens);
+                stem += compileSubGraph("subgraph cluster_"+subclusterEnum()+ " {",newGraphColor,newNodeColor,tokens);
             }
             else if (token.type == VAR) {
                 var nodeName = token.val;
@@ -110,7 +111,12 @@ var tokenize = function (str) {
 };
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
-var map = {a:'f',g:'f'};
-var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
+//var map = {a:'f',g:'f'};
+//var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
+var map = {};
+map.a = 'ALX';
+map.b = 'KILLS';
+map.c = 'VICE';
+var z = compile2viz("(a) b (c) \na b\tb c",map)
 console.log(z);
 
