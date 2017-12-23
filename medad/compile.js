@@ -146,7 +146,7 @@ var compile2line = function (src,map) {
     lineInternal.prefix = [];
     lineInternal.bool = [];
     connections = makeConnectionsMap(connections);
-    var compileProp = function (tokens) {
+    var compileProp = function (tokens,quantFlag) {
         var token = tokens();
         var props = [];
         var nodesOnLevel = [];
@@ -155,7 +155,7 @@ var compile2line = function (src,map) {
             var prop = {};
             if (token.type == LPAREN) {
                 prop.type = NEGATE;
-                prop.body = compileProp(tokens);
+                prop.body = compileProp(tokens,!quantFlag);
             }
             else if (token.type == VAR) {
                 prop.type = PRED;
@@ -174,15 +174,15 @@ var compile2line = function (src,map) {
             var a = inverse[0];
             var b = inverse[1];
             if (nodesOnLevel.indexOf(a) >= 0 && nodesOnLevel.indexOf(b) >= 0) {
-                addQuant(lineInternal.prefix,THEREIS,val);
+                addQuant(lineInternal.prefix,quantFlag,val);
             }
             else {
-                addQuant(lineInternal.prefix,FORALL,val);
+                addQuant(lineInternal.prefix,!quantFlag,val);
             }
         });
         return props;
     };
-    lineInternal.matrix = compileProp(subGraphs);
+    lineInternal.matrix = compileProp(subGraphs,true);
     return lineInternal;
 };
 
@@ -246,11 +246,12 @@ var quantContains = function(prefix,val) {
     return false;
 }; 
 
-var addQuant = function (prefix,quant,val) {
+var addQuant = function (prefix,quantFlag,val) {
+    quant = quantFlag ? FORALL : THEREIS;
     if (quantContains(prefix,val)) {
         return;
     }
-    prefix.push({type:quant,val:val});
+    prefix.unshift({type:quant,val:val});
 };
     
 
