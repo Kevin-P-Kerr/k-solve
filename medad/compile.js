@@ -7,9 +7,7 @@ var getAlphaGen = function () {
     };
 };
 
-var compile2viz = function (src) {
-    var nodeLabels = getAlphaGen();
-    var val2label = {};
+var compile2viz = function (src,nodeMap) {
     var prelude = "digraph G { ";
     src = src.split('\n');
     var subGraphs = src[0];
@@ -25,9 +23,10 @@ var compile2viz = function (src) {
                 stem += compileSubGraph("subgraph cluster_e {",newGraphColor,newNodeColor,tokens);
             }
             else if (token.type == VAR) {
-                var label = nodeLabels();
-                val2label[token.val] = label;
-                stem += label + "[label="+token.val+";]" +";";
+                var nodeName = token.val;
+                var nodeLabel = nodeMap[nodeName];
+                if (!nodeLabel) { nodeLabel = nodeName; }
+                stem += nodeName + "[label="+nodeLabel+";]" +";";
             }
             token = tokens();
         }
@@ -37,7 +36,7 @@ var compile2viz = function (src) {
                 con = con.split(' ');
                 var ant = con[0];
                 var cons = con[1]
-                stem += (val2label[ant]+ " -> " + val2label[cons]+"; ");
+                stem += (ant+ " -> " + cons +"; ");
             });
         }
         stem += " }";
@@ -111,6 +110,7 @@ var tokenize = function (str) {
 };
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
-var z = compile2viz("(a) b c ( d e f (f g ))\na d\te f\tc e")
+var map = {a:'f',g:'f'};
+var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
 console.log(z);
 
