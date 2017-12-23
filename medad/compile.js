@@ -114,9 +114,9 @@ var tokenize = function (str) {
     return tokens;
 };
 
-var makeConnectionsMap = function (connections) {
+var makeConnectionsMap = function (connections,varGen) {
     connections = connections.split('\t');
-    var varGen = getAlphaGen();
+    varGen = varGen || getAlphaGen();
     var map = {};
     map.inverse = {};
     connections.forEach(function (con) {
@@ -137,66 +137,98 @@ var makeConnectionsMap = function (connections) {
     return map;
 };
 
-var addQuantifiers = function (src) {
+var addQuantifiers = function (src,connections) {
     var quants = [];
     var subGraphs = src[0];
-    var connections = src[1];
     subGraphs = makeTokens(tokenize(subGraphs));
-    connections = makeConnectionsMap(connections);
     var helper = function (tokens) {
-        var ret = [];
         token = tokens();
+        var inter = [];
         while (token && token.type != RPAREN) {
-            var ast = {};
             if (token.type == LPAREN) {
-                ast.type = LPAREN;
-                ast.body = helper(tokens);
+                inter.push(helper(tokens));
             }
             else if (token.type == VAR) {
-                ast.type = VAR;
-                ast.val = token.val;
+                inter.push(token.val);
             }
-            ret.push(ast);
             token = tokens();
         }
-        return ret;
+        return inter;
     };
-    var parseAST = function (ast,quantFlag) {
-        var todo = [];
-        var nodesOnLevel = [];
-        var connsOnLevel = [];
-        ast.forEach(function (ct) {
-            if (ct.type == LPAREN) {
-                todo.push(ct);
-            }
-            else if (ct.type == VAR) {
-                nodesOnLevel.push(ct.val);
-                connections[ct.val].forEach(function (c) { connsOnLevel.push(c); });
-            }
-        });
-        connsOnLevel.forEach(function (con) {
-            var inverse = connections.inverse[con];
-            if (nodesOnLevel.indexOf(inverse[0]) >= 0 && nodesOnLevel.indexOf(inverse[1]) >= 0) {
-                addQuant(quants,con,quantFlag);
-            }
-            else {
-                addQuant(quants,con,!quantFlag);
-            }
-        });
-        todo.forEach(function (t) { parseAST(t.body,!quantFlag); });
-    };
-    parseAST(helper(subGraphs),false);
+    var ordered = helper(subGraphs);
+    var k,v;
+    for (k in connections.inverse) {
+        v = connections.inverse[k];
+        var a = v[0];
+        var b = v[1];
+        var n = findHighest(a,b,ordered);
+        var qf;
+        if (n < 0) { qf = true;} 
+        else { qf = n%2==0; }
+        addQuant(quants,k,qf);
+    }
     return quants;
 };
 
-var compile2line = function (src,map) {
+var isArray = function (a) {
+    return Object.prototype.toString.call(a).match('Array');
+};
+
+var findHighest = function (a,b,ordered) {
+    var helper = function (x,o) {
+        var i = 0;
+        var ii = o.length;
+        var s;
+        for (;i<ii;i++) {
+            s = o[i];
+            if (s == x) { return i; }
+            if (isArray(s)) {
+                if (helper(x,s) >= 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    };
+    var first = function (index,a,b,c) {
+        var i =0;
+        var ii = index.length;
+        var ac,bc;
+        for (;i<ii;i++) {
+            if (index[i] == a || index[i] == b) {
+                return c;
+            }
+            else if (isArray(index[i])) {
+                if (helper(a,index[i])>=0) {
+                    ac = first(index[i],a,b,c+1);
+                }
+                if (helper(b,index[i])>=0) {
+                    bc = first(index[i],a,b,c+1);
+                }
+            }
+        }
+        if (ac && bc) {
+            return Math.min(ac,bc);
+        }
+        return ac ? ac : bc;
+    };
+    var indexone = helper(a,ordered);
+    var indextwo = helper(b,ordered);
+    if (indexone != indextwo) { return -1; }
+    else {
+        var index = ordered[indexone];
+        return first(index,a,b,1);
+    }
+};
+
+var compile2line = function (src,map,gen) {
     src = src.split('\n');
     var subGraphs = src[0];
     var connections = src[1];
     subGraphs = makeTokens(tokenize(subGraphs));
     var lineInternal = {};
-    lineInternal.prefix = addQuantifiers(src);
-    connections = makeConnectionsMap(connections);
+    connections = makeConnectionsMap(connections,gen);
+    lineInternal.prefix = addQuantifiers(src,connections);
     var compileProp = function (tokens) {
         var token = tokens();
         var props = [];
@@ -287,17 +319,38 @@ var addQuant = function (prefix,val,quantFlag) {
     }
     prefix.push({type:quant,val:val});
 };
+
+var compileAxioms = function (srcs,map) {
+    var lines = [];
+    var canonicalGen = getAlphaGen();
+    srcs.forEach(function (src) { lines.push(compile2line(src,map,canonicalGen)); });
+    return lines;
+};
+    
     
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
 //var map = {a:'f',g:'f'};
 //var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
 var map = {};
-map.a = 'ALX';
-map.b = 'KILLS';
-map.d = 'LOVES';
-map.e = 'VICE';
-var z = compile2viz("(a) b (c) \na b\tb c",map)
-var z = compile2line("(a) b (d (e)) \na b\tb d\td e",map)
+map.A = 'ALX';
+map.B = 'KILLS';
+map.D = 'LOVES';
+map.E = 'VICE';
+var z = compile2line("(A) B (D E) \nA B\tB D\tD E",map)
 console.log(println(z));
+/*
+var map = {};
+map.A = 'MAN';
+map.B = 'MORTAL';
+map.C = 'SOCRATES';
+map.D = 'MAN';
+var axioms = [];
+axioms.push("(A)(B)\nA B");
+axioms.push("(C)(D)\nC D");
+var lns = compileAxioms(axioms,map);
+lns.forEach(function (z) {
+    console.log(println(z));
+});
+*/
 
