@@ -186,6 +186,57 @@ var compile2line = function (src,map) {
     return lineInternal;
 };
 
+var printProp = function (prop) {
+    var p = "";
+    if (prop.type == NEGATE) {
+        p = "~(";
+        var first = true;
+        prop.body.forEach(function (body) {
+            if (first) {
+                first = false;
+                p += printProp(body);
+            }
+            else {
+                p += " + " + printProp(body);
+            }
+        });
+        p += ")";
+    }
+    else if (prop.type == PRED) {
+        p += prop.name+"(";
+        prop.body.forEach(function (v) {
+            p+=v+" ";
+        });
+        p+=")";
+    }
+    return p;
+};
+
+var println = function (line) {
+    var str = "";
+    line.prefix.forEach(function (pref) {
+        if (pref.type == FORALL) {
+            str += "forall ";
+        }
+        else {
+            str += "there is ";
+        }
+        str += pref.val+" ";
+    });
+    str += ":"
+    var first = true;
+    line.matrix.forEach(function (prop) {
+        if (first) {
+            first = false;
+            str += printProp(prop);
+        }
+        else {
+            str += " + " + printProp(prop);
+        }
+    });
+    return str;
+}; 
+
 var quantContains = function(prefix,val) {
     var i = 0;
     var ii = prefix.length;
@@ -212,6 +263,6 @@ map.b = 'KILLS';
 map.d = 'LOVES';
 map.e = 'VICE';
 var z = compile2viz("(a) b (c) \na b\tb c",map)
-var z = compile2line("(a) b (d e) \na b\tb d\td e",map)
-console.log(JSON.stringify(z));
+var z = compile2line("(a) b (d (e)) \na b\tb d\td e",map)
+console.log(println(z));
 
