@@ -72,6 +72,7 @@ var NEGATE = 3;
 var PRED = 4;
 var THEREIS = 5;
 var FORALL = 6;
+var MULT = 7;
 
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
@@ -254,6 +255,9 @@ var compile2line = function (src,map,gen) {
 
 var printProp = function (prop) {
     var p = "";
+    if (prop.type == MULT) {
+        p = printProp(prop.body[0]) +"*"+printProp(prop.body[1]);
+    }
     if (prop.type == NEGATE) {
         p = "~(";
         var first = true;
@@ -324,9 +328,29 @@ var compileAxioms = function (srcs,map) {
     var lines = [];
     var canonicalGen = getAlphaGen();
     srcs.forEach(function (src) { lines.push(compile2line(src,map,canonicalGen)); });
+    var a = lines[0];
+    var b = lines[1];
+    var s = println(multiply(a,b));
+    console.log(s);
     return lines;
 };
-    
+
+var multiply = function (a,b) {
+    var c = {};
+    c.prefix = [];
+    a.prefix.forEach(function (p) { c.prefix.push(p); });
+    b.prefix.forEach(function (p) { c.prefix.push(p); });
+    c.matrix = [];
+    a.matrix.forEach(function (aa) {
+        b.matrix.forEach(function (bb) {
+            var n = {};
+            n.type = MULT;
+            n.body = [aa,bb];
+            c.matrix.push(n);
+        });
+    });
+    return c;
+};
     
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
@@ -339,7 +363,6 @@ map.D = 'LOVES';
 map.E = 'VICE';
 var z = compile2line("(A) B (D E) \nA B\tB D\tD E",map)
 console.log(println(z));
-/*
 var map = {};
 map.A = 'MAN';
 map.B = 'MORTAL';
@@ -352,5 +375,4 @@ var lns = compileAxioms(axioms,map);
 lns.forEach(function (z) {
     console.log(println(z));
 });
-*/
 
