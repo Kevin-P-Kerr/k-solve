@@ -131,7 +131,7 @@ var makeConnectionsMap = function (connections,varGen) {
         if (!map[l]) {
             map[l] = [];
         }
-        map[ant].push(v);
+        map[ant].unshift(v);
         map[l].push(v);
         map.inverse[v] = [ant,l];
     });
@@ -351,18 +351,44 @@ var multiply = function (a,b) {
     });
     return c;
 };
-    
+
+var replace = function (p,t,f) {
+    var i = 0;
+    var ii = p.prefix.length;
+    for (;i<ii;i++) {
+        if (p.prefix[i].val == f) {
+            break;
+        }
+    }
+    p.prefix.splice(i);
+    var helper = function (props) {
+        props.forEach(function (subp) {
+            if (subp.type == PRED && subp.body.indexOf(f) >= 0) {
+                var dex = subp.body.indexOf(f);
+                subp.body[dex] = t;
+            }
+            if (subp.type == MULT) {
+                helper(subp.body[0]);
+                helper(subp.body[1]);
+            }
+            if (subp.type == NEGATE) {
+                helper(subp.body);
+            }
+        });
+    };
+    helper(p.matrix);
+};
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
 //var map = {a:'f',g:'f'};
 //var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
 var map = {};
-map.A = 'ALX';
-map.B = 'KILLS';
-map.D = 'LOVES';
-map.E = 'VICE';
-var z = compile2line("(A) B (D E) \nA B\tB D\tD E",map)
+map.A = 'LOVES';
+map.B = 'JOYS';
+var z = compile2line("(A) B \nA B\tB A",map)
+replace(z,'a','b');
 console.log(println(z));
+/*
 var map = {};
 map.A = 'MAN';
 map.B = 'MORTAL';
@@ -375,4 +401,5 @@ var lns = compileAxioms(axioms,map);
 lns.forEach(function (z) {
     console.log(println(z));
 });
+*/
 
