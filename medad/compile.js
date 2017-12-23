@@ -68,6 +68,10 @@ var makeTokens = function (tokens) {
 var LPAREN = 0;
 var RPAREN = 1;
 var VAR = 2;
+var NEGATE = 3;
+var PRED = 4;
+var THEREIS = 5;
+var FORALL = 6;
 
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
@@ -110,13 +114,104 @@ var tokenize = function (str) {
     return tokens;
 };
 
+var makeConnectionsMap = function (connections) {
+    connections = connections.split('\t');
+    var varGen = getAlphaGen();
+    var map = {};
+    map.inverse = {};
+    connections.forEach(function (con) {
+        con = con.split(' ');
+        var v = varGen();
+        var ant = con[0];
+        var l = con[1];
+        if (!map[ant]) {
+            map[ant] = [];
+        }
+        if (!map[l]) {
+            map[l] = [];
+        }
+        map[ant].push(v);
+        map[l].push(v);
+        map.inverse[v] = [ant,l];
+    });
+    return map;
+};
+
+var compile2line = function (src,map) {
+    src = src.split('\n');
+    var subGraphs = src[0];
+    var connections = src[1];
+    subGraphs = makeTokens(tokenize(subGraphs));
+    var lineInternal = {};
+    lineInternal.prefix = [];
+    lineInternal.bool = [];
+    connections = makeConnectionsMap(connections);
+    var compileProp = function (tokens) {
+        var token = tokens();
+        var props = [];
+        var nodesOnLevel = [];
+        var varsOnLevel = [];
+        while (token && token.type != RPAREN ) {
+            var prop = {};
+            if (token.type == LPAREN) {
+                prop.type = NEGATE;
+                prop.body = compileProp(tokens);
+            }
+            else if (token.type == VAR) {
+                prop.type = PRED;
+                prop.name = map[token.val];
+                prop.body = connections[token.val];
+                nodesOnLevel.push(token.val);
+                connections[token.val].forEach(function (con) {
+                    varsOnLevel.push(con);
+                });
+            }
+            props.push(prop);
+            token = tokens();
+        }
+        varsOnLevel.forEach(function (val) {
+            var inverse = connections.inverse[val];
+            var a = inverse[0];
+            var b = inverse[1];
+            if (nodesOnLevel.indexOf(a) >= 0 && nodesOnLevel.indexOf(b) >= 0) {
+                addQuant(lineInternal.prefix,THEREIS,val);
+            }
+            else {
+                addQuant(lineInternal.prefix,FORALL,val);
+            }
+        });
+        return props;
+    };
+    lineInternal.matrix = compileProp(subGraphs);
+    return lineInternal;
+};
+
+var quantContains = function(prefix,val) {
+    var i = 0;
+    var ii = prefix.length;
+    for (;i<ii;i++) {
+        if (prefix[i].val == val) { return true;}
+    }
+    return false;
+}; 
+
+var addQuant = function (prefix,quant,val) {
+    if (quantContains(prefix,val)) {
+        return;
+    }
+    prefix.push({type:quant,val:val});
+};
+    
+
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
 //var map = {a:'f',g:'f'};
 //var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
 var map = {};
 map.a = 'ALX';
 map.b = 'KILLS';
-map.c = 'VICE';
+map.d = 'LOVES';
+map.e = 'VICE';
 var z = compile2viz("(a) b (c) \na b\tb c",map)
-console.log(z);
+var z = compile2line("(a) b (d e) \na b\tb d\td e",map)
+console.log(JSON.stringify(z));
 
