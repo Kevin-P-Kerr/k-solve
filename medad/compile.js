@@ -104,7 +104,7 @@ var tokenize = function (str) {
         }
         else {
             var name = '';
-            while (isValidVarChar(str[i])) {
+            while (isValidVarChar(str[i]) && i<ii) {
                 name += str[i];
                 i++;
             }
@@ -327,12 +327,10 @@ var addQuant = function (prefix,val,quantFlag) {
 var compileAxioms = function (srcs,map) {
     var lines = [];
     var canonicalGen = getAlphaGen();
-    srcs.forEach(function (src) { lines.push(compile2line(src,map,canonicalGen)); });
+    srcs.forEach(function (src) {  lines.push(compile2line(src,map,canonicalGen)); });
     var a = lines[0];
     var b = lines[1];
-    var s = println(multiply(a,b));
-    console.log(s);
-    return lines;
+    return multiply(a,b);
 };
 
 var multiply = function (a,b) {
@@ -368,8 +366,8 @@ var replace = function (p,t,f) {
                 subp.body[dex] = t;
             }
             if (subp.type == MULT) {
-                helper(subp.body[0]);
-                helper(subp.body[1]);
+                helper([subp.body[0]]);
+                helper([subp.body[1]]);
             }
             if (subp.type == NEGATE) {
                 helper(subp.body);
@@ -377,6 +375,8 @@ var replace = function (p,t,f) {
         });
     };
     helper(p.matrix);
+    // for chaining
+    return p;
 };
 
 //var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
@@ -388,18 +388,14 @@ map.B = 'JOYS';
 var z = compile2line("(A) B \nA B\tB A",map)
 replace(z,'a','b');
 console.log(println(z));
-/*
 var map = {};
 map.A = 'MAN';
 map.B = 'MORTAL';
 map.C = 'SOCRATES';
 map.D = 'MAN';
 var axioms = [];
-axioms.push("(A)(B)\nA B");
-axioms.push("(C)(D)\nC D");
-var lns = compileAxioms(axioms,map);
-lns.forEach(function (z) {
-    console.log(println(z));
-});
-*/
-
+axioms.push("(A) B\nA B");
+axioms.push("(C) D\nC D");
+var ln = compileAxioms(axioms,map);
+console.log(println(ln));
+console.log(println(replace(ln,'a','b')));
