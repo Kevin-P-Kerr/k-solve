@@ -137,49 +137,83 @@ var makeConnectionsMap = function (connections) {
     return map;
 };
 
+var addQuantifiers = function (src) {
+    var quants = [];
+    var subGraphs = src[0];
+    var connections = src[1];
+    subGraphs = makeTokens(tokenize(subGraphs));
+    connections = makeConnectionsMap(connections);
+    var helper = function (tokens) {
+        var ret = [];
+        token = tokens();
+        while (token && token.type != RPAREN) {
+            var ast = {};
+            if (token.type == LPAREN) {
+                ast.type = LPAREN;
+                ast.body = helper(tokens);
+            }
+            else if (token.type == VAR) {
+                ast.type = VAR;
+                ast.val = token.val;
+            }
+            ret.push(ast);
+            token = tokens();
+        }
+        return ret;
+    };
+    var parseAST = function (ast,quantFlag) {
+        var todo = [];
+        var nodesOnLevel = [];
+        var connsOnLevel = [];
+        ast.forEach(function (ct) {
+            if (ct.type == LPAREN) {
+                todo.push(ct);
+            }
+            else if (ct.type == VAR) {
+                nodesOnLevel.push(ct.val);
+                connections[ct.val].forEach(function (c) { connsOnLevel.push(c); });
+            }
+        });
+        connsOnLevel.forEach(function (con) {
+            var inverse = connections.inverse[con];
+            if (nodesOnLevel.indexOf(inverse[0]) >= 0 && nodesOnLevel.indexOf(inverse[1]) >= 0) {
+                addQuant(quants,con,quantFlag);
+            }
+            else {
+                addQuant(quants,con,!quantFlag);
+            }
+        });
+        todo.forEach(function (t) { parseAST(t.body,!quantFlag); });
+    };
+    parseAST(helper(subGraphs),false);
+    return quants;
+};
+
 var compile2line = function (src,map) {
     src = src.split('\n');
     var subGraphs = src[0];
     var connections = src[1];
     subGraphs = makeTokens(tokenize(subGraphs));
     var lineInternal = {};
-    lineInternal.prefix = [];
-    lineInternal.bool = [];
+    lineInternal.prefix = addQuantifiers(src);
     connections = makeConnectionsMap(connections);
-    var compileProp = function (tokens,quantFlag) {
+    var compileProp = function (tokens) {
         var token = tokens();
         var props = [];
-        var nodesOnLevel = [];
-        var varsOnLevel = [];
         while (token && token.type != RPAREN ) {
             var prop = {};
             if (token.type == LPAREN) {
                 prop.type = NEGATE;
-                prop.body = compileProp(tokens,!quantFlag);
+                prop.body = compileProp(tokens);
             }
             else if (token.type == VAR) {
                 prop.type = PRED;
                 prop.name = map[token.val];
                 prop.body = connections[token.val];
-                nodesOnLevel.push(token.val);
-                connections[token.val].forEach(function (con) {
-                    varsOnLevel.push(con);
-                });
             }
             props.push(prop);
             token = tokens();
         }
-        varsOnLevel.forEach(function (val) {
-            var inverse = connections.inverse[val];
-            var a = inverse[0];
-            var b = inverse[1];
-            if (nodesOnLevel.indexOf(a) >= 0 && nodesOnLevel.indexOf(b) >= 0) {
-                addQuant(lineInternal.prefix,quantFlag,val);
-            }
-            else {
-                addQuant(lineInternal.prefix,!quantFlag,val);
-            }
-        });
         return props;
     };
     lineInternal.matrix = compileProp(subGraphs,true);
@@ -246,12 +280,12 @@ var quantContains = function(prefix,val) {
     return false;
 }; 
 
-var addQuant = function (prefix,quantFlag,val) {
+var addQuant = function (prefix,val,quantFlag) {
     quant = quantFlag ? FORALL : THEREIS;
     if (quantContains(prefix,val)) {
         return;
     }
-    prefix.unshift({type:quant,val:val});
+    prefix.push({type:quant,val:val});
 };
     
 
