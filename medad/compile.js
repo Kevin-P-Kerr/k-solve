@@ -377,15 +377,20 @@ var replace = function (p,t,f) {
     return p;
 };
 
-//var z = compile2viz("a b c ( d e f (f g ))\na d\te f\tc e")
-//var map = {a:'f',g:'f'};
-//var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
-var map = {};
-map.A = "MOTHER";
-map.B = "LOVES";
-var z = compile2line("(A) B\nA B\tB A",map)
-console.log(println(z));
-//console.log(z);
+var product = function (lns) {
+    var base = lns[0];
+    var i = 0;
+    var ii = lns.length;
+    for (;i<ii;i++) {
+        base = multiply(base,lns[i]);
+    }
+    return base;
+};
+
+var removeClause = function (p,i) {
+    p.matrix.splice(i,1);
+    return p;
+};
 var map = {};
 map.A = 'MIKE';
 map.B = 'LIVES';
@@ -404,7 +409,7 @@ map.N = 'SARAH';
 map.O = 'CANNOT LIVE';
 map.P = 'ADJACENT';
 map.Q = 'MIKE';
-map.R = '3rdFloor';
+map.R = 'MIKE';
 map.S = 'ADJACENT';
 map.T = '2ndFloor';
 var axioms = [];
@@ -412,8 +417,35 @@ axioms.push("(A) B (C)\nA B\tB C");
 axioms.push("(D) E (F (G) (H))\nD E\tE F\tF G\tF H");
 axioms.push("(I) J (K (L) (M))\nI J\tJ K\tK L\tK M");
 axioms.push("(N) O (P (Q))\nN O\tO P\tP Q");
-axioms.push("(R) S (R)\nR S\tS R");
+axioms.push("(R) S (T)\nR S\tS T");
 var lns = compileAxioms(axioms,map);
 lns.forEach(function (ln) {
     console.log(println(ln));
 });
+removeClause(lns[0],0);
+removeClause(lns[0],1);
+removeClause(lns[1],0);
+removeClause(lns[1],1);
+removeClause(lns[2],0);
+removeClause(lns[2],1);
+removeClause(lns[3],0);
+removeClause(lns[3],1);
+removeClause(lns[3],1);
+removeClause(lns[4],0);
+removeClause(lns[4],1);
+
+lns.forEach(function (ln) {
+ //   console.log(println(ln));
+});
+
+var ln = product(lns);
+replace(ln,'a','m');
+replace(ln,'a','n');
+replace(ln,'d','h');
+replace(ln,'e','i');
+replace(ln,'f','j');
+replace(ln,'c','k');
+replace(ln,'b','n');
+replace(ln,'e','o');
+console.log('***');
+console.log(println(ln));
