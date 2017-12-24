@@ -131,8 +131,8 @@ var makeConnectionsMap = function (connections,varGen) {
         if (!map[l]) {
             map[l] = [];
         }
-        map[ant].unshift(v);
-        map[l].push(v);
+        map[ant].push(v);
+        map[l].unshift(v);
         map.inverse[v] = [ant,l];
     });
     return map;
