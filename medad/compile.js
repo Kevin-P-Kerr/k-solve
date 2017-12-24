@@ -328,9 +328,7 @@ var compileAxioms = function (srcs,map) {
     var lines = [];
     var canonicalGen = getAlphaGen();
     srcs.forEach(function (src) {  lines.push(compile2line(src,map,canonicalGen)); });
-    var a = lines[0];
-    var b = lines[1];
-    return multiply(a,b);
+    return lines;
 };
 
 var multiply = function (a,b) {
@@ -358,7 +356,7 @@ var replace = function (p,t,f) {
             break;
         }
     }
-    p.prefix.splice(i);
+    p.prefix.splice(i,1);
     var helper = function (props) {
         props.forEach(function (subp) {
             if (subp.type == PRED && subp.body.indexOf(f) >= 0) {
@@ -383,19 +381,39 @@ var replace = function (p,t,f) {
 //var map = {a:'f',g:'f'};
 //var z = compile2viz("(a) b c ( d e f (g h ))\na d\ta g\te f\tc e",map)
 var map = {};
-map.A = 'LOVES';
-map.B = 'JOYS';
-var z = compile2line("(A) B \nA B\tB A",map)
-replace(z,'a','b');
+map.A = "MOTHER";
+map.B = "LOVES";
+var z = compile2line("(A) B\nA B\tB A",map)
 console.log(println(z));
+//console.log(z);
 var map = {};
-map.A = 'MAN';
-map.B = 'MORTAL';
-map.C = 'SOCRATES';
-map.D = 'MAN';
+map.A = 'MIKE';
+map.B = 'LIVES';
+map.C = '3rdFloor';
+map.D = 'SARAH';
+map.E = 'LIVES';
+map.F = 'EITHER';
+map.G = '2ndFloor';
+map.H = '1stFloor';
+map.I = 'MATT';
+map.J = 'LIVES';
+map.K = 'EITHER';
+map.L = '2ndFloor';
+map.M = '1stFloor';
+map.N = 'SARAH';
+map.O = 'CANNOT LIVE';
+map.P = 'ADJACENT';
+map.Q = 'MIKE';
+map.R = '3rdFloor';
+map.S = 'ADJACENT';
+map.T = '2ndFloor';
 var axioms = [];
-axioms.push("(A) B\nA B");
-axioms.push("(C) D\nC D");
-var ln = compileAxioms(axioms,map);
-console.log(println(ln));
-console.log(println(replace(ln,'a','b')));
+axioms.push("(A) B (C)\nA B\tB C");
+axioms.push("(D) E (F (G) (H))\nD E\tE F\tF G\tF H");
+axioms.push("(I) J (K (L) (M))\nI J\tJ K\tK L\tK M");
+axioms.push("(N) O (P (Q))\nN O\tO P\tP Q");
+axioms.push("(R) S (R)\nR S\tS R");
+var lns = compileAxioms(axioms,map);
+lns.forEach(function (ln) {
+    console.log(println(ln));
+});
