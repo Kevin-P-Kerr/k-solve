@@ -132,7 +132,9 @@ var makeConnectionsMap = function (connections,varGen) {
             map[l] = [];
         }
         map[ant].push(v);
-        map[l].unshift(v);
+        if (ant != l) {
+            map[l].unshift(v);
+        }
         map.inverse[v] = [ant,l];
     });
     return map;
@@ -426,4 +428,4 @@ console.log('****');
 console.log(println(ln));
 */
 
-module.exports = {removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
