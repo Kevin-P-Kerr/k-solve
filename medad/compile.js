@@ -326,9 +326,10 @@ var addQuant = function (prefix,val,quantFlag) {
 
 var compileAxioms = function (srcs,map) {
     var lines = [];
+    var graphs = [];
     var canonicalGen = getAlphaGen();
-    srcs.forEach(function (src) {  lines.push(compile2line(src,map,canonicalGen)); });
-    return lines;
+    srcs.forEach(function (src) { graphs.push(compile2viz(src,map));  lines.push(compile2line(src,map,canonicalGen)); });
+    return [graphs,lines];
 };
 
 var multiply = function (a,b) {
@@ -379,7 +380,7 @@ var replace = function (p,t,f) {
 
 var product = function (lns) {
     var base = lns[0];
-    var i = 0;
+    var i = 1;
     var ii = lns.length;
     for (;i<ii;i++) {
         base = multiply(base,lns[i]);
@@ -391,33 +392,23 @@ var removeClause = function (p,i) {
     p.matrix.splice(i,1);
     return p;
 };
+/*
 var map = {};
-map.A = 'MIKE';
-map.B = 'LIVES';
-map.C = '3rdFloor';
-map.D = 'SARAH';
-map.E = 'LIVES';
-map.F = 'EITHER';
-map.G = '2ndFloor';
-map.H = '1stFloor';
-map.I = 'MATT';
-map.J = 'LIVES';
-map.K = 'EITHER';
-map.L = '2ndFloor';
-map.M = '1stFloor';
-map.N = 'SARAH';
-map.O = 'CANNOT LIVE';
-map.P = 'ADJACENT';
-map.Q = 'MIKE';
-map.R = 'MIKE';
-map.S = 'ADJACENT';
-map.T = '2ndFloor';
+map.A = 'LIVES';
+map.B = 'CANNOT LIVE';
+map.C = 'ADJACENT';
+map.D = 'MIKE';
+map.E = 'SARAH';
+map.F = 'MATT';
+map.G = '1stFloor';
+map.H = '2ndFloor';
+map.I = '3rdFloor';
+map.J = 'EITHER';
 var axioms = [];
-axioms.push("(A) B (C)\nA B\tB C");
-axioms.push("(D) E (F (G) (H))\nD E\tE F\tF G\tF H");
-axioms.push("(I) J (K (L) (M))\nI J\tJ K\tK L\tK M");
-axioms.push("(N) O (P (Q))\nN O\tO P\tP Q");
-axioms.push("(R) S (T)\nR S\tS T");
+axioms.push("(D) A (I)\nD A\tA I");
+axioms.push("(I) C (H)\nI C\tC H");
+axioms.push("(H) C (I)\nH C\tC I");
+axioms.push("(E) B ((C) A (D))\nE B\tB C\tC A\tD A");
 var lns = compileAxioms(axioms,map);
 lns.forEach(function (ln) {
     console.log(println(ln));
@@ -430,22 +421,9 @@ removeClause(lns[2],0);
 removeClause(lns[2],1);
 removeClause(lns[3],0);
 removeClause(lns[3],1);
-removeClause(lns[3],1);
-removeClause(lns[4],0);
-removeClause(lns[4],1);
-
-lns.forEach(function (ln) {
- //   console.log(println(ln));
-});
-
 var ln = product(lns);
-replace(ln,'a','m');
-replace(ln,'a','n');
-replace(ln,'d','h');
-replace(ln,'e','i');
-replace(ln,'f','j');
-replace(ln,'c','k');
-replace(ln,'b','n');
-replace(ln,'e','o');
-console.log('***');
+console.log('****');
 console.log(println(ln));
+*/
+
+module.exports = {removeClause:removeClause,product:product,compileAxioms:compileAxioms};
