@@ -17,3 +17,6 @@ var lns = pack[1];
 var graph = pack[0];
 console.log(graph[0]);
 lns.forEach(function (ln) { console.log(println(ln)); });
+console.log('***');
+var ln = logicUtils.product(lns);
+console.log(println(ln));

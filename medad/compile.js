@@ -124,18 +124,26 @@ var makeConnectionsMap = function (connections,varGen) {
         con = con.split(' ');
         var v = varGen();
         var ant = con[0];
-        var l = con[1];
+        var r = con[1];
         if (!map[ant]) {
             map[ant] = [];
         }
-        if (!map[l]) {
-            map[l] = [];
+        if (!map[r]) {
+            map[r] = [];
         }
-        map[ant].push(v);
-        if (ant != l) {
-            map[l].unshift(v);
+        if (r == ant) {
+            if (!map[ant]) {
+                map[ant] = [v];
+            }
+            else {
+                map[r].push(v);
+            }
         }
-        map.inverse[v] = [ant,l];
+        else {
+            map[r].push(v);
+            map[ant].push(v);
+        }
+        map.inverse[v] = [ant,r];
     });
     return map;
 };
@@ -394,38 +402,49 @@ var removeClause = function (p,i) {
     p.matrix.splice(i,1);
     return p;
 };
-/*
-var map = {};
-map.A = 'LIVES';
-map.B = 'CANNOT LIVE';
-map.C = 'ADJACENT';
-map.D = 'MIKE';
-map.E = 'SARAH';
-map.F = 'MATT';
-map.G = '1stFloor';
-map.H = '2ndFloor';
-map.I = '3rdFloor';
-map.J = 'EITHER';
-var axioms = [];
-axioms.push("(D) A (I)\nD A\tA I");
-axioms.push("(I) C (H)\nI C\tC H");
-axioms.push("(H) C (I)\nH C\tC I");
-axioms.push("(E) B ((C) A (D))\nE B\tB C\tC A\tD A");
-var lns = compileAxioms(axioms,map);
-lns.forEach(function (ln) {
-    console.log(println(ln));
-});
-removeClause(lns[0],0);
-removeClause(lns[0],1);
-removeClause(lns[1],0);
-removeClause(lns[1],1);
-removeClause(lns[2],0);
-removeClause(lns[2],1);
-removeClause(lns[3],0);
-removeClause(lns[3],1);
-var ln = product(lns);
-console.log('****');
-console.log(println(ln));
-*/
 
-module.exports = {println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+var compile2sat = function (ln,index) {
+    var matrix = ln.matrix;
+    var trueProp = matrix[index];
+    var gen = getAlphaGen();
+    var newMatrix = matrix.slice(index,1);
+    var satProblem = '';
+    var prop2satVariable = {};
+    var helper = function (prop,inverse) {
+        var base = '';
+        if (prop.type == MULT) {
+            var body = prop.body;
+            base += helper(body[0],inverse);
+            base += helper(body[1],inverse);
+        }
+        else { 
+            var v = printProp(prop.body);
+            if (!prop2satVariable[v]) {
+                prop2satVariable[v] = gen();
+            }
+            var s = prop2satVariable[v];
+            if ((prop.type == NEGATE &&inverse) || (prop.type == VAR && !inverse)) {
+                base += "( " + s + ")";
+            }
+            else if (prop.type == VAR && inverse) {
+                base += " "+s+" ";
+            }
+            else if (prop.type == NEGATE && !inverse) {
+                base += "[ "+s+" ]";
+            }
+        }
+        return base;
+    };
+    satProblem += helper(trueProp,false);
+    newMatrix.forEach(function (p) {
+        satProblem += "\n[";
+        satProblem += helper(p);
+        satProblem += " ]";
+    });
+    return {problem:problem,varTable:prop2satVariable};
+};
+
+
+
+
+module.exports = {multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
