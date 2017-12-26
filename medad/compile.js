@@ -403,11 +403,60 @@ var removeClause = function (p,i) {
     return p;
 };
 
+var removeContradictions = function (matrix) {
+    var nm = [];
+    matrix.forEach(function (prop) {
+        if (!contradiction(prop)) { return; }
+        nm.push(prop);
+    });
+    return nm;
+};
+
+var contradiction = function (prop) {
+    if (prop.type == PRED || prop.type == NEGATE) {
+        return true; //  because only an atomic clause can be negated;
+    }
+    else if (prop.type != MULT) {
+        throw new Error();
+    }
+    var table = {};
+    var flatten = function (prop) {
+        var s;
+        if (prop.type == PRED) {
+            s = printProp(prop);
+            if (table[s] === false) {
+                throw new Error();
+            }
+            table[s] = true
+        }
+        if (prop.type == NEGATE) {
+            s = printProp(prop.body[0]);
+            if (table[s] === true) {
+                throw new Error();
+            }
+            table[s] = false;
+        }
+        if (prop.type == MULT) {
+            flatten(prop.body[0]);
+            flatten(prop.body[1]);
+        }
+    }
+    try {
+        flatten(prop);
+    }
+    catch (e) {
+        return false;
+    }
+    return true;
+};
+
 var compile2sat = function (ln,index) {
+    console.log(println(ln));
     var matrix = ln.matrix;
-    var trueProp = matrix[index];
     var gen = getAlphaGen();
-    var newMatrix = matrix.slice(index,1);
+    var newMatrix = removeContradictions(matrix);
+    var trueProp = newMatrix[index];
+    newMatrix.splice(index,1);
     var satProblem = '';
     var prop2satVariable = {};
     var helper = function (prop,inverse) {
@@ -417,16 +466,26 @@ var compile2sat = function (ln,index) {
             base += helper(body[0],inverse);
             base += helper(body[1],inverse);
         }
-        else { 
-            var v = printProp(prop.body);
+        else {
+            var v;
+            if (prop.type == MULT || prop.type==NEGATE) {
+                v = printProp(prop.body[0]);
+            }
+            else if (prop.type == PRED) {
+                v = printProp(prop);
+            }
+            else {
+                console.log(prop.type);
+                throw new Error();
+            }
             if (!prop2satVariable[v]) {
                 prop2satVariable[v] = gen();
             }
             var s = prop2satVariable[v];
-            if ((prop.type == NEGATE &&inverse) || (prop.type == VAR && !inverse)) {
+            if ((prop.type == NEGATE &&inverse) || (prop.type == PRED && !inverse)) {
                 base += "( " + s + ")";
             }
-            else if (prop.type == VAR && inverse) {
+            else if (prop.type == PRED && inverse) {
                 base += " "+s+" ";
             }
             else if (prop.type == NEGATE && !inverse) {
@@ -436,15 +495,16 @@ var compile2sat = function (ln,index) {
         return base;
     };
     satProblem += helper(trueProp,false);
+    console.log(JSON.stringify(newMatrix));
     newMatrix.forEach(function (p) {
         satProblem += "\n[";
-        satProblem += helper(p);
+        satProblem += helper(p,true);
         satProblem += " ]";
     });
-    return {problem:problem,varTable:prop2satVariable};
+    return {problem:satProblem,varTable:prop2satVariable};
 };
 
 
 
 
-module.exports = {multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {compile2sat:compile2sat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
