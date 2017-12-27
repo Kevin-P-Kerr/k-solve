@@ -267,7 +267,8 @@ var compile2line = function (src,map,gen) {
 var printProp = function (prop) {
     var p = "";
     if (prop.type == MULT) {
-        p = printProp(prop.body[0]) +"*"+printProp(prop.body[1]);
+       //TODO: fix this for a destructured argument list
+       p = printProp(prop.body[0]) +"*"+printProp(prop.body[1]);
     }
     if (prop.type == NEGATE) {
         p = "~(";
@@ -353,7 +354,19 @@ var multiply = function (a,b) {
         b.matrix.forEach(function (bb) {
             var n = {};
             n.type = MULT;
-            n.body = [aa,bb];
+            n.body = [];
+            if (aa.type == MULT) {
+                aa.body.forEach(function (p) { n.body.push(p); });
+            }
+            else {
+                n.body.push(aa);
+            }
+            if (bb.type == MULT) {
+                bb.body.forEach(function (p) { n.body.push(p); });
+            }
+            else {
+                n.body.push(bb);
+            }
             c.matrix.push(n);
         });
     });
@@ -453,7 +466,7 @@ var simplifyProp = function (prop) {
     return prop;
 };
 
-var getSatVar = function (prop,prop2satVariable,gen) {
+var getSatVariable = function (prop,prop2satVariable,gen) {
     var key,v;
     key = printProp(prop);
     if (!prop2satVariable[key]) {
@@ -465,6 +478,7 @@ var getSatVar = function (prop,prop2satVariable,gen) {
 
 // the prop must be in cnf for this to work
 var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
+    gen = gen || getAlphaGen();
     var ret = "";
     var key;
     var v;
@@ -496,27 +510,29 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
                     ret += ("( "+v+ " )\n");
                 }
                 else {
+                    console.log(p.type);
+                    console.log(printProp(p));
                     throw new Error(); 
                 }
             });
         }
         else {
-            str += "[";
+            ret += "[";
             prop.body.forEach(function (p) {
                 if (p.type == NEGATE) {
                     if (p.body.length > 1) { throw new Error(); }
                     v = getSatVariable(p.body[0],prop2satVariable,gen);
-                    str += "("+v+")"; 
+                    ret += "("+v+")"; 
                 }
                 else if (p.type == PRED) {
                     v = getSatVariable(p,prop2satVariable,gen);
-                    str += " "+v+" ";
+                    ret += " "+v+" ";
                 }
                 else {
                     throw new Error();
                 }
             });
-            str += "]\n";
+            ret += "]\n";
         }
     }
     else {
