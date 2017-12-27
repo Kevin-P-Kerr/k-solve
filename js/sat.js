@@ -579,15 +579,20 @@ var getAnswer = function (answer,clauses) {
   return [answer,undetermined];
 }
 
-var main = function () {
-  console.log("solving");
-  //var t = parse(tokenize(fs.readFileSync("./hard.test").toString()));
-  //var t = parse(tokenize(fs.readFileSync("./problem.test").toString()));
-  var t = parse(tokenize("[a b c][(a)b(c)][a(b)(c)][(a)(b)c](c)"));
-  var a = solve(t);
-  printAnswer(a,t);
-}
+var solveUtility = function (str) {
+    var t = parse(tokenize(str));
+    var a = solve(t);
+    var ret = {};
+    if (a) {
+        ret.sat = true;
+        a = getAnswer(a,t);
+        ret.trueVars = a[0][0];
+        ret.falseVars = a[0][1];
+    }
+    else {
+        ret.sat = false;
+    }
+    return ret;
+};
 
-main();
-
-
+module.exports = {solve:solveUtility};

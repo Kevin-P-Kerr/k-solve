@@ -1,4 +1,6 @@
 var logicUtils = require("./compile.js");
+var sat = require("../js/sat.js");
+
 var println = logicUtils.println;
 var axioms = [];
 var map = {};
@@ -19,4 +21,13 @@ console.log(graph[0]);
 lns.forEach(function (ln) { console.log(println(ln)); });
 console.log('***');
 var ln = logicUtils.product(lns);
+logicUtils.replaceVar(ln,'j','a');
+logicUtils.replaceVar(ln,'k','b');
+logicUtils.replaceVar(ln,'k','f');
+logicUtils.replaceVar(ln,'j','e');
 console.log(println(ln));
+var satP = logicUtils.compile2sat(ln,0);
+console.log(satP.problem);
+console.log(JSON.stringify(satP));
+var a = sat.solve(satP.problem);
+console.log(a);

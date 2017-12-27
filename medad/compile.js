@@ -1,3 +1,4 @@
+var sat = require("../js/sat.js");
 var getAlphaGen = function () {
     var c = 'a';
     return function () {
@@ -406,105 +407,69 @@ var removeClause = function (p,i) {
 var removeContradictions = function (matrix) {
     var nm = [];
     matrix.forEach(function (prop) {
-        if (!contradiction(prop)) { return; }
-        nm.push(prop);
+        var problem = compileProp2Sat(prop,false,{});
+        var a = sat.solve(problem);
+        if (a.sat) {
+            nm.push(prop);
+        }
     });
     return nm;
 };
 
-var contradiction = function (prop) {
-    if (prop.type == PRED || prop.type == NEGATE) {
-        return true; //  because only an atomic clause can be negated;
+var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
+    var base = '';
+    gen = gen || getAlphaGen();
+    if (prop.type == MULT) {
+        var body = prop.body;
+        base += compileProp2Sat(body[0],inverse,prop2satVariable,gen);
+        base += compileProp2Sat(body[1],inverse,prop2satVariable,gen);
     }
-    else if (prop.type != MULT) {
-        throw new Error();
-    }
-    var table = {};
-    var flatten = function (prop) {
-        var s;
-        if (prop.type == PRED) {
-            s = printProp(prop);
-            if (table[s] === false) {
-                throw new Error();
-            }
-            table[s] = true
+    else {
+        var v;
+        if (prop.type==NEGATE) {
+            v = printProp(prop.body[0]);
         }
-        if (prop.type == NEGATE) {
-            s = printProp(prop.body[0]);
-            if (table[s] === true) {
-                throw new Error();
-            }
-            table[s] = false;
+        else if (prop.type == PRED) {
+            v = printProp(prop);
         }
-        if (prop.type == MULT) {
-            flatten(prop.body[0]);
-            flatten(prop.body[1]);
+        else {
+            console.log(prop.type);
+            throw new Error();
+        }
+        if (!prop2satVariable[v]) {
+            prop2satVariable[v] = gen();
+        }
+        var s = prop2satVariable[v];
+        if ((prop.type == NEGATE &&inverse) || (prop.type == PRED && !inverse)) {
+            base += "( " + s + ")";
+        }
+        else if (prop.type == PRED && inverse) {
+            base += " "+s+" ";
+        }
+        else if (prop.type == NEGATE && !inverse) {
+            base += "[ "+s+" ]";
         }
     }
-    try {
-        flatten(prop);
-    }
-    catch (e) {
-        return false;
-    }
-    return true;
+    return base;
 };
 
 var compile2sat = function (ln,index) {
-    console.log(println(ln));
     var matrix = ln.matrix;
-    var gen = getAlphaGen();
     var newMatrix = removeContradictions(matrix);
     var trueProp = newMatrix[index];
     newMatrix.splice(index,1);
     var satProblem = '';
     var prop2satVariable = {};
-    var helper = function (prop,inverse) {
-        var base = '';
-        if (prop.type == MULT) {
-            var body = prop.body;
-            base += helper(body[0],inverse);
-            base += helper(body[1],inverse);
-        }
-        else {
-            var v;
-            if (prop.type == MULT || prop.type==NEGATE) {
-                v = printProp(prop.body[0]);
-            }
-            else if (prop.type == PRED) {
-                v = printProp(prop);
-            }
-            else {
-                console.log(prop.type);
-                throw new Error();
-            }
-            if (!prop2satVariable[v]) {
-                prop2satVariable[v] = gen();
-            }
-            var s = prop2satVariable[v];
-            if ((prop.type == NEGATE &&inverse) || (prop.type == PRED && !inverse)) {
-                base += "( " + s + ")";
-            }
-            else if (prop.type == PRED && inverse) {
-                base += " "+s+" ";
-            }
-            else if (prop.type == NEGATE && !inverse) {
-                base += "[ "+s+" ]";
-            }
-        }
-        return base;
-    };
-    satProblem += helper(trueProp,false);
+    var gen = getAlphaGen();
+    satProblem += compileProp2Sat(trueProp,false,prop2satVariable,gen);
     console.log(JSON.stringify(newMatrix));
     newMatrix.forEach(function (p) {
         satProblem += "\n[";
-        satProblem += helper(p,true);
+        satProblem += compileProp2Sat(p,true,prop2satVariable,gen);
         satProblem += " ]";
     });
     return {problem:satProblem,varTable:prop2satVariable};
 };
-
-
 
 
 module.exports = {compile2sat:compile2sat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
