@@ -13,7 +13,7 @@ map.F = 'INTERSECTS';
 map.G = 'EITHER';
 axioms.push('(A) C (B)\nA C\tC B\tA B');
 axioms.push('(D) C (E) \nD E\tC E\tD C');
-axioms.push('(F) D (E G)\nD E\tE G\tF D\tF G\tF G');
+axioms.push('(F) D (E) (G)\nD E\tE G\tF D\tF G\tF G');
 var pack = logicUtils.compileAxioms(axioms,map);
 var lns = pack[1];
 var graph = pack[0];
