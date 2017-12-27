@@ -416,41 +416,41 @@ var removeContradictions = function (matrix) {
     return nm;
 };
 
-var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
-    var base = '';
-    gen = gen || getAlphaGen();
-    if (prop.type == MULT) {
-        var body = prop.body;
-        base += compileProp2Sat(body[0],inverse,prop2satVariable,gen);
-        base += compileProp2Sat(body[1],inverse,prop2satVariable,gen);
+// takes a prop with nested negations and returns one with atomic negations
+var simplifyProp = function (prop) {
+    if (prop.type == NEGATE) {
+        var newProp = {};
+        newProp.type = MULT;
+        var b = [];
+        newProp.body = b;
+        prop.body.forEach(function (p) {
+            var sp = simplifyProp(p);
+            if (sp.type == MULT) {
+                sp.body.forEach(function (spp) {
+                    if(spp.type == NEGATE) {
+                        b.push(spp.body);
+                    }
+                    else if (spp.type == PRED) {
+                        b.push({type:NEGATE,body:spp});
+                    }
+                    else {
+                        throw new Error();
+                    }
+                });
+            }
+            else if (sp.type == NEGATE) {
+                b.push(sp.body);
+            }
+            else if (sp.type == PRED) {
+                b.push({type:NEGATE,body:sp});
+            }
+            else {
+                throw new Error();
+            }
+        });
+        return newProp;
     }
-    else {
-        var v;
-        if (prop.type==NEGATE) {
-            v = printProp(prop.body[0]);
-        }
-        else if (prop.type == PRED) {
-            v = printProp(prop);
-        }
-        else {
-            console.log(prop.type);
-            throw new Error();
-        }
-        if (!prop2satVariable[v]) {
-            prop2satVariable[v] = gen();
-        }
-        var s = prop2satVariable[v];
-        if ((prop.type == NEGATE &&inverse) || (prop.type == PRED && !inverse)) {
-            base += "( " + s + ")";
-        }
-        else if (prop.type == PRED && inverse) {
-            base += " "+s+" ";
-        }
-        else if (prop.type == NEGATE && !inverse) {
-            base += "[ "+s+" ]";
-        }
-    }
-    return base;
+    return prop;
 };
 
 var compile2sat = function (ln,index) {
@@ -462,14 +462,12 @@ var compile2sat = function (ln,index) {
     var prop2satVariable = {};
     var gen = getAlphaGen();
     satProblem += compileProp2Sat(trueProp,false,prop2satVariable,gen);
-    console.log(JSON.stringify(newMatrix));
     newMatrix.forEach(function (p) {
-        satProblem += "\n[";
         satProblem += compileProp2Sat(p,true,prop2satVariable,gen);
-        satProblem += " ]";
+        satProblem += "\n";
     });
     return {problem:satProblem,varTable:prop2satVariable};
 };
 
 
-module.exports = {compile2sat:compile2sat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {simplifyProp:simplifyProp,compile2sat:compile2sat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
