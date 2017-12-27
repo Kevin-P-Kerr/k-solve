@@ -453,6 +453,79 @@ var simplifyProp = function (prop) {
     return prop;
 };
 
+var getSatVar = function (prop,prop2satVariable,gen) {
+    var key,v;
+    key = printProp(prop);
+    if (!prop2satVariable[key]) {
+        prop2satVariable[key] = gen();
+    }
+    v = prop2satVariable[key];
+    return v;
+};
+
+// the prop must be in cnf for this to work
+var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
+    var ret = "";
+    var key;
+    var v;
+    if (prop.type == NEGATE) {
+        if (prop.body.length > 1 || prop.body[0].type!=PRED) {
+            throw new Error();
+        }
+        inverse = !inverse;
+        prop = prop.body[0];
+    }
+    if (prop.type == PRED) {
+        v = getSatVar(prop,prop2satVariable,gen);
+        if (inverse) {
+            return "[ " +v+" ]\n";
+        }
+        else {
+            return "( " + v + " )\n";
+        }
+    }
+    else if (prop.type == MULT) {
+        if (!inverse) {
+            prop.body.forEach(function (p) {
+                if (p.type == NEGATE) {
+                    if (p.body.length > 1) { throw new Error(); }
+                    v = getSatVariable(p.body[0],prop2satVariable,gen);
+                    ret += ("[ "  + v + " ]\n");
+                }else if (p.type == PRED) {
+                    v = getSatVariable(p,prop2satVariable,gen);
+                    ret += ("( "+v+ " )\n");
+                }
+                else {
+                    throw new Error(); 
+                }
+            });
+        }
+        else {
+            str += "[";
+            prop.body.forEach(function (p) {
+                if (p.type == NEGATE) {
+                    if (p.body.length > 1) { throw new Error(); }
+                    v = getSatVariable(p.body[0],prop2satVariable,gen);
+                    str += "("+v+")"; 
+                }
+                else if (p.type == PRED) {
+                    v = getSatVariable(p,prop2satVariable,gen);
+                    str += " "+v+" ";
+                }
+                else {
+                    throw new Error();
+                }
+            });
+            str += "]\n";
+        }
+    }
+    else {
+        throw new Error();
+    }
+    return ret;
+};
+
+// the matrix of the ln must be in cnf
 var compile2sat = function (ln,index) {
     var matrix = ln.matrix;
     var newMatrix = removeContradictions(matrix);
