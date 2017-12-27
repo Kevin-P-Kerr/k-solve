@@ -6,15 +6,17 @@ var VAR = 2;
 var LBRAK = 3;
 var RBRAK = 4;
 
-var DEBUG = true;
+var DEBUG = false;
+
+var log = console.log;
 var setDebug = (function () {
     var c = console.log;
     return function () {
         if (DEBUG) {
-            console.log = c;
+            log = c;
         }
         else {
-            console.log = function () {};
+            log = function () {};
         }
     };
 })();
@@ -107,8 +109,8 @@ var parse = function (tokens) {
             clauses.push(parseL(currentToken,th));
         }
         else {
-            console.log(clauses);
-            console.log(currentToken);
+            log(clauses);
+            log(currentToken);
             throw new Error("whoops");
         }
     }
@@ -278,15 +280,15 @@ var printcl = function (clauses) {
 };
 
 var print = function (clauses) {
-  console.log(printcl(clauses));
+  log(printcl(clauses));
 };
 
 var solvePartial = function (clauses,variable,trueVars,falseVars,positive) {
-  console.log('removing ' + variable+' '+positive);
+  log('removing ' + variable+' '+positive);
   var cpy;
   cpy = eliminate(clauses,variable,positive);
   if (!cpy) {
-    console.log('conflict in solve partial',variable);
+    log('conflict in solve partial',variable);
     return false;
   }
   if (cpy.length == 0) {
@@ -482,7 +484,7 @@ var unwindVariables = function (copy,trueVars,falseVars) {
 };
 
 var solve = function (clauses,trueVars,falseVars) {
-  console.log("solving");
+  log("solving");
   print(clauses);
   trueVars = trueVars || [];
   falseVars = falseVars || [];
@@ -496,7 +498,7 @@ var solve = function (clauses,trueVars,falseVars) {
     unwindVariables(copiedVars,trueVars,falseVars);
     return false;
   }
-  console.log("after reduction");
+  log("after reduction");
   print(clauses);
   var retCond = checkReturnCondition(clauses,trueVars,falseVars);
   if (retCond == false) {
@@ -549,15 +551,15 @@ var printAnswer = function (answer,clauses) {
     var d = DEBUG;
     DEBUG = true;
     setDebug();
-    if (!answer) { console.log("no solution"); }
+    if (!answer) { log("no solution"); }
     else {
         answer = getAnswer(answer,clauses);
-        console.log("positive vars: ");
-        console.log(answer[0][0]);
-        console.log("negative vars:");
-        console.log(answer[0][1]);
-        console.log("undetermined vars:");
-        console.log(answer[1]);
+        log("positive vars: ");
+        log(answer[0][0]);
+        log("negative vars:");
+        log(answer[0][1]);
+        log("undetermined vars:");
+        log(answer[1]);
     }
     DEBUG = d;
     setDebug();

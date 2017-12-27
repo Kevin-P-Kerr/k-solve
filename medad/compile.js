@@ -490,7 +490,7 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
         prop = prop.body[0];
     }
     if (prop.type == PRED) {
-        v = getSatVar(prop,prop2satVariable,gen);
+        v = getSatVariable(prop,prop2satVariable,gen);
         if (inverse) {
             return "[ " +v+" ]\n";
         }
