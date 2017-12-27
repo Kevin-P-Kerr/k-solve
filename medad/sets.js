@@ -26,7 +26,7 @@ logicUtils.replaceVar(ln,'k','b');
 logicUtils.replaceVar(ln,'k','f');
 logicUtils.replaceVar(ln,'j','e');
 console.log(println(ln));
-var satP = logicUtils.compile2sat(ln,1);
+var satP = logicUtils.compile2sat(ln,2);
 console.log(satP.problem);
 console.log(JSON.stringify(satP));
 var a = sat.solve(satP.problem);

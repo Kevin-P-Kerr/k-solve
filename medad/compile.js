@@ -267,8 +267,16 @@ var compile2line = function (src,map,gen) {
 var printProp = function (prop) {
     var p = "";
     if (prop.type == MULT) {
-       //TODO: fix this for a destructured argument list
-       p = printProp(prop.body[0]) +"*"+printProp(prop.body[1]);
+        var first = true;
+        prop.body.forEach(function (sp) {
+            if (first) {
+                first = false;
+            }
+            else {
+                p += "*";
+            }
+            p += printProp(sp);
+        });
     }
     if (prop.type == NEGATE) {
         p = "~(";
