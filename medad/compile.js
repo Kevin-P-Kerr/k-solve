@@ -418,7 +418,7 @@ var removeContradictions = function (matrix) {
 
 // takes a prop with nested negations and returns one with atomic negations
 var simplifyProp = function (prop) {
-    if (prop.type == NEGATE) {
+    if (prop.type == NEGATE && prop.body.length > 1) {
         var newProp = {};
         newProp.type = MULT;
         var b = [];
@@ -428,10 +428,10 @@ var simplifyProp = function (prop) {
             if (sp.type == MULT) {
                 sp.body.forEach(function (spp) {
                     if(spp.type == NEGATE) {
-                        b.push(spp.body);
+                        b.push(spp.body[0]);
                     }
                     else if (spp.type == PRED) {
-                        b.push({type:NEGATE,body:spp});
+                        b.push({type:NEGATE,body:[spp]});
                     }
                     else {
                         throw new Error();
@@ -439,10 +439,10 @@ var simplifyProp = function (prop) {
                 });
             }
             else if (sp.type == NEGATE) {
-                b.push(sp.body);
+                b.push(sp.body[0]);
             }
             else if (sp.type == PRED) {
-                b.push({type:NEGATE,body:sp});
+                b.push({type:NEGATE,body:[sp]});
             }
             else {
                 throw new Error();
