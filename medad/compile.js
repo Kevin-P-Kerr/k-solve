@@ -563,6 +563,45 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
     return ret;
 };
 
+// axioms must be in dnf
+var makeSimpleAxioms = function (axioms) {
+    var newAxioms = [];
+    var numGen = getNumGen();
+    var map = {};
+    axioms.forEach(function (ln) {
+        var nln = {};
+        nln.prefix = ln.prefix;
+        nln.matrix = [];
+        ln.matrix.forEach(function (prop) {
+            var np = {};
+            var num;
+            if (prop.type == PRED) {
+                num = numGen();
+                np.type == PRED;
+                np.name = prop.name;
+                
+
+             
+        });
+        newAxioms.push(nln);
+    });
+    return {axioms:newAxioms,map:map};
+};
+
+var compile2fullSat = function (axioms,from2Map,index) {
+    axioms.forEach(function (ln) {
+        var k,v;
+        for (k in from2Map) {
+            v = from2Map[k];
+            replace(ln,v,k);
+        }
+    });
+    var simpleAxiomInfo = makeSimpleAxioms(axioms);
+    var ln = product(simpleAxiomInfo.axioms);
+    var sat = compile2sat(ln,index);
+    return sat;
+};
+
 // the matrix of the ln must be in dnf
 var compile2sat = function (ln,index) {
     var matrix = ln.matrix;
@@ -581,4 +620,4 @@ var compile2sat = function (ln,index) {
 };
 
 
-module.exports = {simplifyProp:simplifyProp,compile2sat:compile2sat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
