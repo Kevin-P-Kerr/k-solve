@@ -1,10 +1,24 @@
 var sat = require("../js/sat.js");
 var getAlphaGen = function () {
     var c = 'a';
+    var prefix = '';
     return function () {
-        var d = c;
+        if (c == 'z') {
+            c = 'a';
+            prefix = prefix.length == 0 ? 'a' : String.fromCharCode(prefix.charCodeAt(0)+1);
+        }
+        var d = prefix+c;
         c = String.fromCharCode(c.charCodeAt(0) + 1);
         return d;
+    };
+};
+
+var getNumGen = function () {
+    var n = 0;
+    return function () {
+        var x = n;
+        n++;
+        return x;
     };
 };
 
