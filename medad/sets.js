@@ -21,11 +21,12 @@ console.log(graph[0]);
 lns.forEach(function (ln) { var nm = []; ln.matrix.forEach(function (p) { var x = logicUtils.simplifyProp(p); nm.push(x); }); ln.matrix = nm; console.log(println(ln)); });
 console.log('***');
 var m = {};
+m.b = 'j';
+m.c = 'k';
+m.e = 'j';
+m.f = 'k';
 m.a = 'g';
 m.d = 'g';
-m.c = 'i';
-m.f = 'i'; 
-
 var satP = logicUtils.compile2sat(lns,m,4);
 console.log(satP.problem);
 console.log(JSON.stringify(satP));
