@@ -549,35 +549,7 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
     return ret;
 };
 
-var getSatVariables = function (matrix,gen) {
-  var map = {};
-  // assumes each clause has unique variables
-  var helper = function (clause) {
-    var s;
-    var v;
-    if (p.type == PRED) {
-      s = printProp(p);
-      v = gen();
-      map[s] = v;
-    }
-    else if (p.type == NEGATE) {
-      if (p.body.length > 1) {
-        throw new Error();
-      }
-      s = printProp(p.body[0]);
-      v = gen();
-      map[s] = v;
-    }
-    else if (p.type == MULT) {
-      p.body.forEach(function (pp) { helper(pp); });
-    }
-    else {
-      throw new Error();
-    }
-  };
-  matrix.forEach(function (prop) { helper(prop); });
-  return map;
-};
+var addMoreConstraints = function (map,problem) {};
 
 // the matrix of the ln must be in cnf
 var compile2sat = function (ln,index) {
@@ -586,13 +558,14 @@ var compile2sat = function (ln,index) {
     var trueProp = newMatrix[index];
     newMatrix.splice(index,1);
     var satProblem = '';
-    var prop2satVariable = getSatVariables(newMatrix);
+    var prop2satVariable = {};
+    var gen = getAlphaGen();
     satProblem += compileProp2Sat(trueProp,false,prop2satVariable,gen);
     newMatrix.forEach(function (p) {
         satProblem += compileProp2Sat(p,true,prop2satVariable,gen);
         satProblem += "\n";
     });
-    addMoreConstrains(prop2satVariable,satProblem);
+    addMoreConstraints(prop2satVariable,satProblem);
     return {problem:satProblem,varTable:prop2satVariable};
 };
 
