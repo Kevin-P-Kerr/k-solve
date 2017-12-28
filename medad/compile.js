@@ -307,11 +307,16 @@ var printProp = function (prop) {
         p += ")";
     }
     else if (prop.type == PRED) {
-        p += prop.name+"(";
-        prop.body.forEach(function (v) {
-            p+=v+" ";
-        });
-        p+=")";
+        if (prop.body.length > 0) {
+            p += prop.name+"(";
+            prop.body.forEach(function (v) {
+                p+=v+" ";
+            });
+            p+=")";
+        }
+        else {
+            p += prop.name;
+        }
     }
     return p;
 };
@@ -573,15 +578,57 @@ var makeSimpleAxioms = function (axioms) {
         nln.prefix = ln.prefix;
         nln.matrix = [];
         ln.matrix.forEach(function (prop) {
-            var np = {};
+            var np = {type:prop.type};
             var num;
             if (prop.type == PRED) {
                 num = numGen();
-                np.type == PRED;
-                np.name = prop.name;
-                
-
-             
+                np.name = num;
+                np.body = [];
+                map[num] = printProp(prop);
+            }
+            else if (prop.type == NEGATE) {
+                num = numGen();
+                if (prop.body.length > 1 || prop.body[0].type != PRED) {
+                    throw new Error();
+                }
+                var bod = prop.body[0];
+                var b = {type:PRED,body:[],name:num};
+                var str = printProp(bod);
+                np.body = [b];
+                map[num] = str;
+            }
+            else if (prop.type == MULT) {
+                var bod = [];
+                prop.body.forEach(function (p) {
+                    var npp = {type:p.type};
+                    if (p.type == PRED) {
+                        num = numGen();
+                        npp.name = num;
+                        npp.body = [];
+                        map[num] = printProp(p);
+                    }
+                    else if (p.type == NEGATE) {
+                        num = numGen();
+                        if (p.body.length > 1 || p.body[0].type != PRED) {
+                            throw new Error();
+                        }
+                        var pbod = p.body[0];
+                        var b = {type:PRED,body:[],name:pbod.name};
+                        var str = printProp(pbod);
+                        npp.body = [b];
+                        map[num] = str;
+                    }
+                    else {
+                        throw new Error();
+                    }
+                    bod.push(npp);
+                });
+                np.body = bod;
+            }
+            else {
+                throw new Error();
+            }
+            nln.matrix.push(np);
         });
         newAxioms.push(nln);
     });
@@ -597,7 +644,11 @@ var compile2fullSat = function (axioms,from2Map,index) {
         }
     });
     var simpleAxiomInfo = makeSimpleAxioms(axioms);
+    simpleAxiomInfo.axioms.forEach(function (ln) {
+        console.log(println(ln));
+    });
     var ln = product(simpleAxiomInfo.axioms);
+    console.log(println(ln));
     var sat = compile2sat(ln,index);
     return sat;
 };
@@ -617,7 +668,7 @@ var compile2sat = function (ln,index) {
         satProblem += "\n";
     });
     return {problem:satProblem,varTable:prop2satVariable};
-};
+}
 
 
 module.exports = {simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
