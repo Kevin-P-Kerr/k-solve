@@ -484,7 +484,7 @@ var getSatVariable = function (prop,prop2satVariable,gen) {
     return v;
 };
 
-// the prop must be in cnf for this to work
+// the prop must be in dnf for this to work
 var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
     gen = gen || getAlphaGen();
     var ret = "";
@@ -549,7 +549,7 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
     return ret;
 };
 
-// the matrix of the ln must be in cnf
+// the matrix of the ln must be in dnf
 var compile2sat = function (ln,index) {
     var matrix = ln.matrix;
     var newMatrix = removeContradictions(matrix);
