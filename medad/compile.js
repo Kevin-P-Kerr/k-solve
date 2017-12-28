@@ -650,6 +650,31 @@ var compile2fullSat = function (axioms,from2Map,index) {
     var ln = product(simpleAxiomInfo.axioms);
     console.log(println(ln));
     var sat = compile2sat(ln,index);
+    var num2prop = simpleAxiomInfo.map;
+    var prop2num = {};
+    var prop2sat = sat.varTable;
+    for (k in num2prop) {
+        v = num2prop[k];
+        if (!prop2num[v]) {
+            prop2num[v] = [k];
+        }
+        else {
+            prop2num[v].push(k);
+        }
+    }
+    for (k in prop2num) {
+        if (prop2num[k].length < 2) { continue; }
+        v = prop2num[k];
+        var  i = 0;
+        var ii = v.length-1;
+        for (;i<ii;i++) {
+            var n1 = v[i];
+            var n2 = v[i+1];
+            var s1 = prop2sat[n1];
+            var s2 = prop2sat[n2];
+            sat.problem += "[("+s1+") "+s2+"]\n[("+s2+") "+s1+"]";
+        }
+    }
     return sat;
 };
 
