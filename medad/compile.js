@@ -675,6 +675,14 @@ var compile2fullSat = function (axioms,from2Map,index) {
             sat.problem += "[("+s1+") "+s2+"]\n[("+s2+") "+s1+"]";
         }
     }
+    var sat2prop = {};
+    for (k in prop2sat) {
+        var n = parseInt(k);
+        var p = num2prop[n];
+        v = prop2sat[k];
+        sat2prop[v] = p;
+    }
+    sat.varTable = sat2prop;
     return sat;
 };
 

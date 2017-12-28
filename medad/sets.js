@@ -23,12 +23,10 @@ console.log('***');
 var m = {};
 m.a = 'g';
 m.d = 'g';
-m.b = 'h';
-m.e = 'h';
 m.c = 'i';
 m.f = 'i'; 
 
-var satP = logicUtils.compile2sat(lns,m,0);
+var satP = logicUtils.compile2sat(lns,m,4);
 console.log(satP.problem);
 console.log(JSON.stringify(satP));
 var a = sat.solve(satP.problem);
