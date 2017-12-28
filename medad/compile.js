@@ -477,9 +477,8 @@ var simplifyProp = function (prop) {
 var getSatVariable = function (prop,prop2satVariable,gen) {
     var key,v;
     key = printProp(prop);
-    v = gen();
     if (!prop2satVariable[key]) {
-        prop2satVariable[key] = [gen();
+        prop2satVariable[key] = gen();
     }
     v = prop2satVariable[key];
     return v;
