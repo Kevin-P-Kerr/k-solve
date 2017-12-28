@@ -477,8 +477,9 @@ var simplifyProp = function (prop) {
 var getSatVariable = function (prop,prop2satVariable,gen) {
     var key,v;
     key = printProp(prop);
+    v = gen();
     if (!prop2satVariable[key]) {
-        prop2satVariable[key] = gen();
+        prop2satVariable[key] = [gen();
     }
     v = prop2satVariable[key];
     return v;
@@ -549,8 +550,6 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
     return ret;
 };
 
-var addMoreConstraints = function (map,problem) {};
-
 // the matrix of the ln must be in cnf
 var compile2sat = function (ln,index) {
     var matrix = ln.matrix;
@@ -565,7 +564,6 @@ var compile2sat = function (ln,index) {
         satProblem += compileProp2Sat(p,true,prop2satVariable,gen);
         satProblem += "\n";
     });
-    addMoreConstraints(prop2satVariable,satProblem);
     return {problem:satProblem,varTable:prop2satVariable};
 };
 
