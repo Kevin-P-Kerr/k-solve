@@ -644,11 +644,8 @@ var compile2fullSat = function (axioms,from2Map,index) {
         }
     });
     var simpleAxiomInfo = makeSimpleAxioms(axioms);
-    simpleAxiomInfo.axioms.forEach(function (ln) {
-        console.log(println(ln));
-    });
     var ln = product(simpleAxiomInfo.axioms);
-    console.log(println(ln));
+    ln = multiply(ln,ln);
     var sat = compile2sat(ln,index);
     var num2prop = simpleAxiomInfo.map;
     var prop2num = {};

@@ -28,7 +28,5 @@ m.f = 'k';
 m.a = 'g';
 m.d = 'g';
 var satP = logicUtils.compile2sat(lns,m,4);
-console.log(satP.problem);
-console.log(JSON.stringify(satP));
+console.log(JSON.stringify(satP.varTable));
 var a = sat.solve(satP.problem);
-console.log(a);
