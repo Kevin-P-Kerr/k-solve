@@ -1,4 +1,5 @@
 var logicUtils = require("./compile.js");
+var utils = require("./utils.js");
 var sat = require("../js/sat.js");
 
 var println = logicUtils.println;
@@ -17,7 +18,6 @@ axioms.push('(F) (D) E (G)\nD E\tE G\tF D\tF G\tF G');
 var pack = logicUtils.compileAxioms(axioms,map);
 var lns = pack[1];
 var graph = pack[0];
-console.log(graph[0]);
 lns.forEach(function (ln) { var nm = []; ln.matrix.forEach(function (p) { var x = logicUtils.simplifyProp(p); nm.push(x); }); ln.matrix = nm; console.log(println(ln)); });
 console.log('***');
 var m = {};
@@ -28,5 +28,5 @@ m.f = 'k';
 m.a = 'g';
 m.d = 'g';
 var satP = logicUtils.compile2sat(lns,m,4);
-console.log(JSON.stringify(satP.varTable));
 var a = sat.solve(satP.problem);
+console.log(utils.printSolution(a,satP.varTable,satP.trueProp));

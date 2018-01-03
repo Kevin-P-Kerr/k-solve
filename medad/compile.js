@@ -678,6 +678,20 @@ var compile2fullSat = function (axioms,from2Map,index) {
         v = prop2sat[k];
         sat2prop[v] = p;
     }
+    if (sat.trueProp.type != MULT) {
+        throw new Exception();
+    }
+    sat.trueProp.body.forEach(function (p) { 
+         if (p.type == NEGATE) { 
+            p.body[0].name = prop2sat[p.body[0].name];
+        }
+        else if (p.type == PRED) {
+            p.name = prop2sat[p.name];
+        }
+        else {
+            throw new Exception();
+        }
+    });
     sat.varTable = sat2prop;
     return sat;
 };
@@ -696,7 +710,7 @@ var compile2sat = function (ln,index) {
         satProblem += compileProp2Sat(p,true,prop2satVariable,gen);
         satProblem += "\n";
     });
-    return {problem:satProblem,varTable:prop2satVariable};
+    return {problem:satProblem,varTable:prop2satVariable,trueProp:trueProp};
 }
 
 
