@@ -639,8 +639,13 @@ var convolute = function (axioms,num) {
     var simpleAxiomInfo = makeSimpleAxioms(axioms);
     var ln = product(simpleAxiomInfo.axioms);
     var ret = [];
+    var alphaGen = getAlphaGen();
     while (num > 0) {
-      ret.push(copy(ln));
+      var cpy = copy(ln);
+      cpy.prefix.forEach(function (pref) {
+        //replace(cpy,alphaGen(),pref.val);
+      });
+      ret.push(cpy);
       num--;
     }
     return ret;
@@ -756,4 +761,4 @@ var compile2sat = function (ln,index) {
 }
 
 
-module.exports = {NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {convolute:convolute,NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};

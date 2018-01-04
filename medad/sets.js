@@ -18,15 +18,8 @@ axioms.push('(F) (D) E (G)\nD E\tE G\tF D\tF G\tF G');
 var pack = logicUtils.compileAxioms(axioms,map);
 var lns = pack[1];
 var graph = pack[0];
-lns.forEach(function (ln) { var nm = []; ln.matrix.forEach(function (p) { var x = logicUtils.simplifyProp(p); nm.push(x); }); ln.matrix = nm; console.log(println(ln)); });
-console.log('***');
-var m = {};
-m.b = 'j';
-m.c = 'k';
-m.e = 'j';
-m.f = 'k';
-m.a = 'g';
-m.d = 'g';
-var satP = logicUtils.compile2sat(lns,m,15);
-var a = sat.solve(satP.problem);
-console.log(utils.printSolution(a,satP.varTable,satP.trueProp));
+var conv = logicUtils.convolute(lns,2);
+conv.forEach(function (ln) {
+  console.log(println(ln));
+});
+
