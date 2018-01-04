@@ -27,6 +27,6 @@ m.e = 'j';
 m.f = 'k';
 m.a = 'g';
 m.d = 'g';
-var satP = logicUtils.compile2sat(lns,m,4);
+var satP = logicUtils.compile2sat(lns,m,15);
 var a = sat.solve(satP.problem);
 console.log(utils.printSolution(a,satP.varTable,satP.trueProp));

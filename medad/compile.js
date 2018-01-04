@@ -635,6 +635,48 @@ var makeSimpleAxioms = function (axioms) {
     return {axioms:newAxioms,map:map};
 };
 
+var convolute = function (axioms,num) {
+    var simpleAxiomInfo = makeSimpleAxioms(axioms);
+    var ln = product(simpleAxiomInfo.axioms);
+    var ret = [];
+    while (num > 0) {
+      ret.push(copy(ln));
+      num--;
+    }
+    return ret;
+};
+
+var copy = function (ln) {
+  var nln = {};
+  nln.prefix = [];
+  nln.matrix = [];
+  ln.prefix.forEach(function (pref) {
+    var np = {};
+    np.type = pref.type;
+    np.val = pref.val;
+    nln.prefix.push(np);
+  });
+  ln.matrix.forEach(function (prop) {
+    nln.matrix.push(copyProp(prop));
+  });
+  return nln;
+};
+
+var copyProp = function (prop) {
+  var np =  {};
+  np.type = prop.type;
+  if (prop.name) {
+    np.name = prop.name;
+  }
+  if (prop.body) {
+    np.body = [];
+    prop.body.forEach(function (p) {
+      np.body.push(copyProp(p));
+    });
+  }
+  return np;
+};
+
 var compile2fullSat = function (axioms,from2Map,index) {
     axioms.forEach(function (ln) {
         var k,v;
