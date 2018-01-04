@@ -714,4 +714,4 @@ var compile2sat = function (ln,index) {
 }
 
 
-module.exports = {simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
