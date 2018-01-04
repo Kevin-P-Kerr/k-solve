@@ -36,8 +36,11 @@ m['.m'] = '.j';
 m['.n'] = '.k';
 m['.q'] = '.j';
 m['.r'] = '.k';
+m['.t'] = '.i';
+m['.u'] = '.j';
+m['.v'] = '.k';
 var i =0;
-var ii = 100;
+var ii = 1000;
 for (;i<ii;i++) {
   var satP = logicUtils.compile2sat(conv,m,i);
   var a = sat.solve(satP.problem);
