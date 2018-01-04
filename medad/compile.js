@@ -415,8 +415,7 @@ var inPlaceAlter = function (p,t,f) {
                 subp.body[dex] = t;
             }
             if (subp.type == MULT) {
-                helper([subp.body[0]]);
-                helper([subp.body[1]]);
+                helper(subp.body);
             }
             if (subp.type == NEGATE) {
                 helper(subp.body);
@@ -444,8 +443,7 @@ var replace = function (p,t,f) {
                 subp.body[dex] = t;
             }
             if (subp.type == MULT) {
-                helper([subp.body[0]]);
-                helper([subp.body[1]]);
+                helper(subp.body);
             }
             if (subp.type == NEGATE) {
                 helper(subp.body);
