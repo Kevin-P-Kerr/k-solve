@@ -636,8 +636,7 @@ var makeSimpleAxioms = function (axioms) {
 };
 
 var convolute = function (axioms,num) {
-    var simpleAxiomInfo = makeSimpleAxioms(axioms);
-    var ln = product(simpleAxiomInfo.axioms);
+    var ln = product(axioms);
     var ret = [];
     var alphaGen = getAlphaGen();
     while (num > 0) {
@@ -662,12 +661,15 @@ var copy = function (ln) {
     nln.prefix.push(np);
   });
   ln.matrix.forEach(function (prop) {
-    nln.matrix.push(copyProp(prop));
+     nln.matrix.push(copyProp(prop));
   });
   return nln;
 };
 
 var copyProp = function (prop) {
+  if (typeof prop == "string") {
+    return prop;
+  }
   var np =  {};
   np.type = prop.type;
   if (prop.name) {
