@@ -639,7 +639,7 @@ var makeSimpleAxioms = function (axioms) {
                             throw new Error();
                         }
                         var pbod = p.body[0];
-                        var b = {type:PRED,body:[],name:pbod.name};
+                        var b = {type:PRED,body:[],name:num};
                         var str = printProp(pbod);
                         npp.body = [b];
                         map[num] = str;

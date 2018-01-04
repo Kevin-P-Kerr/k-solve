@@ -4,6 +4,8 @@ var PRED = compileUtils.PRED;
 var NEGATE = compileUtils.NEGATE;
 var printSolution = function (satSol,varTable,theorem) {
     if (!satSol.sat) { return "cannot solve sat instance";} 
+    console.log(satSol);
+    console.log(varTable);
     var str = '';
     var concludingClauses = [];
     if (theorem.type != MULT) {
