@@ -20,11 +20,16 @@ var printSolution = function (satSol,varTable,theorem) {
         throw new Error();
       }
     });
+    var usedProps = [];
     satSol.trueVars.forEach(function (v) {
       if (concludingClauses.indexOf(v) >= 0) { return; }
+      if (usedProps.indexOf(varTable[v]) >= 0) { return; } 
+      usedProps.push(varTable[v]);
       str += varTable[v] +"\n";
     });
     satSol.falseVars.forEach(function (v) {
+      if (usedProps.indexOf(varTable[v]) >= 0) { return; } 
+      usedProps.push(varTable[v]);
       if (concludingClauses.indexOf(v) >= 0) { return; }
         str += "~"+varTable[v] +"\n";
     });
