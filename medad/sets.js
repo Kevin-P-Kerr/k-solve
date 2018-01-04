@@ -20,6 +20,7 @@ var lns = pack[1];
 var graph = pack[0];
 var conv = logicUtils.convolute(lns,2);
 conv.forEach(function (ln) {
+  console.log('******');
   console.log(println(ln));
 });
 

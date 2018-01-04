@@ -400,6 +400,34 @@ var multiply = function (a,b) {
     return c;
 };
 
+var inPlaceAlter = function (p,t,f) {
+    var i = 0;
+    var ii = p.prefix.length;
+    for (;i<ii;i++) {
+        if (p.prefix[i].val == f) {
+          p.prefix[i].val = t;
+        }
+    }
+    var helper = function (props) {
+        props.forEach(function (subp) {
+            if (subp.type == PRED && subp.body.indexOf(f) >= 0) {
+                var dex = subp.body.indexOf(f);
+                subp.body[dex] = t;
+            }
+            if (subp.type == MULT) {
+                helper([subp.body[0]]);
+                helper([subp.body[1]]);
+            }
+            if (subp.type == NEGATE) {
+                helper(subp.body);
+            }
+        });
+    };
+    helper(p.matrix);
+    // for chaining
+    return p;
+};
+
 var replace = function (p,t,f) {
     var i = 0;
     var ii = p.prefix.length;
@@ -642,7 +670,7 @@ var convolute = function (axioms,num) {
     while (num > 0) {
       var cpy = copy(ln);
       cpy.prefix.forEach(function (pref) {
-        //replace(cpy,alphaGen(),pref.val);
+        inPlaceAlter(cpy,"."+alphaGen(),pref.val);
       });
       ret.push(cpy);
       num--;
