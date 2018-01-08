@@ -6,6 +6,7 @@ var println = logicUtils.println;
 var axioms = [];
 axioms.push('forall a forall b thereis c: ~CONTAINS(a b) + IN(c b)*~IN(a c)');
 var s = logicUtils.compileLine(axioms[0]);
+console.log(println(s));
 a();
 axioms.push('forall a forall b forall c thereis d: ~INTERSECTS(a b) + IN(d c)*IN(d b)*~IN(d a)');
 var pack = logicUtils.compileAxioms(axioms,map);

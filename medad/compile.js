@@ -96,7 +96,7 @@ var iswhite = function (c) {
 };
 
 var isValidVarChar = function (c) {
-    return !iswhite(c) && c!=':' && c != '(' && c != ')' && c != '[' && c != ']';
+    return !iswhite(c) && c!='*' && c!=':' && c != '(' && c != ')' && c != '[' && c != ']';
 };
 var tokenize = function (str) {
     var tokens = [];
@@ -127,6 +127,9 @@ var tokenize = function (str) {
         }
         else if (c == '~') {
             tokens.push({type:NEGATE});
+        }
+        else if (c == '*') {
+            tokens.push({type:MULT});
         }
         else {
             var name = '';
@@ -839,11 +842,44 @@ var compilePrefix = function (tokens) {
 };
 
 var compileLineProp = function (token,tokens) {
+    var props = [];
+    var isMult = false;
+    props.push(compileLinePred(token,tokens));
+    token = tokens();
+    if (token.type == MULT) {
+        isMult = true;
+        while (token.type == MULT) {
+            token = tokens();
+            props.push(compileLinePred(token,tokens));
+        }
+    }
+    if (!isMult && props.length > 1) {
+        throw new Error();
+    }
+    if (isMult && prop.lenght < 2) {
+        throw new Error();
+    }
+    if (isMult) {
+        return {type:MULT,body:props};
+    }
+    return props[0];
+};
+
+var compileLinePred = function (token,tokens) {
     var prop = {type:PRED,name:token.val};
     var bod = [];
     prop.body = bod;
+    var ot = token;
     token = tokens();
+    
+    if (token.type == NEGATE) {
+        prop.type == NEGATE;
+        prop.body = [compileLinePred(tokens(),tokens)];
+        return prop;
+    }
     if (token.type != LPAREN) {
+        console.log(ot);
+        console.log(token);
         throw new Error();
     }
     token = tokens();
@@ -854,6 +890,7 @@ var compileLineProp = function (token,tokens) {
        bod.push(token.val);
        token = tokens();
     }
+    tokens();
     return prop;
 };
 
@@ -863,20 +900,24 @@ var compileMatrix = function (tokens) {
     var prop = {};
     while (token != undefined) {
         if (token.type == NEGATE) {
-            prop.type == NEGATE;
+            prop.type = NEGATE;
             token = tokens();
-            prop.body = [compileLineProp(token,tokens)];
+            prop.body = [compileLinePred(token,tokens)];
             ret.push(prop);
         }
         else if (token.type == VAR) {
             ret.push(compileLineProp(token,tokens));
         }
         else if (token.type == PLUS) {
+            token = tokens();
         }
         else {
+            while (token) {
+                console.log(token);
+                token = tokens();
+            }
             throw new Error();
         }
-        token = tokens();
     }
     return ret;
 };
