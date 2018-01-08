@@ -4,17 +4,10 @@ var sat = require("../js/sat.js");
 
 var println = logicUtils.println;
 var axioms = [];
-var map = {};
-map.A = 'CONTAINS';
-map.B = 'CONTAINS';
-map.C = 'CONTAINS';
-map.D = 'IN';
-map.E = 'IN';
-map.F = 'INTERSECTS';
-map.G = 'UNIONS';
-axioms.push('(A) B (C)\nA B\tA C\tC B');
-axioms.push('(D) E (C)\nD E\tE C\tD C');
-axioms.push('(F) (D) E (G)\nD E\tE G\tF D\tF G\tF G');
+axioms.push('forall a forall b thereis c: ~CONTAINS(a b) + IN(c b)*~IN(a c)');
+var s = logicUtils.compileLine(axioms[0]);
+a();
+axioms.push('forall a forall b forall c thereis d: ~INTERSECTS(a b) + IN(d c)*IN(d b)*~IN(d a)');
 var pack = logicUtils.compileAxioms(axioms,map);
 var lns = pack[1];
 lns.forEach(function (ln) { console.log(println(ln)); });
@@ -23,10 +16,6 @@ lns.forEach(function (ln) { var nm = []; ln.matrix.forEach(function (p) { var x 
 lns.forEach(function (ln) { console.log(println(ln)); });
 var graph = pack[0];
 var conv = logicUtils.convolute(lns,2);
-conv.forEach(function (ln) {
-  console.log('******');
-  console.log(println(ln));
-});
 var m = {};
 m['.b'] = '.j'
 m['.c'] = '.k'

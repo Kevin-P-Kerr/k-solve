@@ -88,6 +88,7 @@ var PRED = 4;
 var THEREIS = 5;
 var FORALL = 6;
 var MULT = 7;
+var PLUS = 8;
 
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
@@ -117,6 +118,9 @@ var tokenize = function (str) {
         else if (c == ']') {
             tokens.push({type:RBRAK});
         }
+        else if (c == '+') {
+            tokens.push({type:PLUS});
+        }
         else {
             var name = '';
             while (isValidVarChar(str[i]) && i<ii) {
@@ -124,7 +128,15 @@ var tokenize = function (str) {
                 i++;
             }
             i--;
-            tokens.push({type:VAR,val:name});
+            if (name == 'forall') {
+                tokens.push({type:FORALL});
+            }
+            else if (name == 'thereis') {
+                tokens.push({type:THEREIS});
+            }
+            else {
+                tokens.push({type:VAR,val:name});
+            }
         }
     }
     return tokens;
@@ -786,7 +798,19 @@ var compile2sat = function (ln,index) {
         satProblem += "\n";
     });
     return {problem:satProblem,varTable:prop2satVariable,trueProp:trueProp};
-}
+};
 
+var getLineTokens = function (linestr) {
+    return makeTokens(tokenize(linestr));
+};
 
-module.exports = {convolute:convolute,NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+// compile lines in DNF
+var compileLine = function (line) {
+    var ln = {};
+    var tokens = getLineTokens(line);
+    ln.prefix = compilePrefix(tokens);
+    ln.matrix = compileMatrix(tokens);
+    return ln;
+};
+
+module.exports = {compileLine:compileLine,convolute:convolute,NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
