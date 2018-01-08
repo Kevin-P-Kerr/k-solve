@@ -125,6 +125,9 @@ var tokenize = function (str) {
         else if (c == ':') {
             tokens.push({type:COLON});
         }
+        else if (c == '~') {
+            tokens.push({type:NEGATE});
+        }
         else {
             var name = '';
             while (isValidVarChar(str[i]) && i<ii) {
@@ -274,7 +277,7 @@ var compile2line = function (src,map,gen) {
     var compileProp = function (tokens) {
         var token = tokens();
         var props = [];
-        while (token && token.type != RPAREN ) {
+        while (token && token.type != RPAREN) {
             var prop = {};
             if (token.type == LPAREN) {
                 prop.type = NEGATE;
@@ -828,6 +831,25 @@ var compilePrefix = function (tokens) {
         }
         else {
             console.log(token);
+            throw new Error();
+        }
+        token = tokens();
+    }
+    return ret;
+};
+
+var compileMatrix = function (tokens) { 
+    var ret = [];
+    var token = tokens();
+    var prop = {};
+    while (token != undefined) {
+        if (token.type == NEGATE) {
+        }
+        else if (token.type == VAR) {
+        }
+        else if (token.type == PLUS) {
+        }
+        else {
             throw new Error();
         }
         token = tokens();
