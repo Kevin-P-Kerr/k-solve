@@ -838,14 +838,38 @@ var compilePrefix = function (tokens) {
     return ret;
 };
 
+var compileLineProp = function (token,tokens) {
+    var prop = {type:PRED,name:token.val};
+    var bod = [];
+    prop.body = bod;
+    token = tokens();
+    if (token.type != LPAREN) {
+        throw new Error();
+    }
+    token = tokens();
+    while (token.type != RPAREN) {
+       if (token.type != VAR) {
+           throw new Error();
+       }
+       bod.push(token.val);
+       token = tokens();
+    }
+    return prop;
+};
+
 var compileMatrix = function (tokens) { 
     var ret = [];
     var token = tokens();
     var prop = {};
     while (token != undefined) {
         if (token.type == NEGATE) {
+            prop.type == NEGATE;
+            token = tokens();
+            prop.body = [compileLineProp(token,tokens)];
+            ret.push(prop);
         }
         else if (token.type == VAR) {
+            ret.push(compileLineProp(token,tokens));
         }
         else if (token.type == PLUS) {
         }
