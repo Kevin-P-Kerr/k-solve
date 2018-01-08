@@ -89,13 +89,14 @@ var THEREIS = 5;
 var FORALL = 6;
 var MULT = 7;
 var PLUS = 8;
+var COLON = 9;
 
 var iswhite = function (c) {
     return c == ' ' || c == '\n' || c == '\t';
 };
 
 var isValidVarChar = function (c) {
-    return !iswhite(c) && c != '(' && c != ')' && c != '[' && c != ']';
+    return !iswhite(c) && c!=':' && c != '(' && c != ')' && c != '[' && c != ']';
 };
 var tokenize = function (str) {
     var tokens = [];
@@ -120,6 +121,9 @@ var tokenize = function (str) {
         }
         else if (c == '+') {
             tokens.push({type:PLUS});
+        }
+        else if (c == ':') {
+            tokens.push({type:COLON});
         }
         else {
             var name = '';
@@ -802,6 +806,33 @@ var compile2sat = function (ln,index) {
 
 var getLineTokens = function (linestr) {
     return makeTokens(tokenize(linestr));
+};
+
+var compilePrefix = function (tokens) {
+    var ret = [];
+    var token = tokens();
+    if (token.type == COLON) {
+        throw new Error();
+    }
+    var p;
+    while (token.type != COLON) {
+        p = {};   
+        if (token.type == FORALL || token.type == THEREIS) {
+            p.type == token.type;
+            token = tokens();
+            if (token.type != VAR) {
+                throw new Error();
+            }
+            p.val = token.val;
+            ret.push(p);
+        }
+        else {
+            console.log(token);
+            throw new Error();
+        }
+        token = tokens();
+    }
+    return ret;
 };
 
 // compile lines in DNF
