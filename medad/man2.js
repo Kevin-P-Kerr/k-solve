@@ -18,7 +18,7 @@ axioms.forEach(function (ax) {
 var map = {};
 var i = 0;
 var ii =4;
-var conv = logicUtils.convolute(compAx,1);
+var conv = logicUtils.convolute(compAx,2);
 map = {};
 map['.b'] = '.a';
 map['.c'] = '.a';
@@ -26,9 +26,17 @@ map['.e'] = '.d';
 map['.f'] = '.a';
 map['.g'] = '.a';
 map['.h'] = '.d';
+map['.l'] = '.d';
+map['.k'] = '.a';
+map['.i'] = '.d';
+map['.j'] = '.a';
 console.log(println(logicUtils.product(conv)));
-for (i=0,ii=64;i<ii;i++) {
+for (i=0,ii=512;i<ii;i++) {
     satP = logicUtils.compile2sat(conv,map,i);
     a = sat.solve(satP.problem);
-    console.log(utils.printSolution(a,satP.varTable,satP.trueProp));
+    var s = utils.printSolution(a,satP.varTable,satP.trueProp);
+    if (s.match("\n")) {
+        console.log(s);
+        console.log('***');
+    }
 }
