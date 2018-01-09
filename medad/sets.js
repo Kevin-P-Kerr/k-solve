@@ -19,11 +19,13 @@ axioms.forEach(function (ax) {
 });
 var map = {};
 map['.g'] = '.b';
+map['.j'] = '.b';
+map['.k'] = '.c';
 var i = 0;
 var ii =4;
-var conv = logicUtils.convolute(compAx,1);
+var conv = logicUtils.convolute(compAx,2);
 console.log(println(logicUtils.product(conv)));
-for (i=0,ii=16;i<ii;i++) {
+for (i=0,ii=64;i<ii;i++) {
     satP = logicUtils.compile2sat(conv,map,i);
     a = sat.solve(satP.problem);
     var s = utils.printSolution(a,satP.varTable,satP.trueProp);
