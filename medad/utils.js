@@ -7,7 +7,8 @@ var printSolution = function (satSol,varTable,theorem) {
     var str = '';
     var concludingClauses = [];
     if (theorem.type != MULT) {
-      throw new Error();
+        console.log(theorem);
+        throw new Error();
     }
     theorem.body.forEach(function (p) {
       if (p.type == PRED) {
@@ -21,6 +22,7 @@ var printSolution = function (satSol,varTable,theorem) {
         concludingClauses.push(varTable[p.body[0].name]);
       }
       else {
+        console.log(p);
         throw new Error();
       }
     });

@@ -779,7 +779,7 @@ var compile2fullSat = function (axioms,from2Map,index) {
         sat2prop[v] = p;
     }
     if (sat.trueProp.type != MULT) {
-        throw new Exception();
+        sat.trueProp = {type:MULT,body:[sat.trueProp]};
     }
     sat.trueProp.body.forEach(function (p) { 
          if (p.type == NEGATE) { 
@@ -789,7 +789,7 @@ var compile2fullSat = function (axioms,from2Map,index) {
             p.name = prop2sat[p.name];
         }
         else {
-            throw new Exception();
+            throw new Error();
         }
     });
     sat.ln = ln;
