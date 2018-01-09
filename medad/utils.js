@@ -11,10 +11,14 @@ var printSolution = function (satSol,varTable,theorem) {
     }
     theorem.body.forEach(function (p) {
       if (p.type == PRED) {
-        concludingClauses.push(p.name);
+        var v = varTable[p.name];
+        if (concludingClauses.indexOf(v) >= 0) { return; }
+        concludingClauses.push(varTable[p.name]);
       }
       else if (p.type == NEGATE) {
-        concludingClauses.push(p.body[0].name);
+        v = varTable[p.body[0].name];
+        if (concludingClauses.indexOf(v) >= 0) { return; }
+        concludingClauses.push(varTable[p.body[0].name]);
       }
       else {
         throw new Error();
@@ -22,24 +26,31 @@ var printSolution = function (satSol,varTable,theorem) {
     });
     var usedProps = [];
     satSol.trueVars.forEach(function (v) {
+      v = varTable[v];
       if (concludingClauses.indexOf(v) >= 0) { return; }
-      if (usedProps.indexOf(varTable[v]) >= 0) { return; } 
-      usedProps.push(varTable[v]);
-      str += varTable[v] +"\n";
+      if (usedProps.indexOf(v) >= 0) { return; } 
+      usedProps.push(v);
+      str += v +"\n";
     });
     satSol.falseVars.forEach(function (v) {
-      if (usedProps.indexOf(varTable[v]) >= 0) { return; } 
-      usedProps.push(varTable[v]);
+      v = varTable[v];
+      if (usedProps.indexOf(v) >= 0) { return; } 
+      usedProps.push(v);
       if (concludingClauses.indexOf(v) >= 0) { return; }
-        str += "~"+varTable[v] +"\n";
+        str += "~"+v +"\n";
     });
     str += "----\n";
+    var used = {};
     theorem.body.forEach(function (p) {
       if (p.type == PRED) {
+        if (used[varTable[p.name]]) { return; }
         str += varTable[p.name]+"\n";
+        used[varTable[p.name]] = true;
       }
       else if (p.type == NEGATE) {
+        if (used[varTable[p.body[0].name]]) { return; }
         str += "~"+varTable[p.body[0].name]+"\n";
+        used[varTable[p.body[0].name]] = true;
       }
       else { throw new Error();
       }
