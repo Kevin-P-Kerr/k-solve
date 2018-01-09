@@ -792,6 +792,7 @@ var compile2fullSat = function (axioms,from2Map,index) {
             throw new Exception();
         }
     });
+    sat.ln = ln;
     sat.varTable = sat2prop;
     return sat;
 };

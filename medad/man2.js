@@ -16,7 +16,6 @@ axioms.forEach(function (ax) {
     compAx.push(ln);
 });
 var map = {};
-map['b'] = 'a';
 var i = 0;
 var ii =4;
 for(;i<ii;i++) {
@@ -27,6 +26,9 @@ for(;i<ii;i++) {
 var conv = logicUtils.convolute(compAx,2);
 map = {};
 map['.b'] = '.a';
+map['.c'] = '.a';
+map['.d'] = '.a';
+console.log(println(logicUtils.product(conv)));
 for (i=0,ii=16;i<ii;i++) {
     satP = logicUtils.compile2sat(conv,map,i);
     a = sat.solve(satP.problem);
