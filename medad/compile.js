@@ -76,7 +76,6 @@ var getNextColor = function (color) {
 var makeTokens = function (tokens) {
     return function () {
         var x = tokens.shift();
-        console.log(x);
         return x;
     }
 };
@@ -587,8 +586,10 @@ var compileProp2Sat = function (prop,inverse,prop2satVariable,gen) {
                     ret += ("( "+v+ " )\n");
                 }
                 else {
+                    /*
                     console.log(p.type);
                     console.log(printProp(p));
+                    */
                     throw new Error(); 
                 }
             });
@@ -847,14 +848,11 @@ var compileLineProp = function (token,tokens) {
     var prop;
     var isMult = false;
     if (token.type == NEGATE) {
-        console.log('**');
-        console.log(token);
-        console.log('**');
         token = tokens();
         if (token.type != VAR) {
             throw new Error();
         }
-        var p = {type:NEGATE,body:compileLinePred(token,tokens)};
+        var p = {type:NEGATE,body:[compileLinePred(token,tokens)]};
         props.push(p);
     }
     else if (token.type == VAR) {
@@ -863,6 +861,7 @@ var compileLineProp = function (token,tokens) {
     else {
         throw new Error();
     }
+    token = tokens();
     if (token.type == MULT) {
         isMult = true;
         while (token.type == MULT) {
@@ -876,6 +875,7 @@ var compileLineProp = function (token,tokens) {
             else {
                 throw new Error();
             }
+            tokens = tokens();
             props.push(prop);
         }
     }
@@ -907,7 +907,6 @@ var compileLinePred = function (token,tokens) {
        bod.push(token.val);
        token = tokens();
     }
-    tokens();
     return prop;
 };
 
@@ -918,6 +917,7 @@ var compileMatrix = function (tokens) {
     while (token != undefined) {
         if (token.type == VAR || token.type == NEGATE) {
             ret.push(compileLineProp(token,tokens));
+            token = tokens();
         }
         else if (token.type == PLUS) {
             token = tokens();
