@@ -690,7 +690,7 @@ var convolute = function (axioms,num) {
     var ln = product(axioms);
     var ret = [];
     var alphaGen = getAlphaGen();
-    while (num > 0) {
+    while (num >= 0) {
       var cpy = copy(ln);
       cpy.prefix.forEach(function (pref) {
         inPlaceAlter(cpy,"."+alphaGen(),pref.val);
