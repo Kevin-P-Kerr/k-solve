@@ -827,7 +827,7 @@ var compilePrefix = function (tokens) {
     while (token.type != COLON) {
         p = {};   
         if (token.type == FORALL || token.type == THEREIS) {
-            p.type == token.type;
+            p.type = token.type;
             token = tokens();
             if (token.type != VAR) {
                 throw new Error();
