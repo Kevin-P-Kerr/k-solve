@@ -862,6 +862,7 @@ var compileLineProp = function (token,tokens) {
         throw new Error();
     }
     token = tokens();
+    if (!token) { return props[0]; }
     if (token.type == MULT) {
         isMult = true;
         while (token.type == MULT) {
