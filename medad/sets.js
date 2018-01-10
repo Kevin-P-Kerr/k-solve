@@ -7,8 +7,11 @@ var axioms = [];
 axioms.push("forall a forall b thereis c : CONTAINS(a b) + IN(c b)*~IN(c a)");
 axioms.push("forall d thereis f: EMPTY(d) + IN(f d)");
 axioms.push("forall g forall h forall i thereis j: INTERSECT(i g h) + IN(j i)*~IN(j h) + IN(j i)*~IN(j g) + ~IN(j i)*IN(j h)*IN(j g)");
-
-axioms = [axioms[2]];
+axioms.push("forall k forall l forall m forall n: ~INTERSECT(m l k) + ~IN(n l) + ~IN(n k) + IN(n m)");
+// a is the disjoint set of b and c if and only for all d in a, d is at least in b or c, and d is not in both b and c
+// DIS(a b c) <-> (IN(d b) + IN(d c) * ~(IN(d b)*IN(d c)))
+// 
+axioms.push("forall o forall q forall r forall s: ~DISJOINT(o q r) + IN(s q)*~IN(s r) + IN(s r)*~IN(s q)"); 
 var compAx = [];
 axioms.forEach(function (ax) {
     var ln = logicUtils.compileLine(ax);
@@ -18,14 +21,23 @@ axioms.forEach(function (ax) {
     compAx.push(ln);
 });
 var map = {};
-map['.g'] = '.b';
-map['.j'] = '.b';
-map['.k'] = '.c';
+map['.p'] = '.n';
+map['.r'] = '.m';
+map['.e'] = '.m';
+map['.s'] = '.l';
+map['.j'] = '.n';
+map['.h'] = '.m';
+map['.i'] = '.l';
+map['.d'] = '.n';
+map['.o'] = '.k';
+map['.t'] = '.k';
+
 var i = 0;
 var ii =4;
-var conv = logicUtils.convolute(compAx,2);
+var conv = logicUtils.convolute(compAx,0);
 console.log(println(logicUtils.product(conv)));
-for (i=0,ii=64;i<ii;i++) {
+for (i=0,ii=128;i<ii;i++) {
+    console.log(i);
     satP = logicUtils.compile2sat(conv,map,i);
     a = sat.solve(satP.problem);
     var s = utils.printSolution(a,satP.varTable,satP.trueProp);
