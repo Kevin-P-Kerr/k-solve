@@ -1,6 +1,7 @@
-var READFLAG = false;
+var READFLAG = true;
 var fs = require('fs');
 var notes;
+var key = new Buffer(fs.readFileSync("./key").toString()).toString("base64");
 
 var encode = function (str, key) {
     var ce = "base64";
@@ -10,7 +11,6 @@ var encode = function (str, key) {
     var i = 0;
     key = new Buffer(key,"base64").toString();
     while (str.length > key.length) {
-        //console.error(i);
         key = key + key[i];
         i++;
     }
@@ -21,9 +21,7 @@ var encode = function (str, key) {
     var retbuf = Buffer.alloc(buf.length);
     var i = 0;
     var ii = buf.length;
-    console.error(plato.length);
     for (;i<ii;i++) {
-        console.error(i);
         retbuf[i] =(buf[i]^keybuf[i]);
     }
     return retbuf.toString(ce);
@@ -34,14 +32,14 @@ var decode = function (encoded,key) {
 };
 
 if (READFLAG) {
-    notes = fs.readFileSync("./encrypted.txt").toString();
-    notes = new Buffer(notes,"base64").toString("base64");
+    notes = new Buffer(fs.readFileSync("./secret.txt"),"base64").toString("base64");
     notes = new Buffer(decode(notes,key),"base64").toString("utf8");
     fs.writeFileSync("./notes.txt",notes);
 }
 else {
     notes = fs.readFileSync("./notes.txt").toString();
+    notes = new Buffer(notes).toString("base64");
     notes = encode(notes,key);
-    fs.writeFileSync("./encrypted.txt", notes);
+    fs.writeFileSync("./secret.txt", new Buffer(notes,"base64"));
 }
 
