@@ -1,4 +1,4 @@
-var READFLAG = true;
+var READFLAG = false;
 var fs = require('fs');
 var notes;
 var key = new Buffer(fs.readFileSync("./key").toString()).toString("base64");
