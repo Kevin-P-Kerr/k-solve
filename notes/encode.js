@@ -1,4 +1,5 @@
 var READFLAG = false;
+var PERSONAL = true;
 var fs = require('fs');
 var notes;
 var key = new Buffer(fs.readFileSync("./key").toString()).toString("base64");
@@ -31,15 +32,27 @@ var decode = function (encoded,key) {
     return encode(encoded,key);
 };
 
-if (READFLAG) {
-    notes = new Buffer(fs.readFileSync("./secret.txt"),"base64").toString("base64");
-    notes = new Buffer(decode(notes,key),"base64").toString("utf8");
-    fs.writeFileSync("./notes.txt",notes);
+var secretFile;
+var notesFiles;
+
+if (PERSONAL) {
+  secretFile = "./private.txt";
+  notesfile = "./presonal.notes";
 }
 else {
-    notes = fs.readFileSync("./notes.txt").toString();
+  secretFile = "./secret.txt";
+  notesFile = "./notes.txt";
+}
+
+if (READFLAG) {
+    notes = new Buffer(fs.readFileSync(secretFile),"base64").toString("base64");
+    notes = new Buffer(decode(notes,key),"base64").toString("utf8");
+    fs.writeFileSync(notesFile,notes);
+}
+else {
+    notes = fs.readFileSync(notesFile).toString();
     notes = new Buffer(notes).toString("base64");
     notes = encode(notes,key);
-    fs.writeFileSync("./secret.txt", new Buffer(notes,"base64"));
+    fs.writeFileSync(secretFile, new Buffer(notes,"base64"));
 }
 
