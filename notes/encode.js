@@ -1,4 +1,4 @@
-var READFLAG = true;
+var READFLAG = false
 var PERSONAL = true;
 var fs = require('fs');
 var notes;
