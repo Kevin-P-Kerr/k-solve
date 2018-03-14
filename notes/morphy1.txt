@@ -32,34 +32,37 @@ https://chess-db.com/public/game.jsp?id=8000000069.8000000023.112571648.0
 29. Rf7 Rg8 
 30. Rdf1 1-0
 --
-acefgh
+abcdefgh
 rnbqkbnr
+--
+acfgh
+rbkbnr
 
-abcdfgh
-rnbqkbnr
+abcfgh
+rnbknr
 
-1. e4 __ 
-2. Nf3 Nc6 
+1. __ __ 
+2. __ __ 
 3. __ __ 
 4. __ __  
 5. __ __   
-6. O-O d6  
+6. O-O __  
 7. __ __  
-8. cxd4(c) Bb6   
-9. Bb2 Nf6 *
-10. Nbd2 O-O 
-11. e5 dxe5 
-12. dxe5 Ng4 
+8. __ __   
+9. Bb2 __ 
+10. __ O-O 
+11. __ __ 
+12. dxe5 (c) __ 
 13. h3 Nh6 
-14. Qa4 Bf5 
-15. Rad1 Qe7 
-16. Nb3 Qb4 
-17. Qxb4 Nxb4 
-18. Nbd4 Bxd4 
-19. Nxd4 c6 
-20. g4 Be4 
+14. __ __  
+15. Rad1 __  
+16. Nb3 __ 
+17. __ Nxb4  
+18. __ __ 
+19. Nxd4 c6  
+20. g4 __ 
 21. f4 Kh8 
-22. f5 Bd5 
+22. f5 Bd5 *
 23. Bxd5 Nxd5 
 24. g5 Ng8 
 25. Rf3 Rfe8 
