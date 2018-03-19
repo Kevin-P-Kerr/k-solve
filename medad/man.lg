@@ -1,0 +1,20 @@
+a = forall a : ~MAN(a) + MORTAL(a) 
+b = forall a: ~SOC(a) + MAN(a)
+
+print(b)
+
+c = a*b
+
+print(c)
+
+c = simplify(c)
+
+print(c)
+
+d = forall a: SOC(a)
+
+c = c*d
+print(c)
+c = simplify(c)
+
+print(c)
