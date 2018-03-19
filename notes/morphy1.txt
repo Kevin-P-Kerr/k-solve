@@ -36,10 +36,10 @@ abcdefgh
 rnbqkbnr
 --
 acfgh
-rbkbnr
+rbknr
 
 abcfgh
-rnbknr
+rnknr
 
 1. __ __ 
 2. __ __ 
@@ -57,13 +57,13 @@ rnbknr
 14. __ __  
 15. Rad1 __  
 16. Nb3 __ 
-17. __ Nxb4  
+17. __ __ 
 18. __ __ 
 19. Nxd4 c6  
 20. g4 __ 
 21. f4 Kh8 
-22. f5 Bd5 *
-23. Bxd5 Nxd5 
+22. f5 __ 
+23. __ Nxd5 * 
 24. g5 Ng8 
 25. Rf3 Rfe8 
 26. e6 fxe6 
