@@ -10,6 +10,89 @@ var sat = require("../js/sat.js");
     MultExpr = LogicExpr * LogicExpr
     SimplifyExpr = Simplify(LogicExpr)
     ReplaceExpr = Replace(VarLit,LogicExpr)
+    LogicExpr = LogicLit | VarExpr
 */
 
+var interp = function (str) {
+    var variables = {};
+    var lines = str.split('\n');
+    lines.forEach(function (ln) {
+        interpLn(variables,ln);
+    });
+};
+
+var interpLn = function (vars,ln) {
+    if (ln.match("print")) {
+        interpPrint(vars,ln);
+        return;
+    }
+    if (ln.match('=')) {
+        interpAssign(vars,ln);
+        return;
+    }
+    return interpLogicExpr(vars,ln);
+};
+
+var interpPrint = function (vars,ln) {
+    ln = ln.split("print")[1];
+    ln = ln.split("(")[1];
+    ln = ln.split(")")[0];
+    ln = ln.trim();
+    ln = interpLogicExpr(vars,ln);
+    println(ln);
+};
+
+var interpAssign = function (vars,ln) {
+    ln = ln.split("=");
+    var lh = ln[0].trim();
+    var rh = interpLogicExpr(ln[1]);
+    vars[lh] = rh;
+};
+
+var interpLogicExpr = function (vars,ln) {
+    if (ln.match("simplify")) {
+        return simplify(vars,ln);
+    }
+    if (ln.match("replace")) {
+        return replace(vars,ln);
+    }
+    if (ln.match("*")) {
+        return mult(vars,ln);
+    }
+    if (ln.match("forall")) {
+        return logicUtils.compileLn(ln);
+    }
+    return vars[ln.trim()];
+};
+
+var simplify = function (vars,ln) {
+    ln = ln.split("simplify")[1];
+    ln = ln.split("(")[1];
+    ln = ln.split(")")[0];
+    ln = ln.trim();
+    var v = interpLogicExpr(vars,ln);
+    var m = logicUtils.removeContradictions(v.matrix);
+    v.matrix = m;
+    return v;
+};
+
+var replace = function (vars, ln) {
+    ln = ln.split("replace")[1];
+    ln = ln.split("(")[1];
+    ln = ln.split(")")[0];
+    ln = ln.split(",");
+    var prop = interpLogicExpr(ln[0].trim());
+    var to = ln[1].trim();
+    var from = ln[2].trim();
+    return logicUtils.replaceVar(prop,to,from);
+};
+
+var mult = function (vars,ln) {
+    ln = ln.split("*");
+    var op1 = ln[0].trim();
+    var op2 = ln[1].trim();
+    op1= interpLogicExpr(op1);
+    op2 = interpLogicExpr(op2);
+    return logicUtils.multiply(op1,op2);
+};
 
