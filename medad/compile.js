@@ -396,9 +396,11 @@ var compileAxioms = function (srcs,map) {
 
 var multiply = function (a,b) {
     var c = {};
+    var redund = {};
     c.prefix = [];
-    a.prefix.forEach(function (p) { c.prefix.push(p); });
-    b.prefix.forEach(function (p) { c.prefix.push(p); });
+    var prefixAdd = function (p) { if (!redund[p.val]) { c.prefix.push(p); redund[p.val] = [p.type] } else { if (redund[p.val].indexOf(p.type) < 0) { c.prefix.push(p); redund[p.val].push(p.type) } } };
+    a.prefix.forEach(prefixAdd);
+    b.prefix.forEach(prefixAdd);
     c.matrix = [];
     a.matrix.forEach(function (aa) {
         b.matrix.forEach(function (bb) {
@@ -940,4 +942,4 @@ var compileLine = function (line) {
     return ln;
 };
 
-module.exports = {compileLine:compileLine,convolute:convolute,NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
+module.exports = {removeContradictions:removeContradictions,compileLine:compileLine,convolute:convolute,NEGATE:NEGATE,PRED:PRED,MULT:MULT,simplifyProp:simplifyProp,compile2sat:compile2fullSat,multiply:multiply,replaceVar:replace,println:println,removeClause:removeClause,product:product,compileAxioms:compileAxioms};
