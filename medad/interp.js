@@ -1,3 +1,5 @@
+#! /usr/local/bin/node
+
 var logicUtils = require("./compile.js");
 var utils = require("./utils.js");
 var sat = require("../js/sat.js");
