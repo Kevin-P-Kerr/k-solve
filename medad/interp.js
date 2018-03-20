@@ -22,6 +22,9 @@ var interp = function (str) {
 };
 
 var interpLn = function (vars,ln) {
+    if (ln.match("//")) {
+        return;
+    }
     if (ln.match("print")) {
         interpPrint(vars,ln);
         return;

@@ -1,20 +1,18 @@
+// the axioms
 a = forall a : ~MAN(a) + MORTAL(a) 
-b = forall a: ~SOC(a) + MAN(a)
+b = forall b: ~SOC(b) + MAN(b)
+c = forall c thereis d: ~MAN(c) + MOTHER(d c)
+d = forall e forall f: ~MOTHER(e f) + MAN(e)
 
-print(b)
+e = a*b
+e = e*c
+e = e*d
 
-c = a*b
 
-print(c)
-
-c = simplify(c)
-
-print(c)
-
-d = forall a: SOC(a)
-
-c = c*d
-print(c)
-c = simplify(c)
-
-print(c)
+e = replace(e,a,b)
+e = replace(e,a,c)
+e = replace(e,d,e)
+e = replace(e,a,f)
+e = e * forall a: SOC(a)
+e = simplify(e)
+print(e)
