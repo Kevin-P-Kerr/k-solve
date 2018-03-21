@@ -1,5 +1,5 @@
-var READFLAG = false
-var PERSONAL = true;
+var READFLAG = false;
+var PERSONAL = false;
 var fs = require('fs');
 var notes;
 var key;

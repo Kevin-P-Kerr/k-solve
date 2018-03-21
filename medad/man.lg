@@ -14,5 +14,6 @@ e = replace(e,a,c)
 e = replace(e,d,e)
 e = replace(e,a,f)
 e = e * forall a: SOC(a)
+e = e*e
 e = simplify(e)
 print(e)

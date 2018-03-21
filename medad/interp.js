@@ -102,7 +102,8 @@ var mult = function (vars,ln) {
     return logicUtils.multiply(op1,op2);
 };
 
+var file = process.argv[2];
 var fs = require('fs');
-var s = fs.readFileSync("./man.lg");
+var s = fs.readFileSync(file);
 interp(s.toString());
 
