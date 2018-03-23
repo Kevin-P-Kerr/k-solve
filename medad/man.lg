@@ -11,9 +11,15 @@ e = e*d
 
 e = replace(e,a,b)
 e = replace(e,a,c)
-e = replace(e,d,e)
+e = replace(e,a,e)
 e = replace(e,a,f)
-e = e * forall a: SOC(a)
+//e = e * forall a: SOC(a)
 e = e*e
+//print(e)
 e = simplify(e)
 print(e)
+
+x = forall a: Man(a)
+y = thereis a: Man(a);
+x = x*y
+print(x)

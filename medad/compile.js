@@ -404,20 +404,29 @@ var multiply = function (a,b) {
     c.matrix = [];
     a.matrix.forEach(function (aa) {
         b.matrix.forEach(function (bb) {
+            var redund = [];
+            var add = function (p) { 
+                var str = printProp(p);
+                if (redund.indexOf(str) >= 0) {
+                    return;
+                }
+                n.body.push(p);
+                redund.push(str);
+            };
             var n = {};
             n.type = MULT;
             n.body = [];
             if (aa.type == MULT) {
-                aa.body.forEach(function (p) { n.body.push(p); });
+                aa.body.forEach(add);
             }
             else {
-                n.body.push(aa);
+                add(aa);
             }
             if (bb.type == MULT) {
-                bb.body.forEach(function (p) { n.body.push(p); });
+                bb.body.forEach(add);
             }
             else {
-                n.body.push(bb);
+                add(bb);
             }
             c.matrix.push(n);
         });
