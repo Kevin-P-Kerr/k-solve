@@ -405,7 +405,7 @@ var multiply = function (a,b) {
     a.matrix.forEach(function (aa) {
         b.matrix.forEach(function (bb) {
             var redund = [];
-            var add = function (p) { 
+            var add = function (p) {
                 var str = printProp(p);
                 if (redund.indexOf(str) >= 0) {
                     return;
