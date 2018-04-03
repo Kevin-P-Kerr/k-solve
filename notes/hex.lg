@@ -6,7 +6,8 @@ prop1 = forall a thereis b thereis c thereis d thereis e thereis f thereis g: ~T
 prop2 = forall h: ~TILE(h) + BLACK(h) + WHITE(h) + OPEN(h)
 // a hex can only be in one state at once
 prop3 = forall i:  ~TILE(i) + BLACK(i)*~OPEN(i)*~WHITE(i) + WHITE(i)*~OPEN(i)*~BLACK(i) + OPEN(i)*~BLACK(i)*~WHITE(i)
-
+// hexs the bottom left and bottom right hex abut each other left/right
+prop4 = forall j forall k forall l: ~TILE(j) + ~TILE(k) + ~TILE(l) + ~BLABUT(k j) + ~BRABUT(l j) + ~RABUT(k j)*LABUT(j k)
 
 
 
