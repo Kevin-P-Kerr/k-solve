@@ -888,8 +888,9 @@ var compileLineProp = function (token,tokens) {
             else {
                 throw new Error();
             }
-            tokens = tokens();
             props.push(prop);
+            token = tokens();
+            if (!token) { break; }
         }
     }
     if (!isMult && props.length > 1) {
