@@ -2,13 +2,11 @@
 // a hex board is a quadrangle, composed of connected hexagons.  
 // these pentagons abut eachother
 prop1 = forall a thereis b thereis c thereis d thereis e thereis f thereis g: ~TILE(a) + TILE(b)*LABUT(b a)*TILE(c)*RABUT(c a)*TILE(d)*ULABUT(d a)*TILE(e)*URABUT(e a)*TILE(f)*BLABUT(f a)*TILE(g)*BRABUT(g a)
-// each pentagon can be in one of three states: open, black, or white.  
+// each hex can be in one of three states: open, black, or white.  
 prop2 = forall h: ~TILE(h) + BLACK(h) + WHITE(h) + OPEN(h)
-given = thereis aa: TILE(aa)*~BLACK(aa)*~OPEN(aa)
-given = given*prop1
-given = given*prop2
-given = replace(given,a,aa)
-given = replace(given,a,h)
-given = simplify(given)
-print(given)
+// a hex can only be in one state at once
+prop3 = forall i:  ~TILE(i) + BLACK(i)*~OPEN(i)*~WHITE(i) + WHITE(i)*~OPEN(i)*~BLACK(i) + OPEN(i)*~BLACK(i)*~WHITE(i)
+
+
+
 
