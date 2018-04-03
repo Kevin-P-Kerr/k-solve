@@ -62,11 +62,11 @@ var interpLogicExpr = function (vars,ln) {
     if (ln.match("replace")) {
         return replace(vars,ln);
     }
-    if (ln.indexOf("*")>0) {
-        return mult(vars,ln);
-    }
     if (ln.match("forall") || ln.match("thereis")) {
         return logicUtils.compileLine(ln);
+    }
+    if (ln.indexOf("*")>0) {
+        return mult(vars,ln);
     }
     return vars[ln.trim()];
 };
