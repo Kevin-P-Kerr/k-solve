@@ -77,7 +77,29 @@ var parseArgs = function(ln) {
   return args;
 };
 
-
+var applyFunction = function (functionObj,args,vars) {
+  var props = {};
+  var f = functionObj;
+  var v = {};
+  f.body.forEach(function (ln) {
+    interpLn(v,ln);
+  });
+  var k,v,p,i;
+  var ii = args.length;
+  var allProps = [];
+  for (k in v) {
+    p = v[k];
+    for (i=0;i<ii;i++) {
+      p = logicUtils.replaceVar(p,args[i],f.args[i]);
+    }
+    allProps.push(p);
+  }
+  p = allProps[0];
+  for (i=1,ii=allProps.length;i<ii;i++) {
+    p = logicUtils.multiply(p,allProps[i]);
+  }
+  return p;
+};
 
 var interpLn = function (vars,ln) {
     if (ln.match("//")) {
