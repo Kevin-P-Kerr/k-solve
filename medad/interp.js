@@ -21,9 +21,19 @@ var sat = require("../js/sat.js");
 var interp = function (str) {
     var variables = {};
     var lines = str.split('\n');
-    lines.forEach(function (ln) {
+    var i = 0;
+    var ii = lines.length;
+    var f,ln;
+    for (; i<ii;i++) {
+      ln = lines[i];
+      if (ln.match("constructor")) {
+        f = makeFunc(lines,i);
+        variable[f.name] = f;
+      }
+      else {
         interpLn(variables,ln);
-    });
+      }
+    }
 };
 
 var interpLn = function (vars,ln) {
