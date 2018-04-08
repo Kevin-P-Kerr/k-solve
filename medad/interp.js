@@ -4,6 +4,9 @@ var logicUtils = require("./compile.js");
 var utils = require("./utils.js");
 var sat = require("../js/sat.js");
 /*
+    arguments =: {constructors | plan}
+    constructors =: {constructor}
+    constructor =: "constructor" arglist body
     plan =: {Expr | Stmt}
     Expr =: AssignExpr | MultExpr | SimplifyExpr | ReplaceExpr
     Stmt =: PrintStmt
@@ -31,11 +34,18 @@ var interpLn = function (vars,ln) {
         interpPrint(vars,ln);
         return;
     }
+    if (ln.match("constructor")) {
+      addConstructor(vars,ln);
+    }
     if (ln.match('=')) {
         interpAssign(vars,ln);
         return;
     }
-    return interpLogicExpr(vars,ln);
+    return interpExpr(vars,ln);
+};
+
+var addConstructor = function (vars,ln) {
+  
 };
 
 var interpPrint = function (vars,ln) {
