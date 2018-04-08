@@ -464,12 +464,27 @@ var inPlaceAlter = function (p,t,f) {
 var replace = function (p,t,f) {
     var i = 0;
     var ii = p.prefix.length;
+    var newFlag = true;
     for (;i<ii;i++) {
         if (p.prefix[i].val == f) {
             break;
         }
+        if (p.prefix[i].val == t) {
+          newFlag = false;
+        }
     }
-    p.prefix.splice(i,1);
+    // if the newFlag is set, that means we're introducing a new variable, so just replace instances of the old one
+    if (newFlag) {
+      i = 0;
+      for (;i<ii;i++) {
+        if (p.prefix[i].val == f) {
+          p.prefix[i].val = t;
+        }
+      }
+    }
+    else {
+      p.prefix.splice(i,1);
+    }
     var helper = function (props) {
         props.forEach(function (subp) {
             if (subp.type == PRED && subp.body.indexOf(f) >= 0) {

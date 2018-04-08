@@ -28,8 +28,8 @@ var interp = function (str) {
       ln = lines[i];
       if (ln.match("constructor")) {
         f = makeFunc(lines,i);
-        variable[f.name] = f;
-        i = f.endLine;
+        variables[f.name] = f;
+        i = f.endLn;
       }
       else {
         interpLn(variables,ln);
@@ -44,7 +44,7 @@ var makeFunc = function(lines,i) {
   i++;
   var currLn = lines[i];
   var lns = [];
-  while (currLn.match("\t")) {
+  while (currLn.match("\t") || currLn.match(/^\s\s/)) {
     lns.push(currLn);
     i++;
     currLn = lines[i];
@@ -54,6 +54,7 @@ var makeFunc = function(lines,i) {
   f.args = args;
   f.body = lns;
   f.endLn = i-1;
+  f.lines = lns;
   return f;
 };
 
@@ -117,9 +118,19 @@ var interpLn = function (vars,ln) {
 };
 
 var interpExpr = function (vars,ln) {
-  if (ln.match("(")) {
-    var name = ln.split('(')[0].trim();
-    var args = ln.split('(')[1].split(')')[0].split(',');
+  if (ln.indexOf("call") >0) {
+    var cp = ln.split("call")[1];
+    var name = cp.split('(')[0].trim();
+    var args = cp.split('(')[1].split(')')[0].split(',');
+    var vname;
+    try {
+      vname = ln.split('=')[0].trim();
+    }
+    catch (e) { /* no parse error here */ }
+    if (vname) {
+      vars[vname] = applyFunction(vars[name],args,vars);
+      return vars[vname];
+    }
     return applyFunction(vars[name],args,vars);
   }
   else {
@@ -140,7 +151,7 @@ var interpPrint = function (vars,ln) {
 var interpAssign = function (vars,ln) {
     ln = ln.split("=");
     var lh = ln[0].trim();
-    var rh = interpLogicExpr(vars,ln[1]);
+    var rh = interpExpr(vars,ln[1]);
     vars[lh] = rh;
 };
 
