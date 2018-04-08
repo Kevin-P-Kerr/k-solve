@@ -29,12 +29,55 @@ var interp = function (str) {
       if (ln.match("constructor")) {
         f = makeFunc(lines,i);
         variable[f.name] = f;
+        i = f.endLine;
       }
       else {
         interpLn(variables,ln);
       }
     }
 };
+
+var makeFunc = function(lines,i) {
+  var start = lines[i];
+  var name = parseName(start);
+  var args = parseArgs(start);
+  i++;
+  var currLn = lines[i];
+  var lns = [];
+  while (currLn.match("\t")) {
+    lns.push(currLn);
+    i++;
+    currLn = lines[i];
+  }
+  var f = {};
+  f.name = name;
+  f.args = args;
+  f.body = lns;
+  f.endLn = i-1;
+  return f;
+};
+
+// parse the name of a constructor
+var parseName = function(ln) {
+  ln = ln.split("constructor")[1];
+  ln = ln.split('(')[0].trim();
+  return ln;
+};
+
+// parse the argument list from the constructor
+var parseArgs = function(ln) {
+  ln = ln.split("constructor")[1];
+  ln = ln.split('(')[1];
+  ln = ln.split(')')[0];
+  ln = ln.split(',');
+  var args = [];
+  ln.forEach(function (arg) {
+    args.push(arg.trim());
+  });
+  return args;
+};
+
+
 
 var interpLn = function (vars,ln) {
     if (ln.match("//")) {
