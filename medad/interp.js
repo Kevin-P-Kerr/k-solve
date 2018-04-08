@@ -116,6 +116,17 @@ var interpLn = function (vars,ln) {
     return interpExpr(vars,ln);
 };
 
+var interpExpr = function (vars,ln) {
+  if (ln.match("(")) {
+    var name = ln.split('(')[0].trim();
+    var args = ln.split('(')[1].split(')')[0].split(',');
+    return applyFunction(vars[name],args,vars);
+  }
+  else {
+    return interpLogicExpr(vars,ln);
+  }
+};
+
 var interpPrint = function (vars,ln) {
     ln = ln.split("print")[1];
     ln = ln.split("(")[1];
