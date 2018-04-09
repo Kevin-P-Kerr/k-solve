@@ -394,13 +394,30 @@ var compileAxioms = function (srcs,map) {
     return [graphs,lines];
 };
 
+var prefixMultiply = function (a,b) {
+    var mprefix = [];
+    var redund = {};
+    var prefixAdd = function (p) {
+        var v = p.val;
+        if (redund[v]) {
+            if (redund[v].type == FORALL && p.type == THEREIS) {
+                mprefix[redund[v].index].type = THEREIS;
+            }
+        }
+        else {
+            mprefix.push(p);
+            redund[v] = {type:p.type,index:mprefix.length-1};
+        }
+    };
+    a.forEach(prefixAdd);
+    b.forEach(prefixAdd);
+    return mprefix;
+};
+
 var multiply = function (a,b) {
     var c = {};
     var redund = {};
-    c.prefix = [];
-    var prefixAdd = function (p) { if (!redund[p.val]) { c.prefix.push(p); redund[p.val] = [p.type] } else { if (redund[p.val].indexOf(p.type) < 0) { c.prefix.push(p); redund[p.val].push(p.type) } } };
-    a.prefix.forEach(prefixAdd);
-    b.prefix.forEach(prefixAdd);
+    c.prefix = prefixMultiply(a.prefix,b.prefix);
     c.matrix = [];
     a.matrix.forEach(function (aa) {
         b.matrix.forEach(function (bb) {
