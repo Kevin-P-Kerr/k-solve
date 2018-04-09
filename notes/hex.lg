@@ -9,7 +9,9 @@ constructor HEX_TILE(a) :
   prop3 = forall a:  ~TILE(a) + BLACK(a)*~OPEN(a)*~WHITE(a) + WHITE(a)*~OPEN(a)*~BLACK(a) + OPEN(a)*~BLACK(a)*~WHITE(a)
 
 tile = call HEX_TILE(z)
-e = thereis z: TILE(z)*BLACK(z)
+rtile = call HEX_TILE(y)
+tile = tile * rtile
+print(tile)
+e = thereis z thereis y: TILE(z)*BLACK(z)*TILE(y)*WHITE(y)
 tile = tile * e
 tile = simplify(tile)
-print(tile)

@@ -394,6 +394,7 @@ var compileAxioms = function (srcs,map) {
     return [graphs,lines];
 };
 
+// TODO: fix this
 var prefixMultiply = function (a,b) {
     var mprefix = [];
     var redund = {};
