@@ -1,0 +1,5 @@
+constructor CHESS_SQUARE(a) :
+    forall a: ~CSQ(a) + ~BLACK(a) + WHITE(a)
+    forall a thereis b: ~CSQ(a) + ONE_RANK(a) + CSQ(b)*BELOW(b a)
+    forall a thereis c: ~CSQ(a) + EIGHT_RANK(a) + CSQ(c)*ABOVE(c a)
+    forall a thereis d: 
