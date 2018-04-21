@@ -81,15 +81,45 @@ var tokenize = function (str) {
       tokens.push(tok);
     }
   }
-  return tokens;
+  return makeTokens(tokens);
+}; 
 
-};  
+var makeTokens = function(tokens) {
+  var i = 0;
+  return function () {
+    var t = tokens[i];
+    i++;
+    return t;
+  }
+};
+
+
 
 var parse = function (str) {
   var gameState = initGameState();
   gameState.annotations = "";
   var tokens = tokenize(str);
-  console.log(tokens);
+  var tok;
+  var lply,rply;
+  while (tok = tokens()) {
+    if (tok.type == TT_LBRAK) { //skip
+      while (tok.type !== TT_RBRAK) {
+        tok = tokens();
+      }
+    }
+    if (tok.type == TT_SYM) {
+      tok = tokens();
+      if (tok.type !== TT_PERIOD) {
+        throw new Error();
+      }
+      lply = tokens();
+      rply = tokens();
+      parsePly(lply,gameState,0);
+      parsePly(rply,gameState,1);
+      writePieceAnnotation(gameState);
+      writeRelationAnnotation(gameState);
+  }
+    return gameState.annotations;
 };
 
 var s = parse(png);
