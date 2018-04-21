@@ -5,22 +5,15 @@ var png = fs.readFileSync("./game.png").toString();
 var alpha = ['a','b','c','d','e','f','g','h'];
 var updateGameState = function (ln,gameState) {
   gameState.annotations += ln;
-  if (ln.match("[")) { return; }
-  ln =ln.split(/\d\./);
+  if (ln.match(/\[/)) { gameState.annotations += "\n"; return; }
+  ln =ln.split(/\d\d?\./);
   ln.forEach(function (ln) {
+    ln = ln.trim();
     if (ln.length < 5) { return; }
     ln = ln.split(' ');
-    var moveWhite = {};
-    if (ln[0].length == 2) {
-      moveWhite.moveto = (alpha.indexOf(ln[0][0])*8)+parseInt(ln[0]ln[1],2);
-    }
-    else if (ln[0].length == 3) {
-      moveWhite.moveto = (alpha.indexOf(ln[0][1])*8)+parseInt(ln[0]ln[2],2);
-    }
-    else {
-      moveWhite.moveto = (alpha.indexOf(ln[0][1])*8)+parseInt(ln[0]ln[2],2);
-    }
+    console.log(ln);
   });
+  gameState.annotations += "\n";
 };
 
 var initGameState = function () {
@@ -54,10 +47,8 @@ var initGameState = function () {
 };
   
 
-
 var parse = function (lines) {
   var gameState = initGameState();
-  console.log(gameState);
   gameState.annotations = "";
   lines.forEach(function (ln) {updateGameState(ln,gameState) });
   return gameState.annotations;
