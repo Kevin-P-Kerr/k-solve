@@ -3,18 +3,6 @@ var fs = require('fs');
 var png = fs.readFileSync("./game.png").toString();
 
 var alpha = ['a','b','c','d','e','f','g','h'];
-var updateGameState = function (ln,gameState) {
-  gameState.annotations += ln;
-  if (ln.match(/\[/)) { gameState.annotations += "\n"; return; }
-  ln =ln.split(/\d\d?\./);
-  ln.forEach(function (ln) {
-    ln = ln.trim();
-    if (ln.length < 5) { return; }
-    ln = ln.split(' ');
-    console.log(ln);
-  });
-  gameState.annotations += "\n";
-};
 
 var initGameState = function () {
   var order = ["r","n","b","k","q","b","k","r"];
@@ -45,14 +33,63 @@ var initGameState = function () {
   }
   return s;
 };
-  
 
-var parse = function (lines) {
-  var gameState = initGameState();
-  gameState.annotations = "";
-  lines.forEach(function (ln) {updateGameState(ln,gameState) });
-  return gameState.annotations;
+var killwhite = function (str,i) {
+  while (str[i] == '\n' || str[i] == " " || str[i] == '\t' || str[i] == '\r') {
+    i++;
+  }
+  return i;
 };
 
-var s = parse(png.split("\n"));
-console.log(s);
+var TT_LBRAK = 0;
+var TT_RBRAK = 1;
+var TT_SYM = 2;
+var TT_PERIOD = 3;
+
+
+var tokenize = function (str) {
+  var i = 0;
+  var ii = str.length;
+  var tokens = [];
+  var tok;
+  var s,ss;
+  for(;i<ii;i++) {
+    tok = {};
+    i = killwhite(str,i);
+    s = str[i];
+    if (s == '[') {
+      tokens.push({type:TT_LBRAK});
+      continue;
+    }
+    if (s == ']') {
+      tokens.push({type:TT_RBRAK});
+      continue;
+    }
+    if (s == '.') {
+      tokens.push({type:TT_PERIOD});
+      continue;
+    }
+    else {
+      ss = "";
+      while (s !== ' ' && s !== '\t' && s !== '\n'  && s !== '\r' && s !== '.' && i < ii) {
+        ss += s;
+        i++;
+        s = str[i];
+      }
+      i--;
+      tok = {type:TT_SYM,val:ss};
+      tokens.push(tok);
+    }
+  }
+  return tokens;
+
+};  
+
+var parse = function (str) {
+  var gameState = initGameState();
+  gameState.annotations = "";
+  var tokens = tokenize(str);
+  console.log(tokens);
+};
+
+var s = parse(png);
