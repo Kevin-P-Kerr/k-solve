@@ -95,7 +95,94 @@ var makeTokens = function(tokens) {
 
 var getSimpleLocation = function(move) {
   return (alpha.indexOf(move[0])*8)+parseInt(move[1],10)
-}
+};
+
+var getLocation = function (move) {
+  return getSimpleLocation(move[move.length-2]+move[move.length-1]);
+};
+
+var getPreviousLocation = function (move,i,gameState,isWhite) {
+  var loc;
+  if (move.length == 3) {
+    var p = move[0];
+    var test = function (n) {
+      return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
+    };
+    var testTwoDirections = function (n) {
+      if (test(n)) {
+        return n;
+      }
+      if (test(n*-1)) {
+        return n*-1;
+      }
+      return false;
+    };
+    var move
+    if (p == 'b') {
+      var iter = 1;
+      while (iter < 8) {
+        loc = testTwoDirections(7*iter);
+        if (loc) {
+          return loc;
+        }
+        loc = testTwoDirections(9*iter);
+        if (loc) {
+          return loc;
+        }
+        iter++;
+      }
+    }
+    if (p == 'r') {
+      var iter = 1;
+      while (iter < 8) {
+        loc = testTwoDirections(8*iter);
+        if (loc) {
+          return loc;
+        }
+        loc = testTwoDirections(1*iter);
+        if (loc) {
+          return loc;
+        }
+        iter++;
+      }
+    }
+    if (p == 'q') {
+      var iter = 1;
+      while (iter < 8) {
+        loc = testTwoDirections(8*iter);
+        if (loc) {
+          return loc;
+        }
+        loc = testTwoDirections(1*iter);
+        if (loc) {
+          return loc;
+        }
+        loc = testTwoDirections(9*iter);
+        if (loc) {
+          return loc;
+        }
+        loc = testTwoDirections(7*iter);
+        if (loc) {
+          return loc;
+        }
+        iter++;
+      }
+    }
+    if (p == 'n') {
+        var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,1+16+1];
+        var g = 0;
+        var gg = cand.length;
+        for (; g<gg;g++ ){
+          if (test(cand[g])) {
+            return cand[g];
+          }
+        }
+        throw new Error();
+    }
+    throw new Error();
+  }
+
+};
 
 var parsePly = function (ply,gameState,isWhite) {
   var move = ply.val;
@@ -121,7 +208,7 @@ var parsePly = function (ply,gameState,isWhite) {
   }
 
   if (move.length == 2) { // pawn movement
-    sqr = ;
+    sqr = getSimpleLocation(move);
     var psqr = sqr - (8 * (isWhite? 1 : -1));
     gameState[sqr] = gameState[psqr];
     gameState[psqr] = 0;
@@ -135,7 +222,7 @@ var parsePly = function (ply,gameState,isWhite) {
   }
   else {
     var l = getLocation(move);
-    var ll = getPreviousLocation(move,l);
+    var ll = getPreviousLocation(move,l,gameState,isWhite);
     gameState[l] = gameState[ll];
     gameState[ll] = 0;
   }
@@ -164,8 +251,9 @@ var parse = function (str) {
       parsePly(rply,gameState,false);
       writePieceAnnotation(gameState);
       writeRelationAnnotation(gameState);
+    }
   }
-    return gameState.annotations;
+  return gameState.annotations;
 };
 
 var s = parse(png);
