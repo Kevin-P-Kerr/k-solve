@@ -93,7 +93,53 @@ var makeTokens = function(tokens) {
   }
 };
 
+var getSimpleLocation = function(move) {
+  return (alpha.indexOf(move[0])*8)+parseInt(move[1],10)
+}
 
+var parsePly = function (ply,gameState,isWhite) {
+  var move = ply.val;
+  var sqr;
+  if (playVal.match("-")) { // game over
+    return;
+  }
+  if (move === "O-O") {
+    var offset = isWhite? 0:56;
+    gameState[offset+6] = gameState[offset+8];
+    gameState[offset+7] = gameState[offset+5];
+    gameState[offset+5] = 0;
+    gameState[offset+8] = 0;
+    return;
+  }
+  if (move === "O-O-O") {
+    var offset = isWhite? 0:56;
+    gameState[offset+4] = gameState[offset+0];
+    gameState[offset+3] = gameState[offset+5];
+    gameState[offset+5] = 0;
+    gameState[offset+0] = 0;
+    return;
+  }
+
+  if (move.length == 2) { // pawn movement
+    sqr = ;
+    var psqr = sqr - (8 * (isWhite? 1 : -1));
+    gameState[sqr] = gameState[psqr];
+    gameState[psqr] = 0;
+  }
+  else if (move.match("x")) {
+    move = match.split("x");
+    var capture = getSimpleLocation(move[1]);
+    var from = getLocation(move[0]);
+    gameState[capture] = gameState[from];
+    fameState[from] = 0;
+  }
+  else {
+    var l = getLocation(move);
+    var ll = getPreviousLocation(move,l);
+    gameState[l] = gameState[ll];
+    gameState[ll] = 0;
+  }
+};
 
 var parse = function (str) {
   var gameState = initGameState();
@@ -114,8 +160,8 @@ var parse = function (str) {
       }
       lply = tokens();
       rply = tokens();
-      parsePly(lply,gameState,0);
-      parsePly(rply,gameState,1);
+      parsePly(lply,gameState,true);
+      parsePly(rply,gameState,false);
       writePieceAnnotation(gameState);
       writeRelationAnnotation(gameState);
   }
