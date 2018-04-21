@@ -71,7 +71,7 @@ var tokenize = function (str) {
     }
     else {
       ss = "";
-      while (s !== ' ' && s !== '\t' && s !== '\n'  && s !== '\r' && s !== '.' && i < ii) {
+      while (s !== ' ' && s !== '\t' && s !== '\n'  && s !== '\r' && s !== '.' && s!==']' && i < ii) {
         ss += s;
         i++;
         s = str[i];
@@ -88,6 +88,7 @@ var makeTokens = function(tokens) {
   var i = 0;
   return function () {
     var t = tokens[i];
+    console.log(t);
     i++;
     return t;
   }
@@ -187,7 +188,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
 var parsePly = function (ply,gameState,isWhite) {
   var move = ply.val;
   var sqr;
-  if (playVal.match("-")) { // game over
+  if (move.match("-")) { // game over
     return;
   }
   if (move === "O-O") {
