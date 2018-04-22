@@ -18,7 +18,7 @@ var initGameState = function () {
   for (i=9,ii=16;i<=ii;i++) {
     s.push({init:true,color:"white",piece:"p"});
   }
-  for (i=17,ii=48;i<ii;i++) {
+  for (i=17,ii=48;i<=ii;i++) {
     s.push(0);
   }
   for (i=49,ii=56;i<=ii;i++) {
@@ -274,7 +274,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     }
     console.log(move,p,i,getCoord(i));
     cand.forEach(function (n) { console.log(getCoord(n)); });
-    console.log(gameState[cand[6]]);
+    console.log(cand[6],gameState[cand[6]]);
     throw new Error();
   }
   else if (totallyDetermined(move)) {
