@@ -108,7 +108,7 @@ var isCheck = function (move) {
 };
 
 var isUnambiguous = function (move) {
-  return move.length == 3; || (isCheck(move) && move.length == 4);
+  return move.length == 3 || (isCheck(move) && move.length == 4);
 };
 
 var totallyDetermined = function (move) {
@@ -117,11 +117,11 @@ var totallyDetermined = function (move) {
 
 var getPreviousLocation = function (move,i,gameState,isWhite) {
   var loc;
+  var p = move[0];
+  var test = function (n) {
+    return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
+  };
   if (isUnambiguous(move)) {
-    var p = move[0];
-    var test = function (n) {
-      return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
-    };
     var testTwoDirections = function (n) {
       if (test(n)) {
         return n;
@@ -196,12 +196,29 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     throw new Error();
   }
   else if (totallyDetermined(move)) {
-      return 
+      return getSimpleLocation(move[1]+move[2]);
   }
   else {
+    var locator = move[1];
+    iter = 0;
+    var inc;
+    var psqr;
+    if (alpha.indexOf(locator) >= 0) {
+      locator = alpha.indexOf(locator)*8;
+      inc = 8;
+    }
+    else {
+      locator = parseInt(locator,10);
+      inc = 1;
+    }
+    while (iter < 8) {
+      if (test(locator+(inc*iter))) {
+        return locator+(inc*iter);
+      }
+      iter++;
+    }
   }
-
-
+  throw new Error();
 };
 
 var parsePly = function (ply,gameState,isWhite) {
