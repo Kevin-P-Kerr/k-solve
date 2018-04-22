@@ -99,12 +99,25 @@ var getSimpleLocation = function(move) {
 };
 
 var getLocation = function (move) {
-  return getSimpleLocation(move[move.length-2]+move[move.length-1]);
+  var offset = isCheck(move) ? 1 : 0;
+  return getSimpleLocation(move[move.length-(2+offset)]+move[move.length-(1+offset)]);
+};
+
+var isCheck = function (move) {
+  return move.match("#") || move.match(/\+/);
+};
+
+var isUnambiguous = function (move) {
+  return move.length == 3; || (isCheck(move) && move.length == 4);
+};
+
+var totallyDetermined = function (move) {
+  return move.length == 4 || (isCheck(move) && move.length == 5);
 };
 
 var getPreviousLocation = function (move,i,gameState,isWhite) {
   var loc;
-  if (move.length == 3) {
+  if (isUnambiguous(move)) {
     var p = move[0];
     var test = function (n) {
       return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
@@ -182,6 +195,12 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     }
     throw new Error();
   }
+  else if (totallyDetermined(move)) {
+      return 
+  }
+  else {
+  }
+
 
 };
 
