@@ -228,35 +228,23 @@ var getRankAndFile = function (i) {
   var n = i-1;
   while (ll>0) {
     ret.push(n);
-    if (gameState[n]) {
-      break;
-    }
     n--;
     ll--;
   }
   n = i+1;
   while (rl>0) {
     ret.push(n);
-    if (gameState[n]) {
-      break;
-    }
     n++;
     rl--;
   }
   n = i+8;
   while (n <= 64) {
     ret.push(n);
-    if (gameState[n]) {
-      break;
-    }
     n+=8;
   }
   n = i-8;
   while (n >= 1) {
     ret.push(n);
-    if (gameState[n]) {
-      break;
-    }
     n-=8;
   }
   return ret;
@@ -446,6 +434,7 @@ var writeRelationAnnotation = function (gs) {
       }
     }
     if (piece == 'R') {
+      adj = getRankAndFile
     }
     if (piece == 'N') {
     }
