@@ -5,7 +5,7 @@ var png = fs.readFileSync("./game.png").toString();
 var alpha = [false,'a','b','c','d','e','f','g','h'];
 
 var initGameState = function () {
-  var order = [false,"r","n","b","k","q","b","n","r"];
+  var order = [false,"R","N","B","Q","K","B","N","R"];
   var s =[false];
   var i,ii,o;
   for (i=1,ii=8;i<=ii;i++){
@@ -184,18 +184,21 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
   if (isUnambiguous(move)) {
     var cand;
     var move
-    if (p == 'b') {
+    if (p == 'B') {
       cand = getDiagonals(i);
     }
-    if (p == 'r') {
+    if (p == 'R') {
       cand = getRankAndFile(i);
     }
-    if (p == 'q') {
+    if (p == 'Q') {
       var diag = getDiagonals(i);
       cand = getRankAndFile(i);
       diag.forEach(function (i) { cand.push(i); });
     }
-    if (p == 'n') {
+    if (p == 'K') {
+      cand = [i-1,i+1,i-8,i+8];
+    }
+    if (p == 'N') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
     }
     var g = 0;
@@ -236,13 +239,12 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
 var parsePly = function (ply,gameState,isWhite) {
   var move = ply.val;
   var sqr;
-  if (move.match("-")) { // game over
-    return;
-  }
   if (move === "O-O") {
     var offset = isWhite? 0:56;
     gameState[offset+6] = gameState[offset+8];
     gameState[offset+7] = gameState[offset+5];
+    gameState[offset+6].init = false;
+    gameState[offset+7].init =false;
     gameState[offset+5] = 0;
     gameState[offset+8] = 0;
     return;
@@ -251,8 +253,13 @@ var parsePly = function (ply,gameState,isWhite) {
     var offset = isWhite? 0:56;
     gameState[offset+4] = gameState[offset+0];
     gameState[offset+3] = gameState[offset+5];
+    gameState[offset+4].init=false;
+    gameState[offset+3].init=false;
     gameState[offset+5] = 0;
     gameState[offset+0] = 0;
+    return;
+  }
+  if (move.match("-")) { // game over
     return;
   }
 
@@ -269,7 +276,16 @@ var parsePly = function (ply,gameState,isWhite) {
   else if (move.match("x")) {
     move = move.split("x");
     var capture = getLocation(move[1]);
-    var from = getLocation(move[0]);
+    // if this is a pawn capture, things are simpler, maybe
+    var from;
+    if (alpha.indexOf(move[0]) >= 1) {
+      var sign = isWhite ? 1 : -1;
+      var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[0]) ? -1 : 1;
+      from = capture+(8*sign)+shift;
+    }
+    else {
+      from = getPreviousLocation(move[0]+"aa",capture,gameState,isWhite);
+    }
     gameState[capture] = gameState[from];
     gameState[capture].init = false;
     gameState[from] = 0;
@@ -313,7 +329,6 @@ var writePieceAnnotation = function (gameState) {
 };
 
 var parse = function (str) {
-  str = str.toLowerCase();
   var gameState = initGameState();
   gameState.annotations = "";
   var tokens = tokenize(str);
