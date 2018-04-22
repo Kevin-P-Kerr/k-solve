@@ -88,14 +88,14 @@ var makeTokens = function(tokens) {
   var i = 0;
   return function () {
     var t = tokens[i];
-    console.log(t);
+    //console.log(t);
     i++;
     return t;
   }
 };
 
 var getSimpleLocation = function(move) {
-  return (alpha.indexOf(move[0])*8)+parseInt(move[1],10)
+  return (alpha.indexOf(move[0])+1)+((parseInt(move[1],10)-1) *8);
 };
 
 var getLocation = function (move) {
@@ -183,7 +183,9 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       }
     }
     if (p == 'n') {
+       // console.log(i);
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,1+16+1];
+        //console.log(cand);
         var g = 0;
         var gg = cand.length;
         for (; g<gg;g++ ){
@@ -246,16 +248,18 @@ var parsePly = function (ply,gameState,isWhite) {
 
   if (move.length == 2) { // pawn movement
     sqr = getSimpleLocation(move);
+    console.log(sqr);
     var psqr = sqr - (8 * (isWhite? 1 : -1));
     gameState[sqr] = gameState[psqr];
     gameState[psqr] = 0;
+    gameState[sqr].init = false;
   }
   else if (move.match("x")) {
     move = match.split("x");
     var capture = getSimpleLocation(move[1]);
     var from = getLocation(move[0]);
     gameState[capture] = gameState[from];
-    fameState[from] = 0;
+    gameState[from] = 0;
   }
   else {
     var l = getLocation(move);
@@ -265,12 +269,38 @@ var parsePly = function (ply,gameState,isWhite) {
   }
 };
 
+var getCoord = function (i) {
+  i = i+1;
+  var file = i%8;
+  var rank = (i-file)/8;
+  return alpha[file]+(rank+"");
+};
+
+var writePieceAnnotation = function (gameState) {
+  var str = gameState.annotations;
+  str += "\n\t";
+  var i =0;
+  var ii = gameState.length;
+  var sqr,sqrNum;
+  for (;i<ii;i++) {
+    sqr = gameState[i];
+    if (sqr && !sqr.init) {
+      str += (sqr.piece + getCoord(i));
+    }
+  }
+  gameState.annotations = (str+"\n");
+    
+};
+
 var parse = function (str) {
+  str = str.toLowerCase();
   var gameState = initGameState();
   gameState.annotations = "";
   var tokens = tokenize(str);
   var tok;
   var lply,rply;
+  var moveNum = 1;
+  try {
   while (tok = tokens()) {
     if (tok.type == TT_LBRAK) { //skip
       while (tok.type !== TT_RBRAK) {
@@ -284,12 +314,14 @@ var parse = function (str) {
       }
       lply = tokens();
       rply = tokens();
+      gameState.annotations += ("move " +moveNum++ +":\n");
+      gameState.annotations += (lply.val +" " +rply.val);
       parsePly(lply,gameState,true);
       parsePly(rply,gameState,false);
       writePieceAnnotation(gameState);
-      writeRelationAnnotation(gameState);
+  //    writeRelationAnnotation(gameState);
     }
-  }
+  } } catch(e) { console.log(gameState.annotations); console.log(e); }
   return gameState.annotations;
 };
 
