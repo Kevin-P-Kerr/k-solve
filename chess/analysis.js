@@ -153,6 +153,28 @@ var getDiagonals = function (i) {
   }
   return ret;
 };
+
+var getRankAndFile = function (i) {
+  var ret = [];
+  var n = i;
+  while (n >= 1) {
+    ret.push(n-1);
+  }
+  n = i;
+  while (n>=8) {
+    ret.push(n+1);
+  }
+  n = i;
+  while (n >= 1) {
+    ret.push(n-8);
+  }
+  n = i;
+  while (n <= 64) {
+    ret.push(n+8);
+  }
+  return ret;
+};
+
 var getPreviousLocation = function (move,i,gameState,isWhite) {
   console.log(getCoord(i));
   var loc;
@@ -167,8 +189,12 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       cand = getDiagonals(i);
     }
     if (p == 'r') {
+      cand = getRankAndFile(i);
     }
     if (p == 'q') {
+      var diag = getDiagonals(i);
+      cand = getRankAndFile(i);
+      diag.forEach(function (i) { cand.push(i); });
     }
     if (p == 'n') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
