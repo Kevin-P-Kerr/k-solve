@@ -18,15 +18,15 @@ var initGameState = function () {
   for (i=9,ii=16;i<=ii;i++) {
     s.push({init:true,color:"white",piece:"p"});
   }
-  for (i=17,ii=32;i<ii;i++) {
+  for (i=17,ii=48;i<ii;i++) {
     s.push(0);
   }
-  for (i=33,ii=40;i<=ii;i++) {
+  for (i=49,ii=56;i<=ii;i++) {
     s.push({init:true,color:"black",piece:"p"});
   }
-  for (i=41,ii=48;i<ii;i++) {
+  for (i=57,ii=64;i<ii;i++) {
     o = {};
-    o.piece = order[i-40];
+    o.piece = order[i-57];
     o.init = true;
     o.color = "black";
     s.push(o);
@@ -250,6 +250,9 @@ var parsePly = function (ply,gameState,isWhite) {
     sqr = getSimpleLocation(move);
     console.log(sqr);
     var psqr = sqr - (8 * (isWhite? 1 : -1));
+    if (!gameState[psqr]) {
+      psqr = psqr - (8*(isWhite? 1:-1));
+    }
     gameState[sqr] = gameState[psqr];
     gameState[psqr] = 0;
     gameState[sqr].init = false;
@@ -270,10 +273,9 @@ var parsePly = function (ply,gameState,isWhite) {
 };
 
 var getCoord = function (i) {
-  i = i+1;
   var file = i%8;
-  var rank = (i-file)/8;
-  return alpha[file]+(rank+"");
+  var rank = ((i-file)/8)+1;
+  return alpha[file-1]+(rank+"");
 };
 
 var writePieceAnnotation = function (gameState) {
@@ -286,6 +288,7 @@ var writePieceAnnotation = function (gameState) {
     sqr = gameState[i];
     if (sqr && !sqr.init) {
       str += (sqr.piece + getCoord(i));
+      str += " ";
     }
   }
   gameState.annotations = (str+"\n");
