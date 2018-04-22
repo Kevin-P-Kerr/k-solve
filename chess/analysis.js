@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-var png = fs.readFileSync("./game.png").toString();
+var png = fs.readFileSync("./morphyanderssen.png").toString();
 
 var alpha = [false,'a','b','c','d','e','f','g','h'];
 
@@ -115,6 +115,9 @@ var totallyDetermined = function (move) {
 };
 
 var getRD = function (i,up) {
+  if ((i%8) ==0) {
+    return false;
+  }
   var sign = up ? 1 : -1;
   var n = i+(9*sign);
   if (n <= 64 && n>=1) {
@@ -124,6 +127,9 @@ var getRD = function (i,up) {
 };
 
 var getLD = function (i,up) {
+  if (i%8 == 1) {
+    return false;
+  }
   var sign = up ? 1 : -1;
   var n = i+(7*sign);
   if (n <= 64 && n >= 1) {
@@ -286,8 +292,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
-    console.log(move,p,i,getCoord(i));
-    cand.forEach(function (n) { console.log(getCoord(n)); });
     throw new Error();
   }
   else if (totallyDetermined(move)) {
@@ -448,14 +452,14 @@ var getNightMoves = function (i) {
   return ret;
 };
 
-var writeRelationAnnotation = function (gs) {
+var writeRelationAnnotation = function (gs,onlyInit) {
   var str = "";
   var i = 0;
   var ii = gs.length;
   var sqr,piece,adj,n;
   for (;i<ii;i++) {
     sqr = gs[i];
-    if (!sqr) { continue;}
+    if (!sqr || (sqr.init && onlyInit)) { continue;}
     piece = sqr.piece;
     if (piece == 'p') {
       //TODO: en passant
@@ -533,9 +537,10 @@ var parse = function (str) {
       writePieceAnnotation(gameState,"white");
       writePieceAnnotation(gameState,"black");
       gameState.annotations += "\n";
-      writeRelationAnnotation(gameState);
+      writeRelationAnnotation(gameState,false);
+      gameState.annotations += "\n";
     }
-  } } catch(e) { console.log(gameState.annotations);  console.log(e.stack); }
+  } } catch(e) { /*console.log(gameState.annotations); */  console.log(e.stack); }
   return gameState.annotations;
 };
 
