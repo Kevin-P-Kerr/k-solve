@@ -115,6 +115,44 @@ var totallyDetermined = function (move) {
   return move.length == 4 || (isCheck(move) && move.length == 5);
 };
 
+var getRD = function (i,up) {
+  var sign = up ? 1 : -1;
+  var n = i+(9*sign);
+  if (n <= 64 && n>=1) {
+    return n;
+  }
+  return false;
+};
+
+var getLD = function (i,up) {
+  var sign = up ? 1 : -1;
+  var n = i+(7*sign);
+  if (n <= 64 && n >= 1) {
+    return n;
+  }
+  return false;
+};
+
+var getDiagonals = function (i) {
+  var d = i;
+  var ret = [];
+  while (d = getRD(d,true)) {
+    ret.push(d);
+  }
+  d = i;
+  while (d = getLD(d,true)) {
+    ret.push(d);
+  }
+  d = i;
+  while (d = getRD(d,false)) {
+    ret.push(d);
+  }
+  d = i;
+  while (d = getLD(d,false)) {
+    ret.push(d);
+  }
+  return ret;
+};
 var getPreviousLocation = function (move,i,gameState,isWhite) {
   console.log(getCoord(i));
   var loc;
@@ -123,8 +161,10 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     return gameState[n] && ((gameState[n].color == "white") == isWhite) && gameState[n].piece == p;
   };
   if (isUnambiguous(move)) {
+    var cand;
     var move
     if (p == 'b') {
+      cand = getDiagonals(i);
     }
     if (p == 'r') {
     }
@@ -132,14 +172,14 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     }
     if (p == 'n') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
-        var g = 0;
-        var gg = cand.length;
-        for (; g<gg;g++ ){
-          if (test(cand[g])) {
-            return cand[g];
-          }
-        }
-        throw new Error();
+    }
+    console.log(cand);
+    var g = 0;
+    var gg = cand.length;
+    for (; g<gg;g++ ){
+      if (test(cand[g])) {
+        return cand[g];
+      }
     }
     throw new Error();
   }
@@ -203,7 +243,7 @@ var parsePly = function (ply,gameState,isWhite) {
     gameState[sqr].init = false;
   }
   else if (move.match("x")) {
-    move = match.split("x");
+    move = move.split("x");
     var capture = getSimpleLocation(move[1]);
     var from = getLocation(move[0]);
     gameState[capture] = gameState[from];
