@@ -410,14 +410,13 @@ var writePieceAnnotation = function (gameState,color) {
     }
   }
   gameState.annotations = (str);
-    
 };
 
 var writeRelationAnnotation = function (gs) {
-  var annos = "";
+  var str = "";
   var i = 0;
   var ii = gs.length;
-  var sqr,piece,adj,n,nn;
+  var sqr,piece,adj,n;
   for (;i<ii;i++) {
     sqr = gs[i];
     if (!sqr) { continue;}
@@ -430,21 +429,40 @@ var writeRelationAnnotation = function (gs) {
         adj = [i+7];
       }
       else {
-        adj = [i+7,i+8];
+        adj = [i+7,i+9];
       }
     }
     if (piece == 'R') {
-      adj = getRankAndFile
+      adj = getRankAndFileBlocking(i,gs);
     }
     if (piece == 'N') {
+      adj = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
     }
     if (piece == 'B') {
+      adj = getDiagonalsBlocking(i,gs);
     }
     if (piece == 'Q') {
+      adj = getRankAndFileBlocking(i,gs);
+      var dia = getDiagonalsBlocking(i,gs);
+      dia.forEach(function (s) { adj.push(s); });
     }
     if (piece == 'K') {
+      adj = [i-1,i+1,i-8,i+8,i+9,i-9,i+7,i-7]
     }
+    adj.forEach(function (n) {
+      var o_sqr = gs[n];
+      if (!o_sqr) { return; }
+      if (o_sqr.color == sqr.color) {
+        str += "(defend ";
+      }
+      else {
+        str += "(attack ";
+      }
+      str += (getCoord(i) + " " + getCoord(n));
+      str += ") ";
+    });
   }
+  gs.annotations += str;
 };
 
 var parse = function (str) {
