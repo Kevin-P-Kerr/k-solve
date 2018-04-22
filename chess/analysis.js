@@ -116,13 +116,11 @@ var totallyDetermined = function (move) {
 };
 
 var getPreviousLocation = function (move,i,gameState,isWhite) {
+  console.log(getCoord(i));
   var loc;
   var p = move[0];
   var test = function (n) {
-    if (n == 7) {
-      console.log(gameState[n]);
-    }
-    return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
+    return gameState[n] && ((gameState[n].color == "white") == isWhite) && gameState[n].piece == p;
   };
   if (isUnambiguous(move)) {
     var testTwoDirections = function (n) {
@@ -187,8 +185,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     }
     if (p == 'n') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
-        console.log(getCoord(i),i);
-        console.log(cand);
         var g = 0;
         var gg = cand.length;
         for (; g<gg;g++ ){
@@ -264,12 +260,14 @@ var parsePly = function (ply,gameState,isWhite) {
     var capture = getSimpleLocation(move[1]);
     var from = getLocation(move[0]);
     gameState[capture] = gameState[from];
+    gameState[capture].init = false;
     gameState[from] = 0;
   }
   else {
     var l = getLocation(move);
     var ll = getPreviousLocation(move,l,gameState,isWhite);
     gameState[l] = gameState[ll];
+    gameState[l].init = false;
     gameState[ll] = 0;
   }
 };
@@ -290,7 +288,12 @@ var writePieceAnnotation = function (gameState) {
   for (;i<ii;i++) {
     sqr = gameState[i];
     if (sqr && !sqr.init) {
-      str += (sqr.piece + getCoord(i));
+      if (sqr.piece != 'p') {
+        str += (sqr.piece + getCoord(i));
+      }
+      else {
+        str += (getCoord(i));
+      }
       str += " ";
     }
   }
