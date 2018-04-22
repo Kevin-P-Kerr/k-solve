@@ -181,7 +181,7 @@ var getDiagonalsBlocking = function (i,gameState) {
 
 var getRankAndFileBlocking = function (i,gameState) {
   var ret = [];
-  var n = i;
+  var n = i-1;
   var ll = i%8;
   var rl = 8-ll;
   while (ll>0) {
@@ -192,7 +192,7 @@ var getRankAndFileBlocking = function (i,gameState) {
     n--;
     ll--;
   }
-  n = i;
+  n = i+1;
   while (rl>0) {
     if (gameState[n]) {
       ret.push(n);
@@ -201,7 +201,7 @@ var getRankAndFileBlocking = function (i,gameState) {
     n++;
     rl--;
   }
-  n = i;
+  n = i+8;
   while (n <= 64) {
     if (gameState[n]) {
       ret.push(n);
@@ -209,7 +209,7 @@ var getRankAndFileBlocking = function (i,gameState) {
     }
     n+=8;
   }
-  n = i;
+  n = i-8;
   while (n >= 1) {
     if (gameState[n]) {
       ret.push(n);
@@ -217,6 +217,7 @@ var getRankAndFileBlocking = function (i,gameState) {
     }
     n-=8;
   }
+  console.log(ret);
   return ret;
 };
 
@@ -272,8 +273,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
-    console.log(p);
-    console.log(move);
     throw new Error();
   }
   else if (totallyDetermined(move)) {
