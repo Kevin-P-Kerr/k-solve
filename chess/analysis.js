@@ -272,6 +272,9 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
+    console.log(move,p,i,getCoord(i));
+    cand.forEach(function (n) { console.log(getCoord(n)); });
+    console.log(gameState[cand[6]]);
     throw new Error();
   }
   else if (totallyDetermined(move)) {
