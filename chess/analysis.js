@@ -156,21 +156,16 @@ var getDiagonals = function (i) {
 
 var getRankAndFile = function (i) {
   var ret = [];
-  var n = i;
-  while (n >= 1) {
-    ret.push(n-1);
+  var leftLimit = Math.floor(i/8)*8;
+  var rightLimit = leftLimit+8;
+  for (;leftLimit < rightLimit;leftLimit++) {
+    ret.push(leftLimit);
   }
-  n = i;
-  while (n>=8) {
-    ret.push(n+1);
-  }
-  n = i;
-  while (n >= 1) {
-    ret.push(n-8);
-  }
-  n = i;
-  while (n <= 64) {
-    ret.push(n+8);
+  var lower = i%8;
+  lower = lower == 0 ? 8 : lower;
+  var upper = 56+lower;
+  for (;lower<=upper;lower+=8) {
+    ret.push(lower);
   }
   return ret;
 };
@@ -227,7 +222,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       inc = 1;
     }
     while (iter < 8) {
-      console.log(iter);
       if (test(locator+(inc*iter))) {
         return locator+(inc*iter);
       }
