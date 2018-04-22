@@ -112,7 +112,7 @@ var isUnambiguous = function (move) {
 };
 
 var totallyDetermined = function (move) {
-  return move.length == 4 || (isCheck(move) && move.length == 5);
+  return move.length == 5 || (isCheck(move) && move.length == 6);
 };
 
 var getRD = function (i,up) {
@@ -218,8 +218,8 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     iter = 0;
     var inc;
     var psqr;
-    if (alpha.indexOf(locator) >= 0) {
-      locator = alpha.indexOf(locator)*8;
+    if (alpha.indexOf(locator) >= 1) {
+      locator = alpha.indexOf(locator);
       inc = 8;
     }
     else {
@@ -227,6 +227,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       inc = 1;
     }
     while (iter < 8) {
+      console.log(iter);
       if (test(locator+(inc*iter))) {
         return locator+(inc*iter);
       }
@@ -281,7 +282,11 @@ var parsePly = function (ply,gameState,isWhite) {
     if (alpha.indexOf(move[0]) >= 1) {
       var sign = isWhite ? 1 : -1;
       var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[0]) ? -1 : 1;
-      from = capture+(8*sign)+shift;
+      from = capture-(8*sign)+shift;
+      // check for en passant
+      if (!gameState[capture]) {
+        capture = capture+(8*sign);
+      }
     }
     else {
       from = getPreviousLocation(move[0]+"aa",capture,gameState,isWhite);
@@ -306,15 +311,15 @@ var getCoord = function (i) {
   return alpha[file]+(rank+"");
 };
 
-var writePieceAnnotation = function (gameState) {
+var writePieceAnnotation = function (gameState,color) {
   var str = gameState.annotations;
-  str += "\n\t";
+  str += ("\nfor " + color + "\n\t");
   var i =0;
   var ii = gameState.length;
   var sqr,sqrNum;
   for (;i<ii;i++) {
     sqr = gameState[i];
-    if (sqr && !sqr.init) {
+    if (sqr && !sqr.init && sqr.color == color) {
       if (sqr.piece != 'p') {
         str += (sqr.piece + getCoord(i));
       }
@@ -353,7 +358,8 @@ var parse = function (str) {
       gameState.annotations += (lply.val +" " +rply.val);
       parsePly(lply,gameState,true);
       parsePly(rply,gameState,false);
-      writePieceAnnotation(gameState);
+      writePieceAnnotation(gameState,"white");
+      writePieceAnnotation(gameState,"black");
   //    writeRelationAnnotation(gameState);
     }
   } } catch(e) { console.log(gameState.annotations); console.log(e.stack); }
