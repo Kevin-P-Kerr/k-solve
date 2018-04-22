@@ -222,16 +222,42 @@ var getRankAndFileBlocking = function (i,gameState) {
 
 var getRankAndFile = function (i) {
   var ret = [];
-  var leftLimit = Math.floor(i/8)*8;
-  var rightLimit = leftLimit+8;
-  for (;leftLimit < rightLimit;leftLimit++) {
-    ret.push(leftLimit);
+  var ll = i%8;
+  if (ll == 0) { ll = 8; }
+  var rl = 8-ll;
+  var n = i-1;
+  while (ll>0) {
+    ret.push(n);
+    if (gameState[n]) {
+      break;
+    }
+    n--;
+    ll--;
   }
-  var lower = i%8;
-  lower = lower == 0 ? 8 : lower;
-  var upper = 56+lower;
-  for (;lower<=upper;lower+=8) {
-    ret.push(lower);
+  n = i+1;
+  while (rl>0) {
+    ret.push(n);
+    if (gameState[n]) {
+      break;
+    }
+    n++;
+    rl--;
+  }
+  n = i+8;
+  while (n <= 64) {
+    ret.push(n);
+    if (gameState[n]) {
+      break;
+    }
+    n+=8;
+  }
+  n = i-8;
+  while (n >= 1) {
+    ret.push(n);
+    if (gameState[n]) {
+      break;
+    }
+    n-=8;
   }
   return ret;
 };
@@ -399,6 +425,39 @@ var writePieceAnnotation = function (gameState,color) {
     
 };
 
+var writeRelationAnnotation = function (gs) {
+  var annos = "";
+  var i = 0;
+  var ii = gs.length;
+  var sqr,piece,adj,n,nn;
+  for (;i<ii;i++) {
+    sqr = gs[i];
+    if (!sqr) { continue;}
+    piece = sqr.piece;
+    if (piece == 'p') {
+      if ((i%8) == 1) {
+        adj = [i+9];
+      }
+      else if ((i%8) == 0) {
+        adj = [i+7];
+      }
+      else {
+        adj = [i+7,i+8];
+      }
+    }
+    if (piece == 'R') {
+    }
+    if (piece == 'N') {
+    }
+    if (piece == 'B') {
+    }
+    if (piece == 'Q') {
+    }
+    if (piece == 'K') {
+    }
+  }
+};
+
 var parse = function (str) {
   var gameState = initGameState();
   gameState.annotations = "";
@@ -430,7 +489,7 @@ var parse = function (str) {
       writePieceAnnotation(gameState,"white");
       writePieceAnnotation(gameState,"black");
       gameState.annotations += "\n";
-  //    writeRelationAnnotation(gameState);
+      writeRelationAnnotation(gameState);
     }
   } } catch(e) { console.log(gameState.annotations);  console.log(e.stack); }
   return gameState.annotations;
