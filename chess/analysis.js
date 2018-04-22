@@ -395,7 +395,7 @@ var writePieceAnnotation = function (gameState,color) {
       str += " ";
     }
   }
-  gameState.annotations = (str+"\n");
+  gameState.annotations = (str);
     
 };
 
@@ -415,17 +415,21 @@ var parse = function (str) {
     }
     if (tok.type == TT_SYM) {
       tok = tokens();
+      if (!tok) { // game over
+        return gameState.annotations;
+      }
       if (tok.type !== TT_PERIOD) {
         throw new Error();
       }
       lply = tokens();
       rply = tokens();
-      gameState.annotations += ("move " +moveNum++ +":\n");
+      gameState.annotations += ("\nmove " +moveNum++ +":\n");
       gameState.annotations += (lply.val +" " +rply.val);
       parsePly(lply,gameState,true);
       parsePly(rply,gameState,false);
       writePieceAnnotation(gameState,"white");
       writePieceAnnotation(gameState,"black");
+      gameState.annotations += "\n";
   //    writeRelationAnnotation(gameState);
     }
   } } catch(e) { console.log(gameState.annotations);  console.log(e.stack); }
@@ -433,3 +437,4 @@ var parse = function (str) {
 };
 
 var s = parse(png);
+console.log(s);
