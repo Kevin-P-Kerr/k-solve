@@ -288,7 +288,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     }
     console.log(move,p,i,getCoord(i));
     cand.forEach(function (n) { console.log(getCoord(n)); });
-    console.log(cand[6],gameState[cand[6]]);
     throw new Error();
   }
   else if (totallyDetermined(move)) {
@@ -418,7 +417,7 @@ var getNightMoves = function (i) {
     if ((i/8) <= 6) {
       ret.push(i-1+16);
     }
-    if ((i/8) >= 3) {
+    if ((i/8) >= 2) {
       ret.push(i-1-16);
     }
   }
@@ -426,7 +425,7 @@ var getNightMoves = function (i) {
     if ((i/8) <= 7) {
       ret.push(i-2+8);
     }
-    if ((i/8) >= 2) {
+    if ((i/8) >= 1) {
       ret.push(i-2-8);
     }
   }
@@ -434,7 +433,7 @@ var getNightMoves = function (i) {
     if ((i/8) <= 6) {
       ret.push(i+1+16);
     }
-    if ((i/8) >= 3) {
+    if ((i/8) >= 2) {
       ret.push(i+1-16);
     }
   }
@@ -442,7 +441,7 @@ var getNightMoves = function (i) {
     if ((i/8) <= 7) {
       ret.push(i+2+8);
     }
-    if ((i/8) >= 2) {
+    if ((i/8) >= 1) {
       ret.push(i+2-8);
     }
   }
