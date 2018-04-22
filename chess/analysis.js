@@ -123,65 +123,12 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     return gameState[n] && ((gameState[n].color == "white") == isWhite) && gameState[n].piece == p;
   };
   if (isUnambiguous(move)) {
-    var testTwoDirections = function (n) {
-      if (test(n)) {
-        return n;
-      }
-      if (test(n*-1)) {
-        return n*-1;
-      }
-      return false;
-    };
     var move
     if (p == 'b') {
-      var iter = 1;
-      while (iter < 8) {
-        loc = testTwoDirections(7*iter);
-        if (loc) {
-          return loc;
-        }
-        loc = testTwoDirections(9*iter);
-        if (loc) {
-          return loc;
-        }
-        iter++;
-      }
     }
     if (p == 'r') {
-      var iter = 1;
-      while (iter < 8) {
-        loc = testTwoDirections(8*iter);
-        if (loc) {
-          return loc;
-        }
-        loc = testTwoDirections(1*iter);
-        if (loc) {
-          return loc;
-        }
-        iter++;
-      }
     }
     if (p == 'q') {
-      var iter = 1;
-      while (iter < 8) {
-        loc = testTwoDirections(8*iter);
-        if (loc) {
-          return loc;
-        }
-        loc = testTwoDirections(1*iter);
-        if (loc) {
-          return loc;
-        }
-        loc = testTwoDirections(9*iter);
-        if (loc) {
-          return loc;
-        }
-        loc = testTwoDirections(7*iter);
-        if (loc) {
-          return loc;
-        }
-        iter++;
-      }
     }
     if (p == 'n') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
