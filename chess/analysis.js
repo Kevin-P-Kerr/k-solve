@@ -176,7 +176,6 @@ var getRankAndFile = function (i) {
 };
 
 var getPreviousLocation = function (move,i,gameState,isWhite) {
-  console.log(getCoord(i));
   var loc;
   var p = move[0];
   var test = function (n) {
@@ -199,7 +198,6 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     if (p == 'n') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
     }
-    console.log(cand);
     var g = 0;
     var gg = cand.length;
     for (; g<gg;g++ ){
@@ -270,7 +268,7 @@ var parsePly = function (ply,gameState,isWhite) {
   }
   else if (move.match("x")) {
     move = move.split("x");
-    var capture = getSimpleLocation(move[1]);
+    var capture = getLocation(move[1]);
     var from = getLocation(move[0]);
     gameState[capture] = gameState[from];
     gameState[capture].init = false;
