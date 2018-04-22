@@ -2,11 +2,11 @@ var fs = require('fs');
 
 var png = fs.readFileSync("./game.png").toString();
 
-var alpha = ['a','b','c','d','e','f','g','h'];
+var alpha = [false,'a','b','c','d','e','f','g','h'];
 
 var initGameState = function () {
-  var order = ["r","n","b","k","q","b","k","r"];
-  var s =[];
+  var order = [false,"r","n","b","k","q","b","n","r"];
+  var s =[false];
   var i,ii,o;
   for (i=1,ii=8;i<=ii;i++){
     o = {};
@@ -95,7 +95,7 @@ var makeTokens = function(tokens) {
 };
 
 var getSimpleLocation = function(move) {
-  return (alpha.indexOf(move[0])+1)+((parseInt(move[1],10)-1) *8);
+  return (alpha.indexOf(move[0]))+((parseInt(move[1],10)-1) *8);
 };
 
 var getLocation = function (move) {
@@ -119,6 +119,9 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
   var loc;
   var p = move[0];
   var test = function (n) {
+    if (n == 7) {
+      console.log(gameState[n]);
+    }
     return gameState[n] && (gameState[n].color == "white" && isWhite) && gameState[n].piece == p;
   };
   if (isUnambiguous(move)) {
@@ -183,9 +186,9 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       }
     }
     if (p == 'n') {
-       // console.log(i);
-        var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,1+16+1];
-        //console.log(cand);
+        var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
+        console.log(getCoord(i),i);
+        console.log(cand);
         var g = 0;
         var gg = cand.length;
         for (; g<gg;g++ ){
@@ -248,7 +251,6 @@ var parsePly = function (ply,gameState,isWhite) {
 
   if (move.length == 2) { // pawn movement
     sqr = getSimpleLocation(move);
-    console.log(sqr);
     var psqr = sqr - (8 * (isWhite? 1 : -1));
     if (!gameState[psqr]) {
       psqr = psqr - (8*(isWhite? 1:-1));
@@ -275,7 +277,8 @@ var parsePly = function (ply,gameState,isWhite) {
 var getCoord = function (i) {
   var file = i%8;
   var rank = ((i-file)/8)+1;
-  return alpha[file-1]+(rank+"");
+  if (file == 0) { file == 8; }
+  return alpha[file]+(rank+"");
 };
 
 var writePieceAnnotation = function (gameState) {
@@ -324,7 +327,7 @@ var parse = function (str) {
       writePieceAnnotation(gameState);
   //    writeRelationAnnotation(gameState);
     }
-  } } catch(e) { console.log(gameState.annotations); console.log(e); }
+  } } catch(e) { console.log(gameState.annotations); console.log(e.stack); }
   return gameState.annotations;
 };
 
