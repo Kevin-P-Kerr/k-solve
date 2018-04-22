@@ -458,6 +458,7 @@ var writeRelationAnnotation = function (gs) {
     if (!sqr) { continue;}
     piece = sqr.piece;
     if (piece == 'p') {
+      //TODO: en passant
       if ((i%8) == 1) {
         adj = [i+9];
       }
