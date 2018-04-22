@@ -274,7 +274,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       cand = [i-1,i+1,i-8,i+8,i+9,i-9,i+7,i-7];
     }
     else if (p == 'N') {
-        var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
+        var cand = getNightMoves(i);
     }
     else {
       throw new Error();
@@ -412,6 +412,43 @@ var writePieceAnnotation = function (gameState,color) {
   gameState.annotations = (str);
 };
 
+var getNightMoves = function (i) {
+  var ret = [];
+  if (i%8 >= 2) {
+    if ((i/8) <= 6) {
+      ret.push(i-1+16);
+    }
+    if ((i/8) >= 3) {
+      ret.push(i-1-16);
+    }
+  }
+  if (i%8 >= 3) {
+    if ((i/8) <= 7) {
+      ret.push(i-2+8);
+    }
+    if ((i/8) >= 2) {
+      ret.push(i-2-8);
+    }
+  }
+  if (i%8 <= 7) {
+    if ((i/8) <= 6) {
+      ret.push(i+1+16);
+    }
+    if ((i/8) >= 3) {
+      ret.push(i+1-16);
+    }
+  }
+  if (i%8 <= 6) {
+    if ((i/8) <= 7) {
+      ret.push(i+2+8);
+    }
+    if ((i/8) >= 2) {
+      ret.push(i+2-8);
+    }
+  }
+  return ret;
+};
+
 var writeRelationAnnotation = function (gs) {
   var str = "";
   var i = 0;
@@ -436,7 +473,7 @@ var writeRelationAnnotation = function (gs) {
       adj = getRankAndFileBlocking(i,gs);
     }
     if (piece == 'N') {
-      adj = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
+      adj = getNightMoves(i);
     }
     if (piece == 'B') {
       adj = getDiagonalsBlocking(i,gs);
