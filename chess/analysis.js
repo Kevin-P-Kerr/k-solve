@@ -301,7 +301,7 @@ var parsePly = function (ply,gameState,isWhite) {
 var getCoord = function (i) {
   var file = i%8;
   var rank = ((i-file)/8)+1;
-  if (file == 0) { file == 8; }
+  if (file == 0) { file = 8; }
   return alpha[file]+(rank+"");
 };
 
