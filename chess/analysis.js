@@ -325,6 +325,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       iter++;
     }
   }
+  console.log(move,i,getCoord(i));
   throw new Error();
 };
 
@@ -425,7 +426,11 @@ var writePieceAnnotation = function (gameState,color) {
 
 var getNightMoves = function (i) {
   var ret = [];
-  if (i%8 >= 2) {
+  var file = i%8;
+  if (file == 0) {
+    file = 8;
+  }
+  if (file >= 2) {
     if ((i/8) <= 6) {
       ret.push(i-1+16);
     }
@@ -433,7 +438,7 @@ var getNightMoves = function (i) {
       ret.push(i-1-16);
     }
   }
-  if (i%8 >= 3) {
+  if (file >= 3) {
     if ((i/8) <= 7) {
       ret.push(i-2+8);
     }
@@ -441,7 +446,7 @@ var getNightMoves = function (i) {
       ret.push(i-2-8);
     }
   }
-  if (i%8 <= 7) {
+  if (file <= 7) {
     if ((i/8) <= 6) {
       ret.push(i+1+16);
     }
@@ -449,7 +454,7 @@ var getNightMoves = function (i) {
       ret.push(i+1-16);
     }
   }
-  if (i%8 <= 6) {
+  if (file <= 6) {
     if ((i/8) <= 7) {
       ret.push(i+2+8);
     }
