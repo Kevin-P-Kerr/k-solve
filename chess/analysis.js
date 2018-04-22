@@ -217,7 +217,6 @@ var getRankAndFileBlocking = function (i,gameState) {
     }
     n-=8;
   }
-  console.log(ret);
   return ret;
 };
 
@@ -258,7 +257,7 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       diag.forEach(function (i) { cand.push(i); });
     }
     else if (p == 'K') {
-      cand = [i-1,i+1,i-8,i+8];
+      cand = [i-1,i+1,i-8,i+8,i+9,i-9,i+7,i-7];
     }
     else if (p == 'N') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
@@ -273,6 +272,8 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
+    console.log(move);
+    cand.forEach(function (c) { console.log(getCoord(c)); });
     throw new Error();
   }
   else if (totallyDetermined(move)) {
