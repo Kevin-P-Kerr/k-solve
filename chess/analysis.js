@@ -119,7 +119,8 @@ var getRD = function (i,up) {
     return false;
   }
   var sign = up ? 1 : -1;
-  var n = i+(9*sign);
+  var offset = up ? 9:7;
+  var n = i+(offset*sign);
   if (n <= 64 && n>=1) {
     return n;
   }
@@ -131,7 +132,8 @@ var getLD = function (i,up) {
     return false;
   }
   var sign = up ? 1 : -1;
-  var n = i+(7*sign);
+  var offset = up? 7:9;
+  var n = i+(offset*sign);
   if (n <= 64 && n >= 1) {
     return n;
   }
@@ -141,17 +143,18 @@ var getLD = function (i,up) {
 var getDiagonals = function (i) {
   var d = i;
   var ret = [];
-  while (d = getRD(d,true)) {
+  while ((d = getRD(d,true))) {
     ret.push(d);
   }
+  if (d !== false) { throw new Error(); }
   d = i;
   while (d = getLD(d,true)) {
     ret.push(d);
   }
   d = i;
-  while (d = getRD(d,false)) {
-    ret.push(d);
-  }
+ // while (d = getRD(d,false)) {
+   // ret.push(d);
+ // }
   d = i;
   while (d = getLD(d,false)) {
     ret.push(d);
@@ -292,6 +295,11 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
+    console.log(move);
+    console.log(getCoord(i));
+    cand.forEach(function (i) {
+      console.log(getCoord(i));
+    });
     throw new Error();
   }
   else if (totallyDetermined(move)) {
@@ -540,7 +548,7 @@ var parse = function (str) {
       writeRelationAnnotation(gameState,false);
       gameState.annotations += "\n";
     }
-  } } catch(e) { /*console.log(gameState.annotations); */  console.log(e.stack); }
+  } } catch(e) { /*console.log(gameState.annotations); */  console.log(e.stack); return ""; }
   return gameState.annotations;
 };
 
