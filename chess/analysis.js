@@ -95,6 +95,7 @@ var makeTokens = function(tokens) {
 };
 
 var getSimpleLocation = function(move) {
+  console.log(move);
   return (alpha.indexOf(move[0]))+((parseInt(move[1],10)-1) *8);
 };
 
@@ -185,8 +186,8 @@ var getRankAndFileBlocking = function (i,gameState) {
   var ll = i%8;
   var rl = 8-ll;
   while (ll>0) {
+    ret.push(n);
     if (gameState[n]) {
-      ret.push(n);
       break;
     }
     n--;
@@ -194,8 +195,8 @@ var getRankAndFileBlocking = function (i,gameState) {
   }
   n = i+1;
   while (rl>0) {
+    ret.push(n);
     if (gameState[n]) {
-      ret.push(n);
       break;
     }
     n++;
@@ -203,16 +204,16 @@ var getRankAndFileBlocking = function (i,gameState) {
   }
   n = i+8;
   while (n <= 64) {
+    ret.push(n);
     if (gameState[n]) {
-      ret.push(n);
       break;
     }
     n+=8;
   }
   n = i-8;
   while (n >= 1) {
+    ret.push(n);
     if (gameState[n]) {
-      ret.push(n);
       break;
     }
     n-=8;
@@ -272,8 +273,8 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
-    console.log(move);
-    cand.forEach(function (c) { console.log(getCoord(c)); });
+    //console.log(move,p);
+    //cand.forEach(function (c) { console.log(getCoord(c)); });
     throw new Error();
   }
   else if (totallyDetermined(move)) {
@@ -362,6 +363,7 @@ var parsePly = function (ply,gameState,isWhite) {
   }
   else {
     var l = getLocation(move);
+    console.log(move,l,getCoord(l))
     var ll = getPreviousLocation(move,l,gameState,isWhite);
     gameState[l] = gameState[ll];
     gameState[l].init = false;
@@ -371,8 +373,8 @@ var parsePly = function (ply,gameState,isWhite) {
 
 var getCoord = function (i) {
   var file = i%8;
-  var rank = ((i-file)/8)+1;
   if (file == 0) { file = 8; }
+  var rank = ((i-file)/8)+1;
   return alpha[file]+(rank+"");
 };
 
@@ -427,7 +429,7 @@ var parse = function (str) {
       writePieceAnnotation(gameState,"black");
   //    writeRelationAnnotation(gameState);
     }
-  } } catch(e) { console.log(gameState.annotations); console.log(e.stack); }
+  } } catch(e) { /*console.log(gameState.annotations);*/ console.log(e.stack); }
   return gameState.annotations;
 };
 
