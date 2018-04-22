@@ -154,6 +154,72 @@ var getDiagonals = function (i) {
   return ret;
 };
 
+var getDiagonalsBlocking = function (i,gameState) {
+  var d = i;
+  var ret = [];
+  while (d = getRD(d,true)) {
+    ret.push(d);
+    if (gameState[d]) { break; }
+  }
+  d = i;
+  while (d = getLD(d,true)) {
+    ret.push(d);
+    if (gameState[d]) { break; }
+  }
+  d = i;
+  while (d = getRD(d,false)) {
+    ret.push(d);
+    if (gameState[d]) { break; }
+  }
+  d = i;
+  while (d = getLD(d,false)) {
+    ret.push(d);
+    if (gameState[d]) { break; }
+  }
+  return ret;
+};
+
+var getRankAndFileBlocking = function (i,gameState) {
+  var ret = [];
+  var n = i;
+  var ll = i%8;
+  var rl = 8-ll;
+  while (ll>0) {
+    if (gameState[n]) {
+      ret.push(n);
+      break;
+    }
+    n--;
+    ll--;
+  }
+  n = i;
+  while (rl>0) {
+    if (gameState[n]) {
+      ret.push(n);
+      break;
+    }
+    n++;
+    rl--;
+  }
+  n = i;
+  while (n <= 64) {
+    if (gameState[n]) {
+      ret.push(n);
+      break;
+    }
+    n+=8;
+  }
+  n = i;
+  while (n >= 1) {
+    if (gameState[n]) {
+      ret.push(n);
+      break;
+    }
+    n-=8;
+  }
+  return ret;
+};
+
 var getRankAndFile = function (i) {
   var ret = [];
   var leftLimit = Math.floor(i/8)*8;
@@ -180,21 +246,24 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
     var cand;
     var move
     if (p == 'B') {
-      cand = getDiagonals(i);
+      cand = getDiagonalsBlocking(i,gameState);
     }
-    if (p == 'R') {
-      cand = getRankAndFile(i);
+    else if (p == 'R') {
+      cand = getRankAndFileBlocking(i,gameState);
     }
-    if (p == 'Q') {
-      var diag = getDiagonals(i);
-      cand = getRankAndFile(i);
+    else if (p == 'Q') {
+      var diag = getDiagonalsBlocking(i,gameState);
+      cand = getRankAndFileBlocking(i,gameState);
       diag.forEach(function (i) { cand.push(i); });
     }
-    if (p == 'K') {
+    else if (p == 'K') {
       cand = [i-1,i+1,i-8,i+8];
     }
-    if (p == 'N') {
+    else if (p == 'N') {
         var cand = [i-2-8,i-2+8,i+2-8,i+2+8,i-16-1,i-16+1,i+16-1,i+16+1];
+    }
+    else {
+      throw new Error();
     }
     var g = 0;
     var gg = cand.length;
@@ -203,6 +272,8 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
+    console.log(p);
+    console.log(move);
     throw new Error();
   }
   else if (totallyDetermined(move)) {
