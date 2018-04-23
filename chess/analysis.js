@@ -1,6 +1,8 @@
 var fs = require('fs');
 
-var png = fs.readFileSync("./morphyanderssen.png").toString();
+//var png = fs.readFileSync("./morphyanderssen.png").toString();
+var png = fs.readFileSync("./mygame.png").toString();
+//var png = fs.readFileSync("./game.png").toString();
 
 var alpha = [false,'a','b','c','d','e','f','g','h'];
 
@@ -77,8 +79,10 @@ var tokenize = function (str) {
         s = str[i];
       }
       i--;
-      tok = {type:TT_SYM,val:ss};
-      tokens.push(tok);
+      if (ss.length > 0) {
+        tok = {type:TT_SYM,val:ss};
+        tokens.push(tok);
+      }
     }
   }
   return makeTokens(tokens);
@@ -296,9 +300,10 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
       }
     }
     console.log(move);
-    console.log(getCoord(i));
+    console.log(i,getCoord(i));
+    console.log(gameState[9]);
     cand.forEach(function (i) {
-      console.log(getCoord(i));
+      console.log(i,getCoord(i));
     });
     throw new Error();
   }
@@ -366,14 +371,23 @@ var parsePly = function (ply,gameState,isWhite) {
     gameState[psqr] = 0;
     gameState[sqr].init = false;
   }
+  // pawn promotion
+  else if (move.match("=")) {
+    move = move.split("=");
+    var promo = getSimpleLocation(move[0],move[1]);
+    gameState[promo] = gameState[promo-8];
+    gameState[promo].piece = move[1];
+    gameState[promo-8] = false;
+  }
   else if (move.match("x")) {
+    //TODO: capture with promotion
     move = move.split("x");
     var capture = getLocation(move[1]);
     // if this is a pawn capture, things are simpler, maybe
     var from;
     if (alpha.indexOf(move[0]) >= 1) {
       var sign = isWhite ? 1 : -1;
-      var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[0]) ? -1 : 1;
+      var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[1]) ? -1 : 1;
       from = capture-(8*sign)+shift;
       // check for en passant
       if (!gameState[capture]) {
@@ -476,14 +490,27 @@ var writeRelationAnnotation = function (gs,onlyInit) {
     piece = sqr.piece;
     if (piece == 'p') {
       //TODO: en passant
-      if ((i%8) == 1) {
-        adj = [i+9];
-      }
-      else if ((i%8) == 0) {
-        adj = [i+7];
-      }
+      if (sqr.color == 'white') {
+        if ((i%8) == 1) {
+          adj = [i+9];
+        }
+        else if ((i%8) == 0) {
+          adj = [i+7];
+        }
+        else {
+          adj = [i+7,i+9];
+        }
+      } 
       else {
-        adj = [i+7,i+9];
+        if ((i%8) == 1) {
+          adj = [i-7];
+        }
+        else if ((i%8) == 0) {
+          adj = [i-9];
+        }
+        else {
+          adj = [i-7,i-9];
+        }
       }
     }
     if (piece == 'R') {
@@ -539,6 +566,8 @@ var parse = function (str) {
         return gameState.annotations;
       }
       if (tok.type !== TT_PERIOD) {
+        console.log(tok);
+        console.log(gameState.annotations);
         throw new Error();
       }
       lply = tokens();
@@ -550,7 +579,7 @@ var parse = function (str) {
       writePieceAnnotation(gameState,"white");
       writePieceAnnotation(gameState,"black");
       gameState.annotations += "\n";
-      writeRelationAnnotation(gameState,false);
+      writeRelationAnnotation(gameState,true);
       gameState.annotations += "\n";
     }
   } } catch(e) { /*console.log(gameState.annotations); */  console.log(e.stack); return ""; }
