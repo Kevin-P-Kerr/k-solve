@@ -299,9 +299,8 @@ var getPreviousLocation = function (move,i,gameState,isWhite) {
         return cand[g];
       }
     }
-    console.log(move);
-    console.log(i,getCoord(i));
-    console.log(gameState[9]);
+    console.log(move,i,getCoord(i));
+    console.log(gameState[cand[3]]);
     cand.forEach(function (i) {
       console.log(i,getCoord(i));
     });
@@ -389,10 +388,11 @@ var parsePly = function (ply,gameState,isWhite) {
       var sign = isWhite ? 1 : -1;
       var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[1]) ? -1 : 1;
       from = capture-(8*sign)+shift;
-      // check for en passant
-      if (!gameState[capture]) {
-        capture = capture+(8*sign);
-      }
+      // TODO: check for en passant
+      if (from == 17) {
+            console.log(from,getCoord(from),capture,move,getLocation(move[1]));
+            throw new Error(); 
+    }
     }
     else {
       from = getPreviousLocation(move[0]+"aa",capture,gameState,isWhite);
@@ -402,8 +402,12 @@ var parsePly = function (ply,gameState,isWhite) {
     gameState[from] = 0;
   }
   else {
+    var debug = move == "Na3";
     var l = getLocation(move);
     var ll = getPreviousLocation(move,l,gameState,isWhite);
+    if (ll == 17) {
+        throw new Error();
+    }
     gameState[l] = gameState[ll];
     gameState[l].init = false;
     gameState[ll] = 0;
