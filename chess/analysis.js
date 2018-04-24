@@ -385,8 +385,14 @@ var parsePly = function (ply,gameState,isWhite) {
     // if this is a pawn capture, things are simpler, maybe
     var from;
     if (alpha.indexOf(move[0]) >= 1) {
+      var shift;
       var sign = isWhite ? 1 : -1;
-      var shift = alpha.indexOf(move[0]) > alpha.indexOf(move[1]) ? -1 : 1;
+      if (isWhite) {
+          shift = alpha.indexOf(move[0]) < alpha.indexOf(move[1]) ? -1 : 1;
+      }
+      else {
+          shift = alpha.indexOf(move[0]) > alpha.indexOf(move[1]) ? -1 : 1;
+      }
       from = capture-(8*sign)+shift;
       // TODO: check for en passant
       if (from == 17) {
