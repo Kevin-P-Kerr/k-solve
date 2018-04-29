@@ -881,6 +881,7 @@ var compilePrefix = function (tokens) {
             ret.push(p);
         }
         else {
+          console.log(token);
             throw new Error();
         }
         token = tokens();

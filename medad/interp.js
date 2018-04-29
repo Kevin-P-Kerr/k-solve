@@ -156,6 +156,9 @@ var interpAssign = function (vars,ln) {
 };
 
 var interpLogicExpr = function (vars,ln) {
+  if (ln.indexOf("&")>0) {
+        return mult(vars,ln);
+    }
     if (ln.match("simplify")) {
         return simplify(vars,ln);
     }
@@ -164,9 +167,6 @@ var interpLogicExpr = function (vars,ln) {
     }
     if (ln.match("forall") || ln.match("thereis")) {
         return logicUtils.compileLine(ln);
-    }
-    if (ln.indexOf("*")>0) {
-        return mult(vars,ln);
     }
     return vars[ln.trim()];
 };
@@ -194,7 +194,7 @@ var replace = function (vars, ln) {
 };
 
 var mult = function (vars,ln) {
-    ln = ln.split("*");
+    ln = ln.split("&");
     var op1 = ln[0].trim();
     var op2 = ln[1].trim();
     op1= interpLogicExpr(vars,op1);
