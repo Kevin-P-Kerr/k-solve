@@ -155,7 +155,21 @@ var interpAssign = function (vars,ln) {
     vars[lh] = rh;
 };
 
+var alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+
+var replaceUniques = function (vars,ln) {
+  var u = ln.match(/UNIQUE\d/g);
+  if (!u) { return ln; }
+  u.forEach(function (un) {
+    var special = alpha[Math.floor(Math.random()*alpha.length)] + alpha[Math.floor(Math.random()*alpha.length)];
+    console.log(un,special);
+    ln = ln.replace(new RegExp(un,'g'),special);
+  });
+  return ln;
+};
+
 var interpLogicExpr = function (vars,ln) {
+  ln = replaceUniques(vars,ln);
   if (ln.indexOf("&")>0) {
         return mult(vars,ln);
     }
