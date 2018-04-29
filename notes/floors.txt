@@ -8,7 +8,6 @@ constructor PERSON_FLOOR (a,b,c):
 
 constructor PERSON(a):
   p = forall a thereis UNIQUE1: ~PERSON(a) + FL(UNIQUE1)*LIVES(a UNIQUE1)
-  pp = forall a: ~PERSON(a) + ~FL(a)
 
 mark = call PERSON(a)
 louis = call PERSON(b)

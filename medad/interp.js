@@ -162,7 +162,6 @@ var replaceUniques = function (vars,ln) {
   if (!u) { return ln; }
   u.forEach(function (un) {
     var special = alpha[Math.floor(Math.random()*alpha.length)] + alpha[Math.floor(Math.random()*alpha.length)];
-    console.log(un,special);
     ln = ln.replace(new RegExp(un,'g'),special);
   });
   return ln;
