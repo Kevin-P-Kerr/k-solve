@@ -1,0 +1,62 @@
+# this is meant to be an introductory example of programmatic reasoning.
+
+constructor FLOOR(a): 
+  p = forall a thereis UNIQUE1: ~FL(a) +  ~OCCUPIED(a) + LIVES(UNIQUE1 a)
+
+constructor PERSON_FLOOR (a,b,c):
+  p = forall a forall b forall c: ~FL(c) + ~LIVES(a c) + ~LIVES(b c)
+
+constructor PERSON(a):
+  p = forall a thereis UNIQUE1: ~PERSON(a) + FL(UNIQUE1)*LIVES(a UNIQUE1)
+  pp = forall a: ~PERSON(a) + ~FL(a)
+
+mark = call PERSON(a)
+louis = call PERSON(b)
+david = call PERSON(c)
+# simplification
+mark = mark & thereis a: PERSON(a)
+
+mark = simplify(mark)
+
+louis = louis & thereis b: PERSON(b)
+
+louis = simplify(louis)
+
+david = david & thereis c: PERSON(c)
+
+all_people = mark & louis
+all_people = all_people & david
+
+print(all_people)
+
+floorA = call FLOOR(d)
+floorB = call FLOOR(e)
+floorC = call FLOOR(f)
+
+all_floor = floorA & floorB
+all_floor = all_floor & floorC
+
+fc = call PERSON_FLOOR(a,b,d);
+z = call PERSON_FLOOR(a,b,e);
+zz = call PERSON_FLOOR(a,b,f);
+za = call PERSON_FLOOR(b,c,d);
+zb =  call PERSON_FLOOR(b,c,e);
+zc =  call PERSON_FLOOR(b,c,f);
+zd = call PERSON_FLOOR(a,c,f);
+ze = call PERSON_FLOOR(a,c,f);
+zf =  call PERSON_FLOOR(a,c,f);
+
+fc = fc &z
+fc = fc &zz
+fc = fc &za
+fc = fc & zb
+fc = fc & zc
+fc = fc & zd
+fc = fc & ze
+fc = fc & zf
+fc = simplify(fc)
+
+fc = all_floor & fc
+fc = all_people & fc
+fc = simplify(fc)
+print(fc)
